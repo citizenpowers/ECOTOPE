@@ -51,7 +51,14 @@ left_join(WQ_DownStream,by=c("date","Ecotope","TEST_NAME"))  %>%
 mutate(`Difference`=`Upstream Values`-`Downstream Values`)
 
 
+# QC Blank Evaluation -----------------------------------------------------
 
+QC_Blanks_Tidy <-WQ_Data  %>%
+filter(SAMPLE_TYPE=="FCEB") %>%
+group_by(TEST_NAME,REMARK_CODE) %>%
+summarise(n=n())
+  
+  
 
 
 # Visualize ---------------------------------------------------------------
