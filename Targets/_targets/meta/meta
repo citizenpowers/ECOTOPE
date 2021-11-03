@@ -1,0 +1,13 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
+raw_data_file|stem||ece5e41270641184|ef46db3751d8e999|2110307107|Data/WQ Data/WQ Data.xlsx|t18900.8483923658s||0|file|vector|||||_paths_ missing files DataWQ DataWQ Data.xlsx
+pre_process|function|33a9fe50ca1d320d||||||||||||||
+path_train|stem|e60133dfce58d65d|fc75c5dd185c4c51|ef46db3751d8e999|-1984714141||t18901.0994280766s|316cc09d68060f29|67|rds|vector|||2.18|package Formula was built under R version 4.0.3|
+df_train|stem|17212ef7e975e0c5|75785ff17beb3987|9b48732ec09a73d3|-2034633352||t18901.8496132985s|c68f081012a6a193|17933|rds|vector|||2.98|package Formula was built under R version 4.0.3|
+df_tidy|stem|c0ead437c7500b5a|7330fd8bb84a41d7|b50327f85faf7ca7|1067493404||t18901.8525697311s|411ad9ef56c91da4|15848|rds|vector|||3.19|package Formula was built under R version 4.0.3|
+up_dwn|stem|2a7d8284023b49ae|4f12d0df2a0dade2|69f0e0c1de51e1f8|565735473||t18901.8559785972s|bfe2198ee61869e5|3964|rds|vector|||6.44|package Formula was built under R version 4.0.3|
+df_raw_plot|stem|9c3de9fc6533d63b|4c550ab7b7e7c750|9541fd26dfd4cac5|-770947446||t18901.8599899031s|4969a8fd81f57d99|129743|rds|vector|||7.28|package Formula was built under R version 4.0.3|
+df_raw_data_plot|function|f25f18f78f2b25c3||||||||||||||
+data_tidy|function|eca884a8d6484c4e||||||||||||||
+load_dataset|function|d303eb5844f45749||||||||||||||
+Upstream_downstream|function|6855fade68c510df||||||||||||||
+differences_plot|stem|9a80a98e4c8322ef|91238d060452d1c6|17c25ce61354c4c2|1342716042||t18901.8780562252s|79ff1dec471063ae|92005|rds|vector|||7.45|package Formula was built under R version 4.0.3|

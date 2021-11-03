@@ -1,11 +1,9 @@
 library(dplyr)
 library(ggplot2)
-library(readr)
 library(tidyr)
 library(stringr)
 library(lubridate)
 library(scales)
-library(gghighlight)
 library(RColorBrewer)
 library(viridis)
 library(Hmisc)
@@ -17,13 +15,12 @@ library(readxl)
 
 # Import Data -------------------------------------------------------------
 
+
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 
 
 
-
 # Tidy Data ---------------------------------------------------------------
-
 
 WQ_Data_Tidy <-WQ_Data  %>%
 filter(STATION!="OCS",SAMPLE_TYPE=="SAMP") %>%  
@@ -72,5 +69,11 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(date,`Difference`,color=Ecotope,fill=Ecotope))+geom_smooth(size=1,se=FALSE)+geom_point()+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
-ggplot(WQ_Upstream_Downstream_Tidy,aes(Ecotope,`Difference`,,fill=Ecotope))+geom_boxplot()+geom_hline(yintercept=0)+
+ggplot(WQ_Upstream_Downstream_Tidy,aes(Ecotope,`Difference`,fill=Ecotope))+geom_boxplot()+geom_hline(yintercept=0)+
 facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+ggplot(WQ_Upstream_Downstream_Tidy,aes((`Upstream Values`+`Downstream Values`)/2,`Difference`,fill=Ecotope,color=Ecotope))+geom_point(shape=21)+geom_smooth(se=FALSE)+geom_hline(yintercept=0)+
+facet_wrap(~TEST_NAME,scales = "free")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
+
