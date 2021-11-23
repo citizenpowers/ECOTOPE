@@ -31,6 +31,12 @@ Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv",skip = 8)
 Mixed_Sonde_082621 <-  read_csv("Data/Sonde/Mixed- 083121 134557.csv")
 Naiad_Sonde_082621<- read_csv("Data/Sonde/Southern Naiad- 083121 135134.csv")
 
+#Deployment 3
+Bare_091521 <- read_csv("Data/Sonde/20210915_bare.csv")
+Mixed_091521 <- read_csv("Data/Sonde/20210915_mixed.csv")
+Chara_091521 <- read_csv("Data/Sonde/20210915_chara.csv")
+Naiad_091521 <- read_csv("Data/Sonde/20210915_naiad.csv")
+Typha_091521 <- read_csv("Data/Sonde/20210915_typha.csv")
 
 # Tidy Data from deployment 1---------------------------------------------------------------
 
@@ -53,8 +59,9 @@ slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 19
 
 write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
 
-Cattail_Sonde_2 <-Cattail_Sonde_082621  %>%
-filter(`Site Name`=="STA34C2B56")  
+Cattail_Sonde_2 <-Column_Name_fixer(Cattail_Sonde_082621)  %>%
+Date_fixer()  %>%
+filter(`Site`=="STA34C2B56")  %>%
 mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
 
 Chara_Sonde_2 <- Column_Name_fixer(Chara_Sonde_082621) %>%
@@ -81,6 +88,7 @@ write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
 
 Naiad_Sonde_2 <- Column_Name_fixer(Naiad_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
+mutate(across(4:9, ~ as.numeric(.))) %>%
 slice(1992:2325) %>%  #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1992 and collected at 1995
 mutate(Site="STA3/4C2B_Ecotope_Naiad")
 
@@ -90,12 +98,19 @@ slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 19
 
 write.csv(PDYNAMICS_STA34C2A27_DATA,"PDYNAMICS_STA34C2A27_071721_081717.csv")
 
+
+# Deployment 3 ------------------------------------------------------------
+
+All_Sonde_wide_3 <- bind_rows(Column_Name_fixer(Bare_091521),Column_Name_fixer(Chara_091521), Column_Name_fixer(Typha_091521), Column_Name_fixer(Naiad_091521),Column_Name_fixer(Mixed_091521)) %>%
+mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," ")))  
+  
+
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2)   
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,All_Sonde_wide_3)   
 
 All_Sonde_long <- All_Sonde_wide %>%
-pivot_longer(names_to = "Parameter",values_to="Value",6:20) 
+pivot_longer(names_to = "Parameter",values_to="Value",5:18) 
 
 
 
