@@ -27,7 +27,7 @@ Mixed_Sonde <- read_csv("Data/Sonde/EXOdata_Mixed_ECOTOPE_060921.csv")   #deploy
 #Deployment 2
 Bare_Sonde_082621 <- read_csv("Data/Sonde/pdynSTA34A41_ecotopeBare - 082621 174830.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
 Cattail_Sonde_082621 <- read_csv("Data/Sonde/Cattail - 083121 133214.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
-Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv",skip = 8)
+Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv")
 Mixed_Sonde_082621 <-  read_csv("Data/Sonde/Mixed- 083121 134557.csv")
 Naiad_Sonde_082621<- read_csv("Data/Sonde/Southern Naiad- 083121 135134.csv")
 
