@@ -27,9 +27,9 @@ Mixed_Sonde <- read_csv("Data/Sonde/EXOdata_Mixed_ECOTOPE_060921.csv")   #deploy
 #Deployment 2
 Bare_Sonde_082621 <- read_csv("Data/Sonde/pdynSTA34A41_ecotopeBare - 082621 174830.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
 Cattail_Sonde_082621 <- read_csv("Data/Sonde/Cattail - 083121 133214.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
-Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv")
-Mixed_Sonde_082621 <-  read_csv("Data/Sonde/Mixed- 083121 134557.csv")
-Naiad_Sonde_082621<- read_csv("Data/Sonde/Southern Naiad- 083121 135134.csv")
+Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv")  #file contains data from PDYNAMICS site and ECOTOPE site
+Mixed_Sonde_082621 <-  read_csv("Data/Sonde/Mixed- 083121 134557.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
+Naiad_Sonde_082621<- read_csv("Data/Sonde/Southern Naiad- 083121 135134.csv")  #file contains data from PDYNAMICS site and ECOTOPE site
 
 #Deployment 3
 Bare_091521 <- read_csv("Data/Sonde/20210915_bare.csv")
@@ -64,6 +64,8 @@ Date_fixer()  %>%
 filter(`Site`=="STA34C2B56")  %>%
 mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
 
+write.csv(Cattail_Sonde_2 ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
+
 Chara_Sonde_2 <- Column_Name_fixer(Chara_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
 slice(1994:2328) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1994 and collected at 2328
@@ -92,7 +94,7 @@ mutate(across(4:9, ~ as.numeric(.))) %>%
 slice(1992:2325) %>%  #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1992 and collected at 1995
 mutate(Site="STA3/4C2B_Ecotope_Naiad")
 
-PDYNAMICS_STA34C2A27_DATA <-Mixed_Sonde_082621 %>%
+PDYNAMICS_STA34C2A27_DATA <-Naiad_Sonde_082621 %>%
 mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
 slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 
@@ -107,7 +109,8 @@ mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," ")))
 
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,All_Sonde_wide_3)   
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,All_Sonde_wide_3) %>%
+Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
 pivot_longer(names_to = "Parameter",values_to="Value",5:18) 
@@ -125,7 +128,7 @@ ggplot(filter(All_Sonde_long,Value>0),aes(`Date Time`,Value,color=Site,fill=Site
 facet_wrap(~Parameter,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+scale_y_log10()+theme_bw()
 
 #Turbidity log10 scale
-ggplot(filter(All_Sonde_long,`Parameter`=="FNU") ,aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
+ggplot(filter(All_Sonde_long,`Parameter`=="Turbidity FNU") ,aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
 scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_log10(breaks=c(.1,1,10,100,1000),labels=comma)+scale_x_datetime(date_breaks="12 hours",labels = date_format("%b %d %I%p"))+theme_bw()+
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
@@ -205,5 +208,18 @@ for(i in 1:nrow(df))
 return(df)
 }
 
+Site_fixer <- function(df) 
+{
+df1 <- df %>%
+mutate(`Site`=case_when(str_detect(Site,"Bare")~"Bare",
+                        str_detect(Site,"Naiad")~"Southern Naiad",
+                        str_detect(Site,"Cattail")~"Typha",
+                        str_detect(Site,"Typha")~"Typha",
+                        str_detect(Site,"Chara")~"Chara",
+                        str_detect(Site,"Mix")~"Mixed",
+                        str_detect(Site,"South")~"Southern Naiad",
+                        TRUE ~ as.character(Site)))
+return(df1)  
+}
 
 
