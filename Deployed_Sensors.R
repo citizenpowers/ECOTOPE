@@ -53,46 +53,45 @@ mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
 slice(1993:2325) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 mutate(Site="STA3/4C2B_Ecotope_Bare")
   
-PDYNAMICS_STA34C2A41_DATA <-Column_Name_fixer(Bare_Sonde_082621) %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
-slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
-
 Cattail_Sonde_2 <-Column_Name_fixer(Cattail_Sonde_082621)  %>%
 Date_fixer()  %>%
-filter(`Site`=="STA34C2B56")  %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
-
-write.csv(Cattail_Sonde_2 ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
-
+mutate(`Site`="Typha")  %>%
+mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>% 
+slice(3875:4847)
+  
 Chara_Sonde_2 <- Column_Name_fixer(Chara_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
 slice(1994:2328) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1994 and collected at 2328
 mutate(Site="STA3/4C2B_Ecotope_Chara")
-
-PDYNAMICS_STA34C2A9_DATA <-Chara_Sonde_082621 %>%
-mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
-slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-write.csv(PDYNAMICS_STA34C2A9_DATA,"PDYNAMICS_STA34C2A9_070721_081717.csv")
 
 Mixed_Sonde_2 <- Column_Name_fixer(Mixed_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
 slice(1995:2326) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1995 and collected at 2326
 mutate(Site="STA3/4C2B_Ecotope_Mixed")
 
-PDYNAMICS_STA34C2B33_DATA <-Mixed_Sonde_082621 %>%
-mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
-slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
-
 Naiad_Sonde_2 <- Column_Name_fixer(Naiad_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
-mutate(across(4:9, ~ as.numeric(.))) %>%
+mutate(across(4:11, ~ as.numeric(.))) %>%
 slice(1992:2325) %>%  #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1992 and collected at 1995
 mutate(Site="STA3/4C2B_Ecotope_Naiad")
+
+All_Sonde_wide_2 <- bind_rows(Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,Cattail_Sonde_2)
+
+
+
+# PDYNAMICS Data ----------------------------------------------------------
+PDYNAMICS_STA34C2B56_070721_081717_Data <-Column_Name_fixer(Cattail_Sonde_082621)  %>%
+Date_fixer()  %>%
+mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>% #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
+slice(1:3875)
+
+write.csv(PDYNAMICS_STA34C2B56_070721_081717_Data ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
+
+PDYNAMICS_STA34C2A41_DATA <-Column_Name_fixer(Bare_Sonde_082621) %>%
+mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
+slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
+
+write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
 
 PDYNAMICS_STA34C2A27_DATA <-Naiad_Sonde_082621 %>%
 mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
@@ -100,16 +99,27 @@ slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 19
 
 write.csv(PDYNAMICS_STA34C2A27_DATA,"PDYNAMICS_STA34C2A27_071721_081717.csv")
 
+PDYNAMICS_STA34C2B33_DATA <-Mixed_Sonde_082621 %>%
+mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
+slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
+
+write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
+
+PDYNAMICS_STA34C2A9_DATA <-Chara_Sonde_082621 %>%
+mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
+slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
+
+write.csv(PDYNAMICS_STA34C2A9_DATA,"PDYNAMICS_STA34C2A9_070721_081717.csv")
 
 # Deployment 3 ------------------------------------------------------------
 
 All_Sonde_wide_3 <- bind_rows(Column_Name_fixer(Bare_091521),Column_Name_fixer(Chara_091521), Column_Name_fixer(Typha_091521), Column_Name_fixer(Naiad_091521),Column_Name_fixer(Mixed_091521)) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," ")))  
+mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
+filter(`Date Time`>"2021-09-15 09:30:00",`Date Time`<"2021-11-09 11:30:00")  #Time sondes were deployed
   
-
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,All_Sonde_wide_3) %>%
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3) %>%
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
@@ -132,6 +142,31 @@ ggplot(filter(All_Sonde_long,`Parameter`=="Turbidity FNU") ,aes(`Date Time`,Valu
 scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_log10(breaks=c(.1,1,10,100,1000),labels=comma)+scale_x_datetime(date_breaks="12 hours",labels = date_format("%b %d %I%p"))+theme_bw()+
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
+#pH
+ggplot(filter(All_Sonde_long,Parameter=="pH"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Temp
+ggplot(filter(All_Sonde_long,Parameter=="Temp C°"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Temp
+ggplot(filter(All_Sonde_long,Parameter=="SpCond µS/cm"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#DO 
+ggplot(filter(All_Sonde_long,Parameter=="DO mg/L"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#DO%
+ggplot(filter(All_Sonde_long,Parameter=="DO %°"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Turbidity
+ggplot(filter(All_Sonde_long,Parameter=="Turbidity FNU"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+coord_cartesian(ylim = c(0,100))
+
+
 # Helper Functions --------------------------------------------------------
 
 #Renames unique columns to standard column names
@@ -142,14 +177,15 @@ Column_Name_fixer <-function(df)
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Site"),"Site",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Date"),"Date",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Time"),"Time",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"mV"),"Millivolts",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"°C"),"Temp C°",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"\\bDO %-\\b"),"DO %°",names(df)[i])
-      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"ODO % sat"),"DO %°",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"ODO % sat"),"DO %",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"DO mg/L"),"DO mg/L",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"SPC-uS/cm"),"SpCond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"SpCond µS/cm"),"SpCond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"nLFC-uS/cm"),"Cond µS/cm",names(df)[i])
-      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Cond µS/cm"),"Cond µS/cm",names(df)[i])
+     # colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Cond µS/cm"),"Cond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"TDS mg/L"),"TDS mg/L",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"pH-\\b"),"pH",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"FNU-\\b"),"Turbidity FNU",names(df)[i])
@@ -158,6 +194,7 @@ Column_Name_fixer <-function(df)
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"BGA-PC RFU\\b"),"BGA-PC RFU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"BGA-PCug/L\\b"),"BGA-PC ug/L",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Chl RFU"),"Chl RFU",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Chlorophyll RFU"),"Chl RFU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Chl ug/L"),"Chl ug/L",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"fDOM RFU"),"fDOM RFU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"fDOM QSU"),"fDOM QSUL",names(df)[i])
@@ -174,7 +211,7 @@ Column_Name_fixer <-function(df)
   ifelse("Site" %in% names(df), Name_exists <-c(Name_exists,"Site"),"")
   ifelse("Unit ID" %in% names(df), Name_exists <-c(Name_exists,"Unit ID"),"")
   ifelse("Temp C°" %in% names(df), Name_exists <-c(Name_exists,"Temp C°"),"")
-  ifelse("DO %°" %in% names(df), Name_exists <-c(Name_exists,"DO %°"),"")
+  ifelse("DO %" %in% names(df), Name_exists <-c(Name_exists,"DO %"),"")
   ifelse("DO mg/L" %in% names(df), Name_exists <-c(Name_exists,"DO mg/L"),"")
   ifelse("SpCond µS/cm" %in% names(df), Name_exists <-c(Name_exists,"SpCond µS/cm"),"")
   ifelse("Date" %in% names(df), Name_exists <-c(Name_exists,"Date"),"")
