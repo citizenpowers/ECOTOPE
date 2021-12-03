@@ -53,8 +53,8 @@ filter(`Date Time`>"2021-06-09 00:30:00",`Date Time`<"2021-06-29 23:30:00")
 
 #Deployment 2
 Light_Data_081721 <- rbind(Naiad_Mid_Light_20210817_Data,Naiad_Top_Light_20210817_Data,Bare_Mid_Light_20210817_Data,Bare_Top_Light_20210817_Data,Chara_Mid_Light_20210817_Data,Chara_Top_Light_20210817_Data,Mixed_Mid_Light_20210817_Data,Mixed_Top_Light_20210817_Data,Typha_Mid_Light_20210817_Data,Typha_Top_Light_20210817_Data  ) %>%
-mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York")) 
-filter(`Date Time`>"2021-06-09 00:30:00",`Date Time`<"2021-06-29 23:30:00")
+mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%
+filter(`Date Time`>"2021-08-18 00:00:00",`Date Time`<"2021-11-09 00:00:00")
 
 
 # Join Data ---------------------------------------------------------------
@@ -77,6 +77,12 @@ mutate(Hour=hour(`Date Time`),Date=as.Date(`Date Time`)) %>%
 group_by(Site,Position,Hour) %>%
 summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
 
+
+
+
+# Save Data ---------------------------------------------------------------
+
+write.csv(All_light_data ,"./Data/HOBO/All_light_data.csv",row.names = FALSE)
 
 
 

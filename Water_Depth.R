@@ -35,6 +35,13 @@ filter(`Date Time`>"2021-06-09 11:30:00")
 
 
 
+
+# Save data ---------------------------------------------------------------
+
+write.csv(Water_Depth_Data,"./Data/Levelogger/Water_Depth_Data.csv",row.names = FALSE)
+
+
+
 # Figures -----------------------------------------------------------------
 ggplot(Water_Depth_Data,aes(`Date Time`,level,color=Site,fill=Site))+geom_point(shape=21)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()

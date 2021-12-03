@@ -48,6 +48,12 @@ left_join(WQ_DownStream,by=c("date","Ecotope","TEST_NAME"))  %>%
 mutate(`Difference`=`Upstream Values`-`Downstream Values`)
 
 
+# Save Data ---------------------------------------------------------------
+
+
+write.csv(WQ_Upstream_Downstream_Tidy, "./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv",row.names = FALSE)
+
+
 # QC Blank Evaluation -----------------------------------------------------
 
 QC_Blanks_Tidy <-WQ_Data  %>%

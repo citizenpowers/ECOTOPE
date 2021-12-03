@@ -85,31 +85,31 @@ Date_fixer()  %>%
 mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>% #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
 slice(1:3875)
 
-write.csv(PDYNAMICS_STA34C2B56_070721_081717_Data ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
+# write.csv(PDYNAMICS_STA34C2B56_070721_081717_Data ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
 
 PDYNAMICS_STA34C2A41_DATA <-Column_Name_fixer(Bare_Sonde_082621) %>%
 mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
 slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 
-write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
+# write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
 
 PDYNAMICS_STA34C2A27_DATA <-Naiad_Sonde_082621 %>%
 mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
 slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 
-write.csv(PDYNAMICS_STA34C2A27_DATA,"PDYNAMICS_STA34C2A27_071721_081717.csv")
+# write.csv(PDYNAMICS_STA34C2A27_DATA,"PDYNAMICS_STA34C2A27_071721_081717.csv")
 
 PDYNAMICS_STA34C2B33_DATA <-Mixed_Sonde_082621 %>%
 mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
 slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 
-write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
+# write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
 
 PDYNAMICS_STA34C2A9_DATA <-Chara_Sonde_082621 %>%
 mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
 slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
 
-write.csv(PDYNAMICS_STA34C2A9_DATA,"PDYNAMICS_STA34C2A9_070721_081717.csv")
+# write.csv(PDYNAMICS_STA34C2A9_DATA,"PDYNAMICS_STA34C2A9_070721_081717.csv")
 
 # Deployment 3 ------------------------------------------------------------
 
@@ -124,6 +124,13 @@ Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
 pivot_longer(names_to = "Parameter",values_to="Value",5:18) 
+
+
+
+# Save Data ---------------------------------------------------------------
+
+write.csv(All_Sonde_long,"./Data/Sonde/All_Sonde_long.csv",row.names = FALSE)
+
 
 
 
