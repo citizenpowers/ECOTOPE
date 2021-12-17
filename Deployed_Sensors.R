@@ -132,8 +132,6 @@ pivot_longer(names_to = "Parameter",values_to="Value",5:18)
 write.csv(All_Sonde_long,"./Data/Sonde/All_Sonde_long.csv",row.names = FALSE)
 
 
-
-
 # Figures -----------------------------------------------------------------
 
 #all parameters
