@@ -74,7 +74,7 @@ pivot_wider(names_from = TEST_NAME,values_from=`Difference`)
 TP_Correlation <- TP_differences_vs_Analytes %>%
 select(-date,-Ecotope) %>%  
 select(sort(current_vars())) %>% #sorts column alphabetically
-cor(method="pearson",use = "pairwise.complete.obs")
+cor(method="spearman",use = "pairwise.complete.obs")
 
 
 
