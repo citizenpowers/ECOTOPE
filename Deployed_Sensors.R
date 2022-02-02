@@ -38,6 +38,14 @@ Chara_091521 <- read_csv("Data/Sonde/20210915_chara.csv")
 Naiad_091521 <- read_csv("Data/Sonde/20210915_naiad.csv")
 Typha_091521 <- read_csv("Data/Sonde/20210915_typha.csv")
 
+#Deployment 4
+Bare_112421 <- read_csv("Data/Sonde/20220111_Bare.csv", skip = 8)
+Naiad_112421 <- read_csv("Data/Sonde/20220111_Naiad.csv",skip = 8)
+Mixed_112421 <- read_csv("Data/Sonde/20220111_Mixed.csv",skip = 8)
+Typha_112421 <- read_csv("Data/Sonde/20220111_Typha.csv",skip = 8)
+Chara_112421 <- read_csv("Data/Sonde/20220111_Chara.csv",skip = 8)
+
+
 # Tidy Data from deployment 1---------------------------------------------------------------
 
 All_Sonde_wide_1 <- bind_rows(Column_Name_fixer(Bare_Sonde),Column_Name_fixer(Chara_Sonde), Column_Name_fixer(Cattail_Sonde), Column_Name_fixer(Mixed_Sonde),Column_Name_fixer(Southern_N_Sonde)) %>%
@@ -116,21 +124,25 @@ slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 19
 All_Sonde_wide_3 <- bind_rows(Column_Name_fixer(Bare_091521),Column_Name_fixer(Chara_091521), Column_Name_fixer(Typha_091521), Column_Name_fixer(Naiad_091521),Column_Name_fixer(Mixed_091521)) %>%
 mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
 filter(`Date Time`>"2021-09-15 09:30:00",`Date Time`<"2021-11-09 11:30:00")  #Time sondes were deployed
-  
+
+
+# Deployment 4 ------------------------------------------------------------
+All_Sonde_wide_4 <- bind_rows(Column_Name_fixer(Bare_112421),Column_Name_fixer(Naiad_112421),Column_Name_fixer(Mixed_112421),Column_Name_fixer(Typha_112421),Column_Name_fixer(Chara_112421)) %>%
+mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
+filter(`Date Time`>"2021-11-23 12:00:00",`Date Time`<"2022-01-11 10:00:00")  #Time sondes were deployed
+
+
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3) %>%
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4) %>%
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
 pivot_longer(names_to = "Parameter",values_to="Value",5:18) 
 
-
-
 # Save Data ---------------------------------------------------------------
 
 write.csv(All_Sonde_long,"./Data/Sonde/All_Sonde_long.csv",row.names = FALSE)
-
 
 # Figures -----------------------------------------------------------------
 
