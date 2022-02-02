@@ -43,6 +43,18 @@ Mixed_Top_Light_20210817_Data <-  select(rename(mutate(read_csv("Data/HOBO/20210
 Typha_Mid_Light_20210817_Data <-  select(rename(mutate(read_csv("Data/HOBO/20210817_Cat_Mid_Hobo.csv", skip = 2),Site="Typha",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
 Typha_Top_Light_20210817_Data <-  select(rename(mutate(read_csv("Data/HOBO/20210817_Cat_top_Hobo.csv", skip = 2),Site="Typha",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
 
+#Deployment 3
+Naiad_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Naiad_Mid.csv", skip = 2),Site="Naiad",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,10:11)
+Naiad_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Naiad_Top.csv", skip = 2),Site="Naiad",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Bare_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Bare_Mid.csv", skip = 2),Site="Bare",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Bare_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Bare_Top.csv", skip = 2),Site="Bare",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Chara_Mid.csv", skip = 2),Site="Chara",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Chara_top.csv", skip = 2),Site="Chara",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Mixed_Mid.csv", skip = 2),Site="Mixed",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Mixed_Top.csv", skip = 2),Site="Mixed",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,6:7)
+Typha_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Cat_Mid.csv", skip = 2),Site="Typha",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Typha_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Cat_top.csv", skip = 2),Site="Typha",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+
 
 # Tidy -----------------------------------------------------------
 
@@ -56,23 +68,25 @@ Light_Data_081721 <- rbind(Naiad_Mid_Light_20210817_Data,Naiad_Top_Light_2021081
 mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%
 filter(`Date Time`>"2021-08-18 00:00:00",`Date Time`<"2021-11-09 00:00:00")
 
+#Deployment 3
+Light_Data_20211123 <- rbind(Naiad_Mid_Light_20211123_Data,Naiad_Top_Light_20211123_Data,Bare_Mid_Light_20211123_Data,Bare_Top_Light_20211123_Data,Chara_Mid_Light_20211123_Data,Chara_Top_Light_20211123_Data,Mixed_Mid_Light_20211123_Data,Mixed_Top_Light_20211123_Data,Typha_Mid_Light_20211123_Data,Typha_Top_Light_20211123_Data  ) %>%
+mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%
+filter(`Date Time`>"2021-11-23 00:00:00",`Date Time`<"2022-01-11 10:00:00")
+
 
 # Join Data ---------------------------------------------------------------
 
-All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721) 
-
-
-
+All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123) 
 
 # Analyze data ------------------------------------------------------------
 
-All_light_data_by_hour <-All_light_Data %>%
+All_light_data_by_hour <-All_light_data %>%
 mutate(Hour=hour(`Date Time`),Date=as.Date(`Date Time`)) %>%
 group_by(Date,Site,Position,Hour) %>%
 summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
   
 
-All_light_data_by_hour_table <-All_light_Data %>%
+All_light_data_by_hour_table <-All_light_data %>%
 mutate(Hour=hour(`Date Time`),Date=as.Date(`Date Time`)) %>%
 group_by(Site,Position,Hour) %>%
 summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
