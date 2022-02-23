@@ -28,19 +28,25 @@ library(zoo)
 
 
 Water_Depth_Data <- read_csv("Data/Levelogger/Water_Depth_Data.csv")
-All_light_data <- read_csv("Data/HOBO/All_light_data.csv")
+All_light_data <- read.csv("Data/HOBO/All_light_data.csv")
 All_Sonde_long <- read_csv("Data/Sonde/All_Sonde_long.csv")
-WQ_Upstream_Downstream_Tidy <- read_csv("Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
+WQ_Upstream_Downstream_Tidy <- read_csv("Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv") # Water quality with diffrences between upstream and downstream calculated
+WQ_Data_Tidy <- read_csv("Data/WQ Data/WQ_Data_Tidy.csv")  #all WQ data 
+Field_data <- read_csv("Data/Field Data/Field_data.csv")
 
 
-test <-mutate(All_light_data,Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Naiad"~"Naiad",Site=="Mixed"~"Mixed"))
+# WQ and Field data---------------------------------------------------------------
 
-# Join Data ---------------------------------------------------------------
+WQ_Field_Data <- WQ_Data_Tidy %>% 
+filter(MATRIX=="SW",COLLECT_METHOD=="G") %>%
+select(Date,Ecotope,Position,TEST_NAME,VALUE)  %>%
+bind_rows(Field_data) %>%
+pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used values_fn = mean to average duplicate values
 
-Data_Joined_Tidy  <- Water_Depth_Data %>%
-mutate(Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Southern Naiad"~"Naiad",Site=="Mixed"~"Mixed")) %>%
-left_join(test,by="Ecotope")  
 
-distinct(mutate(All_light_data,Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Naiad"~"Naiad",Site=="Mixed"~"Mixed")),Ecotope)
+# Join WQ and Field Data to continuous data -------------------------------
+
+All_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,05,31,0,0,0,tz = "US/Eastern"),by = "30 min")),"date") %>%
   
-distinct(All_light_data,Site)
+ 
+pivot_wider(All_light_data,names_from =c( Position), values_from=Light.Intensity.Lux)
