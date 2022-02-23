@@ -68,6 +68,7 @@ select(`Date Time`,level,Site) %>%
 pivot_wider(names_from = "Site", values_from="level") %>%
 pivot_longer(names_to = "Site",values_to="level",2:8)  
 
+
 # Save data ---------------------------------------------------------------
 
 write.csv(Water_Depth_Data,"./Data/Levelogger/Water_Depth_Data.csv",row.names = FALSE)  
@@ -75,7 +76,7 @@ write.csv(Water_Depth_Data,"./Data/Levelogger/Water_Depth_Data.csv",row.names = 
 # Figures -----------------------------------------------------------------
 #Water Depth over Time
 ggplot(Water_Depth_Data,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
-scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+
+scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+coord_cartesian(xlim=as.POSIXct(c("2021-06-09 12:00:00","2022-01-03 12:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
 labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
 

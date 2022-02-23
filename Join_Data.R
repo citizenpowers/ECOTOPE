@@ -33,6 +33,14 @@ All_Sonde_long <- read_csv("Data/Sonde/All_Sonde_long.csv")
 WQ_Upstream_Downstream_Tidy <- read_csv("Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
 
 
+test <-mutate(All_light_data,Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Naiad"~"Naiad",Site=="Mixed"~"Mixed"))
+
 # Join Data ---------------------------------------------------------------
 
+Data_Joined_Tidy  <- Water_Depth_Data %>%
+mutate(Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Southern Naiad"~"Naiad",Site=="Mixed"~"Mixed")) %>%
+left_join(test,by="Ecotope")  
 
+distinct(mutate(All_light_data,Ecotope=case_when(Site=="Chara"~"Chara",Site=="Typha"~"Typha",Site=="Bare"~"Bare",Site=="Naiad"~"Naiad",Site=="Mixed"~"Mixed")),Ecotope)
+  
+distinct(All_light_data,Site)

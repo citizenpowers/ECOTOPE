@@ -63,6 +63,13 @@ group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
   
 
+# Contamination Evaluation ------------------------------------------------
+
+Sample_Remarks_Code_Tidy <-WQ_Data  %>%
+filter(SAMPLE_TYPE=="SAMP") %>%
+group_by(TEST_NAME,REMARK_CODE) %>%
+summarise(n=n())
+
 # Correlation ----------------Need to enter physico-chemical parameters-----------------------------
 
 #DF of differences in TP vs change in other anaytes
@@ -77,9 +84,15 @@ select(sort(current_vars())) %>% #sorts column alphabetically
 cor(method="spearman",use = "pairwise.complete.obs")
 
 
-
-
 # Visualize ---------------------------------------------------------------
+
+#All Analytes Concnetration over time points and smoooth
+ggplot(filter(WQ_Data_Tidy,MATRIX=="SW"),aes(date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#All Analytes Concentration over time points and smoooth
+ggplot(filter(WQ_Data_Tidy,MATRIX=="SW"),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #All Analytes Differences (Up-Down)- points and smooth 
 ggplot(WQ_Upstream_Downstream_Tidy,aes(date,`Difference`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
@@ -100,6 +113,9 @@ facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",dire
 #All analytes Differences (Up-Down) by magnitude of average (Up+dowwn)/2- Points and smooth
 ggplot(WQ_Upstream_Downstream_Tidy,aes((`Upstream Values`+`Downstream Values`)/2,`Difference`,fill=Ecotope,color=Ecotope))+geom_point(shape=21)+geom_smooth(se=FALSE)+geom_hline(yintercept=0)+
 facet_wrap(~TEST_NAME,scales = "free")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
+
 
 #Correlation plot
 corrplot(TP_Correlation , type = "upper",  tl.col = "black", tl.srt = 45)
