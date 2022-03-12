@@ -76,7 +76,7 @@ filter(`Date Time`>"2021-11-23 00:00:00",`Date Time`<"2022-01-11 10:00:00")
 
 # Join Data ---------------------------------------------------------------
 
-All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123) %>% rename(`Ecotope`="Site")
+All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123) %>% rename(`Ecotope`="Site") 
 
 # Analyze data ------------------------------------------------------------
 

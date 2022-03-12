@@ -138,11 +138,14 @@ All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,Al
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
-pivot_longer(names_to = "Parameter",values_to="Value",5:18) 
+rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:18) %>%
+pivot_longer(names_to = "Parameter",values_to="Value",3:16) 
+
 
 # Save Data ---------------------------------------------------------------
 
 write.csv(All_Sonde_long,"./Data/Sonde/All_Sonde_long.csv",row.names = FALSE)
+write.csv(All_Sonde_wide,"./Data/Sonde/All_Sonde_wide.csv",row.names = FALSE)
 
 # Figures -----------------------------------------------------------------
 
