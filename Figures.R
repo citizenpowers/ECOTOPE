@@ -37,18 +37,6 @@ filter(SAMPLE_TYPE=="SAMP") %>%
 group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
 
-# Correlation ----------------Need to enter physico-chemical parameters-----------------------------
-
-#DF of differences in TP vs change in other anaytes
-TP_differences_vs_Analytes <- WQ_Upstream_Downstream_Tidy %>%
-select(Date,Ecotope,Difference,TEST_NAME)  %>%
-pivot_wider(names_from = TEST_NAME,values_from=`Difference`) 
-
-#Calculate correlation all ecotopes grouped
-TP_Correlation <- TP_differences_vs_Analytes %>%
-select(-Date,-Ecotope) %>%  
-select(sort(current_vars())) %>% #sorts column alphabetically
-cor(method="spearman",use = "pairwise.complete.obs")
 
 
 # Visualize ---------------------------------------------------------------
@@ -82,13 +70,13 @@ ggplot(WQ_Upstream_Downstream_Tidy,aes((`Upstream Values`+`Downstream Values`)/2
   facet_wrap(~TEST_NAME,scales = "free")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
+# Water depth figures -----------------------------------------------------
+
+ggplot(select(WQ_Field_Data_Continuous_data,`Average DCS (Field Data)`,`DCS Levelogger`,`Date Time`,Position,Ecotope),aes(`Date Time`,`Average DCS (Field Data)`,fill=Position))+geom_point(shape=21,size=2)+
+geom_line(aes(`Date Time`,`DCS Levelogger`*100))+facet_wrap(~Ecotope)+
+scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-03-01 00:00:00")))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
-#Correlation plot
-corrplot(TP_Correlation , type = "upper",  tl.col = "black", tl.srt = 45)
 
-#Correlation Plot with GGALLY 
-ggpairs(select(TP_differences_vs_Analytes,-Date,-Ecotope,-PH,-DO,-COND,-TEMP), title="correlogram with ggpairs()") #removed physico-chemical parameters since that data hasn't been entered yet.
 
-#just select parameters with significant correlation with TP 
-ggpairs(select(TP_differences_vs_Analytes,COLOR,CL,TDPO4,TPO4,`Chlorophyll B`,`Chlorophyll A`,`Pheophytin A`,Hardness,CA,TOTFE), title="correlogram with ggpairs()")

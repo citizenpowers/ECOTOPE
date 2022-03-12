@@ -66,9 +66,7 @@ Water_Depth_Data <- bind_rows(Water_Depth_20210609_Data,Water_Depth_20211123_Dat
 bind_rows(Inflow_outflow_data) %>%
 select(`Date Time`,level,Site) %>%  
 pivot_wider(names_from = "Site", values_from="level") %>%
-pivot_longer(names_to = "Site",values_to="level",2:8)  
-
-
+pivot_longer(names_to = "Site",values_to="level",2:8) 
 # Save data ---------------------------------------------------------------
 
 write.csv(Water_Depth_Data,"./Data/Levelogger/Water_Depth_Data.csv",row.names = FALSE)  
