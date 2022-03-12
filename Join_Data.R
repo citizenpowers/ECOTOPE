@@ -47,6 +47,5 @@ pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used v
 # Join WQ and Field Data to continuous data -------------------------------
 
 All_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,05,31,0,0,0,tz = "US/Eastern"),by = "30 min")),"date") %>%
-  
  
 pivot_wider(All_light_data,names_from=Position,values_from=Light.Intensity.Lux)
