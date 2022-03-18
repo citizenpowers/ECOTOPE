@@ -43,6 +43,12 @@ select(sort(current_vars())) %>% #sorts column alphabetically
 cor(method="spearman",use = "pairwise.complete.obs")
 
 
+Differences_chemistry <- select(select(WQ_Field_Data_Continuous_data,32:52),-`Dif TN`,-`Dif OPO4`)
+Differences_physico <- select(WQ_Field_Data_Continuous_data,53:59,`Dif TPO4`)
+
+
+Values <-  select(WQ_Field_Data_Continuous_data,4:34,)
+
 # Visualize ---------------------------------------------------------------
 
 #Correlation plot
@@ -58,4 +64,7 @@ ggpairs(select(TP_differences_vs_Analytes,COLOR,CL,TDPO4,TPO4,`Chlorophyll B`,`C
 #Correlation Plot with GGALLY 
 ggpairs(select(WQ_Field_Data_Continuous_data,`Average DCS (Field Data)`,`DCS Levelogger`), title="correlogram with ggpairs()") #.
 
+ggpairs(Differences_chemistry, title="correlogram with ggpairs()") #.
+
+ggpairs(Differences_physico, title="correlogram with ggpairs()") #.
 

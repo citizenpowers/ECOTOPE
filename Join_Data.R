@@ -48,13 +48,13 @@ pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used v
 
 WQ_Upstream <- WQ_Field_Data  %>%
 filter(Position=="Upstream") %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:36)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:33)  %>%
 mutate(`Upstream Values`=VALUE)  %>%
 select(Date,Ecotope,TEST_NAME,`Upstream Values`)
 
 WQ_DownStream <- WQ_Field_Data  %>%
 filter(Position=="Downstream") %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:36)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:33)  %>%
 mutate(`Downstream Values`=VALUE) %>%
 select(Date,Ecotope,TEST_NAME,`Downstream Values`) 
 
@@ -82,7 +82,7 @@ left_join(mutate(pivot_wider(as.data.frame(All_Sonde_long),names_from=Parameter,
 # Join Continuous Data to WQ and Field Data -------------------------------
 
 WQ_Field_Data_Continuous_data <- WQ_Field_Diff_Data %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:67)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:61)  %>%
 mutate(`Date Time`=ISOdate(year(Date),month(Date),day(Date),Hour,Minute,0,tz = "US/Eastern")) %>%
 select(-Date,-Hour,-Minute) %>%
 bind_rows(mutate(pivot_longer(Continuous_data,names_to = "TEST_NAME",values_to="VALUE",3:19),Position="Mid")) %>%

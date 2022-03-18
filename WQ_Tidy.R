@@ -31,25 +31,15 @@ WQ_Data_Tidy <-WQ_Data  %>%
                            str_detect(STATION,"STA34C2B_M")~"Mixed",
                            str_detect(STATION,"STA34C2B_B")~"Bare"))  %>%
   mutate(Position=case_when(str_detect(STATION,"DWN")~"Downstream",
-                            str_detect(STATION,"Up")~"Upstream"))
+                            str_detect(STATION,"Up")~"Upstream")) %>%
+  mutate(TEST_NAME=if_else(TEST_NAME=="COND","SpCond",TEST_NAME)) %>%
+  mutate(TEST_NAME=if_else(TEST_NAME=="TEMP","Temp",TEST_NAME)) %>%
+  mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME)) 
 
-WQ_Upstream <- WQ_Data_Tidy  %>%
-  filter(Position=="Upstream") %>%
-  mutate(`Upstream Values`=VALUE)  %>%
-  select(Date,Ecotope,TEST_NAME,`Upstream Values`)
-
-WQ_DownStream <- WQ_Data_Tidy  %>%
-  filter(Position=="Downstream") %>%
-  mutate(`Downstream Values`=VALUE) %>%
-  select(Date,Ecotope,TEST_NAME,`Downstream Values`) 
-
-WQ_Upstream_Downstream_Tidy <- WQ_Upstream %>%
-  left_join(WQ_DownStream,by=c("Date","Ecotope","TEST_NAME"))  %>%
-  mutate(`Difference`=`Upstream Values`-`Downstream Values`)
 
 
 # Save Data ---------------------------------------------------------------
 
 write.csv(WQ_Data_Tidy , "./Data/WQ Data/WQ_Data_Tidy.csv",row.names = FALSE)
 
-write.csv(WQ_Upstream_Downstream_Tidy, "./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv",row.names = FALSE)
+
