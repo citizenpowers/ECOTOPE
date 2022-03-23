@@ -87,6 +87,24 @@ facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
+# Flow Figures ------------------------------------------------------------
+#inflow
+ggplot(WQ_Field_Data_Continuous_data,aes(ymd_hms(`Date Time`),TPO4*100000,fill=Ecotope))+
+geom_line(aes(ymd_hms(`Date Time`),`Mean inflow (cfs)`),color="blue")+
+geom_line(aes(ymd_hms(`Date Time`),`Mean outflow (cfs)`),color="orange")+ 
+geom_point(shape=21,size=2)+ 
+geom_path()+
+facet_wrap(~Ecotope)+
+scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-03-01 00:00:00")))+coord_cartesian(ylim=c(-800,2000))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#inflow vs TPO4
+ggplot(WQ_Field_with_continuous_same_rows,aes(`Mean inflow (cfs)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
+#
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(WQ_Field_Data_Continuous_data,aes(`Temp`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+

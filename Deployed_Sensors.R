@@ -139,7 +139,7 @@ Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
 rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:18) %>%
-pivot_longer(names_to = "Parameter",values_to="Value",3:16) 
+pivot_longer(names_to = "Parameter",values_to="Value",3:15) 
 
 
 # Save Data ---------------------------------------------------------------
@@ -207,7 +207,7 @@ Column_Name_fixer <-function(df)
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"nLFC-uS/cm"),"Cond µS/cm",names(df)[i])
      # colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Cond µS/cm"),"Cond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"TDS mg/L"),"TDS mg/L",names(df)[i])
-      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"pH-\\b"),"pH",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"pH-\\b"),"pH Sonde",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"FNU-\\b"),"Turbidity FNU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"FNU"),"Turbidity FNU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"TSS"),"TSS mg/L",names(df)[i])
