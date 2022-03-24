@@ -29,6 +29,8 @@ All_Sonde_long <- read.csv("Data/Sonde/All_Sonde_long.csv",encoding = "Latin-1",
 WQ_Data_Tidy <- read_csv("Data/WQ Data/WQ_Data_Tidy.csv")  #all WQ data 
 Field_data <- read_csv("Data/Field Data/Field_data.csv")
 Flow_Data <- read_csv("Data/Flow Data/Flow.csv")
+Wind_data <- read_csv( "./Data/Weather Data/Wind_data.csv")
+
 
 # WQ and Field data---------------------------------------------------------------
 
@@ -73,7 +75,8 @@ mutate(Ecotope=ifelse(Ecotope=="Southern Naiad","Naiad",Ecotope))  %>%
 #mutate(Ecotope=case_when(Ecotope=="Naiad?"~"Naiad",Ecotope=="Mixed?"~"Mixed",TRUE~Ecotope)) %>% #were levelogger sensors switched at mixed and naiad  
 left_join(pivot_wider(All_light_data,names_from=Position,values_from=`Light Intensity Lux`,names_prefix="Light Intensity "),by=c("Date Time","Ecotope")) %>%  #join light data
 left_join(mutate(pivot_wider(as.data.frame(select(All_Sonde_long,-`AMPM`)),names_from=Parameter,values_from=Value,values_fn = mean),`Date Time`=ymd_hms(`Date Time`)),by=c("Date Time","Ecotope")) %>%  #join sonde data
-left_join(Flow_Data,by="Date Time")  #join Flow
+left_join(Flow_Data,by="Date Time") %>%  #join Flow
+left_join(Wind_data,by="Date Time")  #join wind data
 
 # Join Continuous Data to WQ and Field Data (continuous and wq data not on same rows)-------------------------------
 
@@ -81,7 +84,7 @@ WQ_Field_Data_Continuous_data <- WQ_Field_Diff_Data %>%
 pivot_longer(names_to = "TEST_NAME",values_to="VALUE",6:61)  %>%
 mutate(`Date Time`=ISOdate(year(Date),month(Date),day(Date),Hour,Minute,0,tz = "US/Eastern")) %>%
 select(-Date,-Hour,-Minute) %>%
-bind_rows(mutate(pivot_longer(Continuous_data,names_to = "TEST_NAME",values_to="VALUE",3:20),Position="Mid")) %>%  #Join Continuous data to WQ and field data
+bind_rows(mutate(pivot_longer(Continuous_data,names_to = "TEST_NAME",values_to="VALUE",3:22),Position="Mid")) %>%  #Join Continuous data to WQ and field data
 pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn=mean)  
 
 colnames(WQ_Field_Data_Continuous_data) <-enc2utf8(colnames(WQ_Field_Data_Continuous_data))  

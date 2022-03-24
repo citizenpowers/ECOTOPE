@@ -22,6 +22,9 @@ WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_T
 WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
+WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
+
+
 
 # QC Blank Evaluation -----------------------------------------------------
 
@@ -44,7 +47,8 @@ summarise(n=n())
 
 #All Analyses Concentration over time points and smooth
 ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+theme_bw()
 
 #All Analytes Concentration boxplots
 ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
@@ -81,10 +85,49 @@ facet_wrap(~Ecotope)+
 scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-03-01 00:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
-#Depth vs TP Differences
+#Depth vs TP 
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+
+facet_wrap(~Ecotope)+scale_y_log10()+#scale_y_continuous(breaks=seq(0,.03,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Depth vs Temp
+ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(10,40,5),limits=c(10,40))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)
+
+# Wind plots --------------------------------------------------------------
+
+#wind direction and strength on sampling days
+ggplot(WQ_Field_with_continuous_same_rows,aes(`BELLE GL_WNVD_DEGREES CLOCKWI`,`BELLE GL_WNVS_MPH`,color=`BELLE GL_WNVS_MPH`))+geom_col()+
+coord_polar()+scale_color_viridis(option = "D")+
+scale_x_continuous(breaks=seq(0,315,45),limits=c(0,360))+theme_bw()
+
+#wind direction and strength on all days
+ggplot(WQ_Field_Data_Continuous_data,aes(`BELLE GL_WNVD_DEGREES CLOCKWI`,`BELLE GL_WNVS_MPH`,color=`BELLE GL_WNVS_MPH`))+geom_col()+
+coord_polar()+scale_color_viridis(option = "D")+
+scale_x_continuous(breaks=seq(0,315,45),limits=c(0,360))+theme_bw()
+
+#Wind speed vs TP 
+ggplot(WQ_Field_with_continuous_same_rows,aes(`BELLE GL_WNVS_MPH`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
+facet_wrap(~Ecotope)+#scale_y_continuous(breaks=seq(0,.03,0.005))+
+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Wind speed vs difference in TP 
+ggplot(WQ_Field_with_continuous_same_rows,aes(`BELLE GL_WNVS_MPH`,`Dif TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
+facet_wrap(~Ecotope)+#scale_y_continuous(breaks=seq(0,.03,0.005))+
+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+#Wind direction vs TP 
+ggplot(WQ_Field_with_continuous_same_rows,aes(`BELLE GL_WNVD_DEGREES CLOCKWI`,`TPO4`,color=TPO4))+geom_col()+#geom_smooth()+
+facet_wrap(~Ecotope)+coord_polar()+
+scale_color_viridis(option = "D",direction = -1)+
+scale_x_continuous(breaks=seq(0,315,45),limits=c(0,360))+theme_bw()
+
+#Wind direction vs difference in TP  
+ggplot(WQ_Field_with_continuous_same_rows,aes(`BELLE GL_WNVD_DEGREES CLOCKWI`,`Dif TPO4`,color=abs(`Dif TPO4`)))+geom_col()+#geom_smooth()+
+facet_wrap(~Ecotope)+coord_polar()+
+scale_color_viridis(option = "D",direction = -1)+
+scale_x_continuous(breaks=seq(0,315,45),limits=c(0,360))+theme_bw()
 
 
 # Flow Figures ------------------------------------------------------------
@@ -104,7 +147,7 @@ facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
-#
+
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(WQ_Field_Data_Continuous_data,aes(`Temp`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+
@@ -140,3 +183,13 @@ facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+scale_x_continu
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
+
+
+# Ash Figures -------------------------------------------------------------
+
+Ash_DF <- WQ_Field_Data %>%
+mutate(Ash=if_else(`Date`=="2022-03-01","Yes","No")) %>%
+pivot_longer(names_to="TEST_NAME",values_to="VALUE",6:33) 
+
+ggplot(Ash_DF,aes(Ash,`VALUE`,fill=Ash))+geom_boxplot(color="black")+
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
