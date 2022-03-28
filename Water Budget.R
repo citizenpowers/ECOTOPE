@@ -34,7 +34,6 @@ left_join(rename(s7_ET_BK,`Date Time`="date" ),by="Date Time") %>%
 left_join(rename(s7_R_BK,`Date Time`="date" ),by="Date Time") %>%
 fill(S7_R_RAIN_Inches,S7_E_EVAP_Inches) %>%  
 mutate(`Outflow (cfs)`=`Outflow (cfs)`*-1) %>%  
-mutate(`Inflow (cfs)`=if_else(`Inflow (cfs)`<0,0,`Inflow (cfs)`)) %>%  #Midflow data accuracy is questionable. All negative values changed to 0. 
 mutate(`Cumulative Inflow (acre-ft)`=cumsum(`Inflow (cfs)`)*60/43560) %>% #cfs*60 to acre-ft 
 mutate(`Cumulative Outflow (acre-ft)`=cumsum(`Outflow (cfs)`)*60/43560) %>% #cfs*60 to acre-ft 
 mutate(`Cumulative ET (inches)`=cumsum(ifelse(is.na(S7_E_EVAP_Inches), 0, S7_E_EVAP_Inches)) + S7_E_EVAP_Inches*0 ) %>%

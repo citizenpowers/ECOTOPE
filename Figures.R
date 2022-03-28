@@ -41,7 +41,10 @@ filter(SAMPLE_TYPE=="SAMP") %>%
 group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
 
-
+Sample_counts <-WQ_Data  %>%
+  filter(SAMPLE_TYPE=="SAMP") %>%
+  group_by(TEST_NAME) %>%
+  summarise(n=n())
 
 # Visualize WQ -------------------------------------------------------------
 
@@ -86,14 +89,25 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #Depth vs TP 
-ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
-facet_wrap(~Ecotope)+scale_y_log10()+#scale_y_continuous(breaks=seq(0,.03,0.005))+
+ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ geom_point(shape=21,size=2)+geom_smooth()+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #Depth vs Temp
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(10,40,5),limits=c(10,40))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)
+
+#Depth vs TP for 
+Flowing_DF <-  mutate(WQ_Field_with_continuous_same_rows,Flow=case_when(is.na(`Mean inflow (cfs)`)~"No data",
+                                                                   `Mean inflow (cfs)`<10~"Less than 10 cfs",
+                                                                   `Mean inflow (cfs)`>10~"10+ cfs"))
+ggplot(Flowing_DF,aes(`Average DCS (Field Data)`,`TPO4`,fill=Ecotope))+
+facet_wrap(~Flow)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ 
+geom_point(shape=21,size=2)+geom_smooth(fill="grey30",method="lm")+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
 
 # Wind plots --------------------------------------------------------------
 

@@ -73,12 +73,14 @@ filter(minute(date)%%30 == 0)   %>%
 filter(date < today()) %>%  
 ungroup() %>%  
 rename(`Date Time`="date") %>%
-select(`Date Time`,`Mean inflow (cfs)`,`Mean outflow (cfs)`)
+select(`Date Time`,`Mean inflow (cfs)`,`Mean outflow (cfs)`) %>% 
+mutate(`Mean inflow (cfs)`=if_else(`Mean inflow (cfs)`<0,0,`Mean inflow (cfs)`))  #Midflow data accuracy is questionable. All negative values changed to 0. 
 
 #Flow 1 min frequency
 Flow_Data_1_min <- left_join(G378_Flow,G379_Flow,by="date") %>%
 filter(date < today()) %>%  
-rename(`Date Time`="date",`Inflow (cfs)`="G378_inflow",`Outflow (cfs)`="G379_outflow") 
+rename(`Date Time`="date",`Inflow (cfs)`="G378_inflow",`Outflow (cfs)`="G379_outflow") %>%
+mutate(`Inflow (cfs)`=if_else(`Inflow (cfs)`<0,0,`Inflow (cfs)`))  #Midflow data accuracy is questionable. All negative values changed to 0. 
 
 
 
