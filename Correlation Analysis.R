@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -17,29 +19,42 @@ library(GGally)
 # Import Data -------------------------------------------------------------
 
 
-WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
-WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
-WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
-WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
+
+WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
+
+# Tidy Data ---------------------------------------------------------------
+
+Correlation_Data_Tidy <- WQ_Field_with_continuous_same_rows %>% 
+filter(TPO4<30) #remove right handed outliers
 
 
 
-# Correlation ----------------Need to enter physico-chemical parameters-----------------------------
+# Correlation ---------------------------------------------
 
-#DF of differences in TP vs change in other analytes
-TP_differences_vs_Analytes <- WQ_Upstream_Downstream_Tidy %>%
-select(Date,Ecotope,Difference,TEST_NAME)  %>%
-pivot_wider(names_from = TEST_NAME,values_from=`Difference`) 
 
-#Calculate correlation all ecotopes grouped
-TP_Correlation <- TP_differences_vs_Analytes %>%
-select(-Date,-Ecotope) %>%  
+#Calculate DF of TPO4 and Physical Parameters
+TP_Physical_Correlation <- Correlation_Data_Tidy %>%
+select(-`Date`,Ecotope,-Position,-Hour,-Minute) %>%  
+select(TPO4,Ecotope,26:28,74:77)  %>%  #Select Physical parameters
+select(sort(current_vars())) 
+
+
+#Calculate correlation of all ecotopes grouped together
+TP_Correlation <- Correlation_Data_Tidy %>%
+  select(-`Date`,-Ecotope,-Position,-Hour,-Minute) %>%  
+  select(1:28,57:76)  %>%  #remove upstream downstream differences column
+  select(-OPO4,-`TSS mg/L`,-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  #remove parameters that are missing data or has unchanging data
+  select(sort(current_vars())) %>% #sorts column alphabetically
+  cor(method="spearman",use = "pairwise.complete.obs")
+
+
+
+
+
+All_Correlation <- WQ_Field_with_continuous_same_rows %>%
+select(-`Date Time`,-Ecotope,-Position,-Hour,-Minute)  %>% 
 select(sort(current_vars())) %>% #sorts column alphabetically
-cor(method="spearman",use = "pairwise.complete.obs")
 
-All_Correlation <- WQ_Field_Data_Continuous_data %>%
-select(-`Date Time`,-Ecotope,-Position)  %>% 
-select(sort(current_vars())) %>% #sorts column alphabetically
 cor(method="spearman",use = "pairwise.complete.obs")
 
 
@@ -49,11 +64,20 @@ Differences_physico <- select(WQ_Field_Data_Continuous_data,53:59,`Dif TPO4`)
 
 Values <-  select(WQ_Field_Data_Continuous_data,4:34,)
 
+#DF of differences in TP vs change in other analytes
+TP_differences_vs_Analytes <- WQ_Data_Tidy %>%
+select(Date,Ecotope,Difference,TEST_NAME)  %>%
+pivot_wider(names_from = TEST_NAME,values_from=`Difference`) 
+
+
 # Visualize ---------------------------------------------------------------
 
-#Correlation plot
-corrplot(TP_Correlation , type = "upper",  tl.col = "black", tl.srt = 45)
-corrplot(All_Correlation , type = "upper",  tl.col = "black", tl.srt = 45)
+#Correlation Plot with GGALLY of 
+ggpairs(TP_Physical_Correlation,ggplot2::aes(colour=Ecotope), title="correlogram with ggpairs()") #TP04 Correlation with Physico-chemical parameters
+
+
+
+
 
 #Correlation Plot with GGALLY 
 ggpairs(select(TP_differences_vs_Analytes,-Date,-Ecotope,-PH,-DO,-COND,-TEMP), title="correlogram with ggpairs()") #removed physico-chemical parameters since that data hasn't been entered yet.
@@ -67,4 +91,7 @@ ggpairs(select(WQ_Field_Data_Continuous_data,`Average DCS (Field Data)`,`DCS Lev
 ggpairs(Differences_chemistry, title="correlogram with ggpairs()") #.
 
 ggpairs(Differences_physico, title="correlogram with ggpairs()") #.
+
+
+
 
