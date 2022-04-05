@@ -41,11 +41,11 @@ select(sort(current_vars()))
 
 #Calculate correlation of all ecotopes grouped together
 TP_Correlation <- Correlation_Data_Tidy %>%
-  select(-`Date`,-Ecotope,-Position,-Hour,-Minute) %>%  
-  select(1:28,57:76)  %>%  #remove upstream downstream differences column
-  select(-OPO4,-`TSS mg/L`,-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  #remove parameters that are missing data or has unchanging data
-  select(sort(current_vars())) %>% #sorts column alphabetically
-  cor(method="spearman",use = "pairwise.complete.obs")
+select(-`Date`,-Ecotope,-Position,-Hour,-Minute) %>%  
+select(1:28,57:76)  %>%  #remove upstream downstream differences column
+select(-OPO4,-`TSS mg/L`,-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  #remove parameters that are missing data or has unchanging data
+select(sort(current_vars())) %>% #sorts column alphabetically
+cor(method="spearman",use = "pairwise.complete.obs")
 
 
 
@@ -74,10 +74,6 @@ pivot_wider(names_from = TEST_NAME,values_from=`Difference`)
 
 #Correlation Plot with GGALLY of 
 ggpairs(TP_Physical_Correlation,ggplot2::aes(colour=Ecotope), title="correlogram with ggpairs()") #TP04 Correlation with Physico-chemical parameters
-
-
-
-
 
 #Correlation Plot with GGALLY 
 ggpairs(select(TP_differences_vs_Analytes,-Date,-Ecotope,-PH,-DO,-COND,-TEMP), title="correlogram with ggpairs()") #removed physico-chemical parameters since that data hasn't been entered yet.
