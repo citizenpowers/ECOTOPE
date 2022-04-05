@@ -23,8 +23,7 @@ WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
 WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
-
-
+WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
 
 # QC Blank Evaluation -----------------------------------------------------
 
@@ -88,15 +87,26 @@ facet_wrap(~Ecotope)+
 scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-03-01 00:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
-#Depth vs TP 
+#DCS Depth vs TP 
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`))+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ geom_point(shape=21,size=2)+geom_smooth()+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
-#Depth vs Temp
+#DCS Depth vs Temp
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(10,40,5),limits=c(10,40))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)
+
+Temp_DF <-  mutate(WQ_Field_with_continuous_same_rows,`Temp Category`=case_when(is.na(`Temp`)~"No data",
+                                                                                `Temp`<20~"Less than 20C",
+                                                                                between(`Temp`,20,30)~"20-30C",
+                                                                                `Temp`>30~"Greater than 30C"))
+#DCS depth vs TP for various temp categories
+ggplot(Temp_DF,aes(`Average DCS (Field Data)`,`TPO4`,fill=Ecotope))+
+facet_wrap(~`Temp Category`)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ 
+geom_point(shape=21,size=2)+geom_smooth(fill="grey30",method="lm")+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
 
 #Depth vs TP for 
 Flowing_DF <-  mutate(WQ_Field_with_continuous_same_rows,Flow=case_when(is.na(`Mean inflow (cfs)`)~"No data",
@@ -159,8 +169,6 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 ggplot(WQ_Field_with_continuous_same_rows,aes(`Mean inflow (cfs)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-
 
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(WQ_Field_Data_Continuous_data,aes(`Temp`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
