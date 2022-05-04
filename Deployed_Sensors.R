@@ -45,6 +45,12 @@ Mixed_112421 <- read_csv("Data/Sonde/20220111_Mixed.csv",skip = 8)
 Typha_112421 <- read_csv("Data/Sonde/20220111_Typha.csv",skip = 8)
 Chara_112421 <- read_csv("Data/Sonde/20220111_Chara.csv",skip = 8)
 
+#Deployment 5
+chara_20220502 <- read_csv("Data/Sonde/20220502_chara.csv",skip = 8)
+Bare_20220502 <- read_csv("Data/Sonde/20220502_bare.csv",skip = 8)
+Typha_20220502 <- read_csv("Data/Sonde/20220502_typha.csv",skip = 8)
+Mixed_20220502 <- read_csv("Data/Sonde/20220502_mix.csv",skip = 8)
+Naiad_20220502 <- read_csv("Data/Sonde/20220502_naiad.csv",skip = 8)
 
 # Tidy Data from deployment 1---------------------------------------------------------------
 
@@ -132,14 +138,21 @@ mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York")) 
 filter(`Date Time`>"2021-11-23 12:00:00",`Date Time`<"2022-01-11 10:00:00")  #Time sondes were deployed
 
 
+# Deployment 5 ------------------------------------------------------------
+
+All_Sonde_wide_5 <- bind_rows(Column_Name_fixer(chara_20220502),Column_Name_fixer(Bare_20220502),Column_Name_fixer(Typha_20220502),Column_Name_fixer(Mixed_20220502),Column_Name_fixer(Naiad_20220502)) %>%
+mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
+filter(`Date Time`>"2022-02-01 12:00:00",`Date Time`<"2022-04-26 09:00:00")  #Time sondes were deployed
+
+
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4) %>%
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4,All_Sonde_wide_5) %>%
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
-rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:18) %>%
-pivot_longer(names_to = "Parameter",values_to="Value",3:15) 
+rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:18,pH,`DO %`,-AMPM) %>%
+pivot_longer(names_to = "Parameter",values_to="Value",3:17) 
 
 
 # Save Data ---------------------------------------------------------------
@@ -150,40 +163,40 @@ write.csv(All_Sonde_wide,"./Data/Sonde/All_Sonde_wide.csv",row.names = FALSE)
 # Figures -----------------------------------------------------------------
 
 #all parameters
-ggplot(All_Sonde_long,aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
+ggplot(All_Sonde_long,aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
 facet_wrap(~Parameter,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #all parameters log10 scale
-ggplot(filter(All_Sonde_long,Value>0),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
+ggplot(filter(All_Sonde_long,Value>0),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
 facet_wrap(~Parameter,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+scale_y_log10()+theme_bw()
 
 #Turbidity log10 scale
-ggplot(filter(All_Sonde_long,`Parameter`=="Turbidity FNU") ,aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
+ggplot(filter(All_Sonde_long,`Parameter`=="Turbidity FNU") ,aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
 scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_log10(breaks=c(.1,1,10,100,1000),labels=comma)+scale_x_datetime(date_breaks="12 hours",labels = date_format("%b %d %I%p"))+theme_bw()+
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
 #pH
-ggplot(filter(All_Sonde_long,Parameter=="pH"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21)+
-scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+ggplot(filter(All_Sonde_long,Parameter=="pH"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+coord_cartesian(ylim = c(6,11))+theme_bw()
 
 #Temp
-ggplot(filter(All_Sonde_long,Parameter=="Temp C°"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="Temp C°"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
-#Temp
-ggplot(filter(All_Sonde_long,Parameter=="SpCond µS/cm"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+#SpCond
+ggplot(filter(All_Sonde_long,Parameter=="SpCond µS/cm"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DO 
-ggplot(filter(All_Sonde_long,Parameter=="DO mg/L"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="DO mg/L"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DO%
-ggplot(filter(All_Sonde_long,Parameter=="DO %°"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="DO %"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #Turbidity
-ggplot(filter(All_Sonde_long,Parameter=="Turbidity FNU"),aes(`Date Time`,Value,color=Site,fill=Site))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="Turbidity FNU"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+coord_cartesian(ylim = c(0,100))
 
 
