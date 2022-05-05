@@ -151,7 +151,7 @@ All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,Al
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%
-rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:18,pH,`DO %`,-AMPM) %>%
+rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:19,`pH Sonde`,`DO %`,-AMPM) %>%
 pivot_longer(names_to = "Parameter",values_to="Value",3:17) 
 
 
@@ -176,7 +176,7 @@ scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = 
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
 #pH
-ggplot(filter(All_Sonde_long,Parameter=="pH"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
+ggplot(filter(All_Sonde_long,Parameter=="pH Sonde"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+coord_cartesian(ylim = c(6,11))+theme_bw()
 
 #Temp
@@ -214,12 +214,15 @@ Column_Name_fixer <-function(df)
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"°C"),"Temp C°",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"\\bDO %-\\b"),"DO %°",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"ODO % sat"),"DO %",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"DO %L"),"DO % Do not Collect",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"DO %"),"DO %",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"DO mg/L"),"DO mg/L",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"SPC-uS/cm"),"SpCond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"SpCond µS/cm"),"SpCond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"nLFC-uS/cm"),"Cond µS/cm",names(df)[i])
      # colnames(df )[i]  <-if_else(str_detect(names(df)[i],"Cond µS/cm"),"Cond µS/cm",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"TDS mg/L"),"TDS mg/L",names(df)[i])
+      colnames(df )[i]  <-if_else(str_detect(names(df)[i],"pH"),"pH Sonde",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"pH-\\b"),"pH Sonde",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"FNU-\\b"),"Turbidity FNU",names(df)[i])
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"FNU"),"Turbidity FNU",names(df)[i])
@@ -234,8 +237,6 @@ Column_Name_fixer <-function(df)
       colnames(df )[i]  <-if_else(str_detect(names(df)[i],"DEP m"),"Depth (m)",names(df)[i])  #doesn't exist for all sondes
     }
   
-  
- 
   #Create character vector of column names only if the column name exists
   Name_exists <- character()
   ifelse("Date" %in% names(df), Name_exists <-c(Name_exists,"Date"),"")
@@ -250,7 +251,7 @@ Column_Name_fixer <-function(df)
   ifelse("Date" %in% names(df), Name_exists <-c(Name_exists,"Date"),"")
   ifelse("Cond µS/cm" %in% names(df), Name_exists <-c(Name_exists,"Cond µS/cm"),"")
   ifelse("TDS mg/L" %in% names(df), Name_exists <-c(Name_exists,"TDS mg/L"),"")
-  ifelse("pH" %in% names(df), Name_exists <-c(Name_exists,"pH"),"")
+  ifelse("pH Sonde" %in% names(df), Name_exists <-c(Name_exists,"pH Sonde"),"")
   ifelse("Turbidity FNU" %in% names(df), Name_exists <-c(Name_exists,"Turbidity FNU"),"")
   ifelse("TSS mg/L" %in% names(df), Name_exists <-c(Name_exists,"TSS mg/L"),"")
   ifelse("BGA-PC RFU" %in% names(df), Name_exists <-c(Name_exists,"BGA-PC RFU"),"")
@@ -291,5 +292,6 @@ mutate(`Site`=case_when(str_detect(Site,"Bare")~"Bare",
                         TRUE ~ as.character(Site)))
 return(df1)  
 }
+
 
 
