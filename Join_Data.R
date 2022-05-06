@@ -1,5 +1,7 @@
 #This script joins all sensor data and WQ data into a single data frame for analysis. 
 
+rm(list = ls())
+
 #Steps
 #1.) Upload Light, Depth, SOnde, and WQ Data from .csv files. If updates are needed run those scripts to update.  
 #2.)
@@ -74,7 +76,7 @@ mutate(Ecotope=ifelse(Ecotope=="Southern Naiad","Naiad",Ecotope))  %>%
 #mutate(Ecotope=case_when(Ecotope=="Naiad"~"Mixed?",Ecotope=="Mixed"~"Naiad?",TRUE~Ecotope)) %>% #were levelogger sensors switched at mixed and naiad  
 #mutate(Ecotope=case_when(Ecotope=="Naiad?"~"Naiad",Ecotope=="Mixed?"~"Mixed",TRUE~Ecotope)) %>% #were levelogger sensors switched at mixed and naiad  
 left_join(pivot_wider(All_light_data,names_from=Position,values_from=`Light Intensity Lux`,names_prefix="Light Intensity "),by=c("Date Time","Ecotope")) %>%  #join light data
-left_join(mutate(pivot_wider(as.data.frame(select(All_Sonde_long,-`AMPM`)),names_from=Parameter,values_from=Value,values_fn = mean),`Date Time`=ymd_hms(`Date Time`)),by=c("Date Time","Ecotope")) %>%  #join sonde data
+left_join(mutate(pivot_wider(as.data.frame(All_Sonde_long),names_from=Parameter,values_from=Value,values_fn = mean),`Date Time`=ymd_hms(`Date Time`)),by=c("Date Time","Ecotope")) %>%  #join sonde data
 left_join(Flow_Data,by="Date Time") %>%  #join Flow
 left_join(Wind_data,by="Date Time")  #join wind data
 
