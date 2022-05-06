@@ -55,6 +55,18 @@ Mixed_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211
 Typha_Mid_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Cat_Mid.csv", skip = 2),Site="Typha",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
 Typha_Top_Light_20211123_Data <-  select(rename(mutate(read_csv("Data/HOBO/20211123_Cat_top.csv", skip = 2),Site="Typha",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
 
+#Deployment 4 
+Cat_top_light_20220503_Data <-select(rename(mutate(read_csv("Data/HOBO/20220503_Cat_top.csv", skip = 1),Site="Typha",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Cat_mid_light_20220503_Data <-select(rename(mutate(read_csv("Data/HOBO/20220503_Cat_Mid.csv", skip = 1),Site="Typha",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_top_light_20220503_Data <-select(rename(mutate(read_csv("Data/HOBO/20220503_Chara_Top.csv", skip = 1),Site="Chara",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_mid_light_20220503_Data <-select(rename(mutate(read_csv("Data/HOBO/20220503_Chara_Mid.csv", skip = 1),Site="Chara",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Mid_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Mixed_Mid.csv", skip = 2),Site="Mixed",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Top_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Mixed_Top.csv", skip = 2),Site="Mixed",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,6:7)
+Naiad_Mid_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Naiad_Mid.csv", skip = 2),Site="Naiad",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,10:11)
+Naiad_Top_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Naiad_Top.csv", skip = 2),Site="Naiad",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Bare_Mid_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Bare_Mid.csv", skip = 2),Site="Bare",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,6:7)  #data corrupt? 
+Bare_Top_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Bare_Top.csv", skip = 2),Site="Bare",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,10:11)
+
 
 # Tidy -----------------------------------------------------------
 
@@ -73,10 +85,16 @@ Light_Data_20211123 <- rbind(Naiad_Mid_Light_20211123_Data,Naiad_Top_Light_20211
 mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%
 filter(`Date Time`>"2021-11-23 00:00:00",`Date Time`<"2022-01-11 10:00:00")
 
+#Deployment 4 
+Light_Data_20220503 <- rbind(Mixed_Top_Light_20220503_Data,Mixed_Mid_Light_20220503_Data,Bare_Top_Light_20220503_Data,Naiad_Top_Light_20220503_Data,Naiad_Mid_Light_20220503_Data,Chara_mid_light_20220503_Data,Chara_top_light_20220503_Data,Cat_mid_light_20220503_Data,Cat_top_light_20220503_Data) %>%
+mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%  
+filter(minute(`Date Time`)%%30==0) %>%  #Mixed_Top_Light_20220503_Data collected at 1 minute frequency. Data filtered to 30 min frequency
+filter(is.POSIXct(`Date Time`)) %>%
+filter(`Date Time`>"2022-04-06 09:00:00")
 
 # Join Data ---------------------------------------------------------------
 
-All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123) %>% rename(`Ecotope`="Site") 
+All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123,Light_Data_20220503) %>% rename(`Ecotope`="Site") 
 
 # Analyze data ------------------------------------------------------------
 
@@ -92,13 +110,9 @@ group_by(Ecotope,Position,Hour) %>%
 summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
 
 
-
-
 # Save Data ---------------------------------------------------------------
 
 write.csv(select(All_light_data,-`Temp C°`) ,"./Data/HOBO/All_light_data.csv",row.names = FALSE) 
-
-
 
 # Figures -----------------------------------------------------------------
 ggplot(All_light_data,aes(`Date Time`,`Light Intensity Lux`,color=Position,fill=Position))+geom_point(shape=21,alpha=.5)+
