@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -88,13 +90,15 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
-ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`))+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ geom_point(shape=21,size=2)+geom_smooth()+
+ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`TPO4`,fill=Position))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005),limits=c(0,.05))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .05),alpha=.5,fill="#99d8c9")+ geom_point(shape=21,size=2)+geom_smooth()+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+ggsave(plot = last_plot(),filename="./Figures/Water Depth vs TP.jpeg",width =11, height =8, units = "in")
 
 #DCS Depth vs Temp
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(10,40,5),limits=c(10,40))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(10,50,5),limits=c(10,50))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)
 
 Temp_DF <-  mutate(WQ_Field_with_continuous_same_rows,`Temp Category`=case_when(is.na(`Temp`)~"No data",
