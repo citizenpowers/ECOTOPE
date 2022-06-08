@@ -67,6 +67,18 @@ Naiad_Top_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220
 Bare_Mid_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Bare_Mid.csv", skip = 2),Site="Bare",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,6:7)  #data corrupt? 
 Bare_Top_Light_20220503_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220503_Bare_Top.csv", skip = 2),Site="Bare",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,10:11)
 
+#Deployment 5 
+Cat_top_light_20220531_Data <-select(rename(mutate(read_csv("Data/HOBO/20220531_Cat_top.csv", skip = 1),Site="Typha",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Cat_mid_light_20220531_Data <-select(rename(mutate(read_csv("Data/HOBO/20220531_Cat_Mid.csv", skip = 1),Site="Typha",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_top_light_20220531_Data <-select(rename(mutate(read_csv("Data/HOBO/20220531_Chara_Top.csv", skip = 1),Site="Chara",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Chara_mid_light_20220531_Data <-select(rename(mutate(read_csv("Data/HOBO/20220531_Chara_Mid.csv", skip = 1),Site="Chara",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Mid_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Mix_mid.csv", skip = 2),Site="Mixed",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Mixed_Top_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Mix_top.csv", skip = 2),Site="Mixed",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Naiad_Mid_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Naiad_Mid.csv", skip = 2),Site="Naiad",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Naiad_Top_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Naiad_Top.csv", skip = 1),Site="Naiad",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+Bare_Mid_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Bare_Mid.csv", skip = 2),Site="Bare",Position="Mid"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)  
+Bare_Top_Light_20220531_Data <-  select(rename(mutate(read_csv("Data/HOBO/20220531_Bare_Top.csv", skip = 2),Site="Bare",Position="Top"),`Date Time`=2,`Temp C°`=3,`Light Intensity Lux`=4),2:4,9:10)
+
 
 # Tidy -----------------------------------------------------------
 
@@ -90,11 +102,18 @@ Light_Data_20220503 <- rbind(Mixed_Top_Light_20220503_Data,Mixed_Mid_Light_20220
 mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%  
 filter(minute(`Date Time`)%%30==0) %>%  #Mixed_Top_Light_20220503_Data collected at 1 minute frequency. Data filtered to 30 min frequency
 filter(is.POSIXct(`Date Time`)) %>%
-filter(`Date Time`>"2022-04-06 09:00:00")
+filter(`Date Time`<"2022-04-26 00:00:00")
+
+#Deployment 5 
+Light_Data_20220531 <- rbind(Mixed_Top_Light_20220531_Data,Mixed_Mid_Light_20220531_Data,Bare_Top_Light_20220531_Data,Naiad_Top_Light_20220531_Data,Naiad_Mid_Light_20220531_Data,Chara_mid_light_20220531_Data,Chara_top_light_20220531_Data,Cat_mid_light_20220531_Data,Cat_top_light_20220531_Data) %>%
+mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%  
+filter(is.POSIXct(`Date Time`)) %>%
+filter(`Date Time`>"2022-05-12 12:00:00",`Date Time`<"2022-05-31 12:00:00")
+
 
 # Join Data ---------------------------------------------------------------
 
-All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123,Light_Data_20220503) %>% rename(`Ecotope`="Site") 
+All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123,Light_Data_20220503,Light_Data_20220531) %>% rename(`Ecotope`="Site") 
 
 # Analyze data ------------------------------------------------------------
 

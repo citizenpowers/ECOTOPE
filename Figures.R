@@ -43,9 +43,9 @@ group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
 
 Sample_counts <-WQ_Data  %>%
-  filter(SAMPLE_TYPE=="SAMP") %>%
-  group_by(TEST_NAME) %>%
-  summarise(n=n())
+filter(SAMPLE_TYPE=="SAMP") %>%
+group_by(TEST_NAME) %>%
+summarise(n=n())
 
 # Visualize WQ -------------------------------------------------------------
 
