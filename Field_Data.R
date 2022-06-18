@@ -33,11 +33,11 @@ mutate(Ecotope=case_when(str_detect(Site,"Chara")~"Chara",str_detect(Site,"Typha
 mutate(Position=case_when(str_detect(Site,"Downstream")~"Downstream",str_detect(Site,"Upstream")~"Upstream")) %>% #create column of upstram/downstream position
 rename(`Collection Depth`="Collection Depth - inconsistant measurements") %>%
 rowwise() %>% #allows for use of DPLYR verbs in Rows
-mutate(`Average DCS (Field Data)`=mean(`DCS 1`,`DCS 2`,`DCS 3`,na.rm = TRUE)) %>%  #average DCS
-mutate(`Average Water Column (Field Data)`=mean(`Water Depth 1`,`Water Depth 2`,`Water Depth 3`,na.rm = TRUE))  # Average Water Column
+mutate(`DCS (Field Data)`=mean(`DCS 1`,`DCS 2`,`DCS 3`,na.rm = TRUE)) %>%  #average DCS
+mutate(`Water Column (Field Data)`=mean(`Water Depth 1`,`Water Depth 2`,`Water Depth 3`,na.rm = TRUE))  # Average Water Column
 
 Field_data <- Field_data_wide %>%
-select(`Date Time`,Ecotope,Position,`Average DCS (Field Data)`,`Average Water Column (Field Data)`,`Collection Depth`,Temp,pH,DO,SpCond) %>%  #Select desired paramters. Only numeric vairables. Can't mix numeric and character variables
+select(`Date Time`,Ecotope,Position,`DCS (Field Data)`,`Water Column (Field Data)`,`Collection Depth`,Temp,pH,DO,SpCond) %>%  #Select desired parameters. Only numeric vairables. Can't mix numeric and character variables
 filter(!is.na(Ecotope)) %>%  #remove FCEB rows
 pivot_longer(names_to = "TEST_NAME",values_to="VALUE",4:10) %>%  #Create long format data frame
 mutate(Hour=hour(`Date Time`),Minute=minute(`Date Time`),Date=as.Date(`Date Time`)) %>%

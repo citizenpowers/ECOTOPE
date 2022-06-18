@@ -67,8 +67,11 @@ all_analytes_plot
 ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
 
 #TPO4 Concentration over time points and smooth
-TPO4_plot <-ggplot(WQ_Field_Data,aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+geom_point(size=2)+geom_smooth(se=FALSE)+
+TPO4_plot <-ggplot(WQ_Field_Data,aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,shape=Position),size=2)+
+geom_smooth(se=FALSE)+
 #scale_fill_manual(values = pal("ft"))+scale_color_manual(values = pal("ft"))+theme_ft()+
+scale_shape_manual(values = c(21:24)) + 
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggthemr("flat dark",type="outer", layout="scientific")
