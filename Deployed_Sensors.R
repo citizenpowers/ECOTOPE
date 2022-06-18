@@ -52,6 +52,13 @@ Typha_20220502 <- read_csv("Data/Sonde/20220502_typha.csv",skip = 8)
 Mixed_20220502 <- read_csv("Data/Sonde/20220502_mix.csv",skip = 8)
 Naiad_20220502 <- read_csv("Data/Sonde/20220502_naiad.csv",skip = 8)
 
+#Deployment 6
+chara_20220531 <- read_csv("Data/Sonde/20220531_chara.csv")
+Bare_20220531 <- read_csv("Data/Sonde/20220531_bare.csv")
+Typha_20220531 <- read_csv("Data/Sonde/20220531_Typha.csv")
+Mixed_20220531 <- read_csv("Data/Sonde/20220531_mix.csv")
+Naiad_20220531 <- read_csv("Data/Sonde/20220531_naiad.csv")
+
 # Tidy Data from deployment 1---------------------------------------------------------------
 
 All_Sonde_wide_1 <- bind_rows(Column_Name_fixer(Bare_Sonde),Column_Name_fixer(Chara_Sonde), Column_Name_fixer(Cattail_Sonde), Column_Name_fixer(Mixed_Sonde),Column_Name_fixer(Southern_N_Sonde)) %>%
@@ -145,9 +152,17 @@ mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York")) 
 filter(`Date Time`>"2022-02-01 12:00:00",`Date Time`<"2022-04-26 09:00:00")  #Time sondes were deployed
 
 
+# Deployment 6 ------------------------------------------------------------
+
+
+All_Sonde_wide_6 <- bind_rows(Column_Name_fixer(chara_20220531),Column_Name_fixer(Bare_20220531),Column_Name_fixer(Typha_20220531),Column_Name_fixer(Mixed_20220531),Column_Name_fixer(Naiad_20220531)) %>%
+mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
+filter(`Date Time`>"2022-05-04 11:00:00",`Date Time`<"2022-05-31 11:00:00")  #Time sondes were deployed
+
+
 # Join Event Data ---------------------------------------------------------
 
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4,All_Sonde_wide_5) %>%
+All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4,All_Sonde_wide_5,All_Sonde_wide_6 ) %>%
 Site_fixer()
 
 All_Sonde_long <- All_Sonde_wide %>%

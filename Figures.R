@@ -46,9 +46,9 @@ group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
 
 Sample_counts <-WQ_Data  %>%
-  filter(SAMPLE_TYPE=="SAMP") %>%
-  group_by(TEST_NAME) %>%
-  summarise(n=n())
+filter(SAMPLE_TYPE=="SAMP") %>%
+group_by(TEST_NAME) %>%
+summarise(n=n())
 
 # Visualize WQ -------------------------------------------------------------
 
@@ -109,7 +109,7 @@ ggplot(select(WQ_Field_Data_Continuous_data,`Average DCS (Field Data)`,`DCS Leve
 geom_line(aes(ymd_hms(`Date Time`),`DCS Levelogger`*100))+
 geom_line(aes(ymd_hms(`Date Time`),`Dif TPO4`*10000),color="red")+ 
 facet_wrap(~Ecotope)+
-scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-03-01 00:00:00")))+
+scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as.POSIXct(c("2021-06-01 00:00:00","2022-05-31 00:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
