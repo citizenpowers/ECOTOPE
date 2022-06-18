@@ -16,7 +16,10 @@ library(readxl)
 library(readr)
 library(corrplot)
 library(GGally)
-
+library(devtools)
+library(artyfarty)
+library(ggpomological)
+library(ggthemr)
 # Import Data -------------------------------------------------------------
 
 
@@ -49,14 +52,34 @@ Sample_counts <-WQ_Data  %>%
 
 # Visualize WQ -------------------------------------------------------------
 
+
 #All Analyses Concentration over time points and smooth
-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+
-scale_x_date(date_breaks="1 month",labels = date_format("%b"))+theme_bw()
+all_analytes_plot <-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
+facet_wrap(~TEST_NAME,scales = "free_y")+
+#scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+
+#scale_color_pomological()+ scale_fill_pomological()  +theme_pomological_fancy()+  #pomological theme
+#scale_fill_manual(values = pal("ft"))+scale_color_manual(values = pal("ft"))+ theme_ft()+ #sparkly stones theme
+scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
+
+ggthemr("flat dark",type="outer", layout="scientific")
+all_analytes_plot
+
+ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
+
+#TPO4 Concentration over time points and smooth
+TPO4_plot <-ggplot(WQ_Field_Data,aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+geom_point(size=2)+geom_smooth(se=FALSE)+
+#scale_fill_manual(values = pal("ft"))+scale_color_manual(values = pal("ft"))+theme_ft()+
+scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+ggthemr("flat dark",type="outer", layout="scientific")
+TPO4_plot
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
+
 
 #All Analytes Concentration boxplots
 ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+theme_bw()+scale_color_brewer(palette = "Set2",direction = -1)
 
 #All Analytes Differences (Up-Down)- points and smooth 
 ggplot(pivot_longer(WQ_Field_Diff_Data,names_to="TEST_NAME",values_to="VALUE",34:61),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
