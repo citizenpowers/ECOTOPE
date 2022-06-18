@@ -108,7 +108,7 @@ filter(`Date Time`<"2022-04-26 00:00:00")
 Light_Data_20220531 <- rbind(Mixed_Top_Light_20220531_Data,Mixed_Mid_Light_20220531_Data,Bare_Top_Light_20220531_Data,Naiad_Top_Light_20220531_Data,Naiad_Mid_Light_20220531_Data,Chara_mid_light_20220531_Data,Chara_top_light_20220531_Data,Cat_mid_light_20220531_Data,Cat_top_light_20220531_Data) %>%
 mutate(`Date Time`=mdy_hms(`Date Time`,tz="America/New_York"))  %>%  
 filter(is.POSIXct(`Date Time`)) %>%
-filter(`Date Time`>"2022-05-12 12:00:00",`Date Time`<"2022-05-31 12:00:00")
+filter(`Date Time`>"2022-05-12 12:00:00",`Date Time`<"2022-05-31 10:00:00")
 
 
 # Join Data ---------------------------------------------------------------
