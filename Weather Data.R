@@ -20,8 +20,8 @@ library(dbhydroR)
 
 # Import Data -------------------------------------------------------------
 
-BELLW_WNVS_BK <- get_hydro(dbkey = "KV270", date_min="2021-06-01",date_max=as.character(today()))  #max daily wind speed in at belleglade weather station
-BELLW_WNVD_BK <- get_hydro(dbkey = "IW852", date_min="2021-06-01",date_max=as.character(today()))  #max daily wind direction in at belleglade weather station
+BELLW_WNVS_BK <- get_hydro(dbkey = "KV270", date_min="2021-06-01",date_max="2022-06-01")  #max daily wind speed in at belleglade weather station
+BELLW_WNVD_BK <- get_hydro(dbkey = "IW852", date_min="2021-06-01",date_max="2022-06-01")  #max daily wind direction in at belleglade weather station
 
 
 # Tidy Data ---------------------------------------------------------------
