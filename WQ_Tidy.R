@@ -23,7 +23,7 @@ WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 # Tidy Data ---------------------------------------------------------------
 
 WQ_Data_Tidy <-WQ_Data  %>%
-  filter(STATION!="OCS",SAMPLE_TYPE=="SAMP") %>%  
+  filter(STATION!="OCS",SAMPLE_TYPE=="SAMP",MATRIX=="SW") %>%  
   mutate(Date=as.Date(COLLECT_DATE)) %>%
   mutate(Ecotope=case_when(str_detect(STATION,"STA34C2B_C")~"Chara",
                            str_detect(STATION,"STA34C2B_T")~"Typha",
