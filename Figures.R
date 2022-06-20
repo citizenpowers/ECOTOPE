@@ -79,6 +79,15 @@ TPO4_plot
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
 
+#TPO4 boxplots
+TPO4_boxplot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Ecotope,TPO4*1000,color=Ecotope))+
+geom_boxplot(fill="#1F77B4")+ scale_y_continuous(breaks=seq(0,40,5),limits=c(0,40))+ guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+ggthemr("flat dark",type="outer", layout="scientific")
+TPO4_boxplot
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =8, height =6, units = "in")
+
 
 #All Analytes Concentration boxplots
 ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+

@@ -42,6 +42,11 @@ mutate(`Cumulative Rain (inches)`=cumsum(ifelse(is.na(S7_R_RAIN_Inches), 0, S7_R
 mutate(`Cumulative Rain (inches)`=`Cumulative Rain (inches)`*2843/12)  #convert inches to acre-ft. Need accurate measurement of 2B size. 2843 includes PSTA cells
 
 
+
+# Save Data ---------------------------------------------------------------
+
+write.csv(Water_budget,"./Data/Water Budget/Upstream vs Downstream by Ecotope.csv",row.names = FALSE)
+
 # Visualize ---------------------------------------------------------------
 
 #Long DF to visualise Water budget by sources

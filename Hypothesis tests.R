@@ -26,9 +26,10 @@ library(BSDA)
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
 WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
+WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
 
-
-# Wilcoxon Ranked Sign Test ---Test upstream vs downstream values for each ecotope------------------------------------
+# ---Test upstream vs downstream values for each ecotope------------------------------------
+#Wilcoxon Ranked Sign Test 
 Sign_Test_TP <- WQ_Upstream_Downstream_Tidy %>%  
 filter(TEST_NAME=="TPO4")        #filter to only TPO4
 
@@ -49,7 +50,6 @@ HPT_table <- data.frame(Ecotope,P.values,CI_low,CI_high)  #combine extracted par
 
 write.csv(HPT_table,"./Data/Publish Tables/Upstream vs Downstream by Ecotope.csv",row.names = FALSE)
 
-
 # Anova Test TP --test for differences between each station from all Ecotopes ----------------------https://www.scribbr.com/statistics/anova-in-r/
 
 AOV_TP <- WQ_Data %>%
@@ -61,3 +61,34 @@ one.way <- aov(VALUE ~ STATION, data = AOV_TP)
 summary(one.way)
 
 TukeyHSD(one.way)
+
+
+# Test for lowest mean TP annual-----------------------------------
+Lowest_TP_by_Ecotope_Table <- WQ_Field_Data  %>%  
+filter(Position=="Downstream") %>%
+group_by(Ecotope) %>%
+summarise(Observations=sum(!is.na(TPO4)),`Mean TP`=mean(TPO4,na.rm=TRUE),`Median TP`=median(TPO4,na.rm=TRUE),`Std Dev TP`=sd(TPO4,na.rm=TRUE) )
+
+write.csv(Lowest_TP_by_Ecotope_Table,"./Data/Publish Tables/Lowest_TP_by_Ecotope_Table.csv",row.names = FALSE)
+
+#ANOVA to test for all differences between ecotopes at downstream station
+AOV_Ecotope_TP <- WQ_Field_Data %>%
+filter(Position=="Downstream") 
+
+one.way.ecotope <- aov(TPO4 ~ Ecotope, data = AOV_Ecotope_TP)
+
+summary(one.way.ecotope)
+
+write.csv(Lowest_TP_by_Ecotope_Table,"./Data/Publish Tables/Lowest_TP_by_Ecotope_Table.csv",row.names = FALSE)
+
+#Wilcoxon Ranked Sign Test 
+Wilcoxon_Ecotope_TP <- WQ_Field_Data %>%
+filter(Position=="Downstream")
+
+pairwise.wilcox.test(Wilcoxon_Ecotope_TP$TPO4, Wilcoxon_Ecotope_TP$Ecotope, p.adjust.method="none")
+
+
+
+
+
+
