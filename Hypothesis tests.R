@@ -47,6 +47,9 @@ CI_high <- c(HPT_Naiad$conf.int[2],HPT_Bare$conf.int[2],HPT_Mixed$conf.int[2],HP
 
 HPT_table <- data.frame(Ecotope,P.values,CI_low,CI_high)  #combine extracted parameters in a table
 
+write.csv(HPT_table,"./Data/Publish Tables/Upstream vs Downstream by Ecotope.csv",row.names = FALSE)
+
+
 # Anova Test TP --test for differences between each station from all Ecotopes ----------------------https://www.scribbr.com/statistics/anova-in-r/
 
 AOV_TP <- WQ_Data %>%
