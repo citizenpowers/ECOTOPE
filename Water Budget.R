@@ -45,7 +45,7 @@ mutate(`Cumulative Rain (inches)`=`Cumulative Rain (inches)`*2843/12)  #convert 
 
 # Save Data ---------------------------------------------------------------
 
-write.csv(Water_budget,"./Data/Water Budget/Upstream vs Downstream by Ecotope.csv",row.names = FALSE)
+write.csv(Water_budget,"./Data/Water Budget/Water Budget.csv",row.names = FALSE)
 
 # Visualize ---------------------------------------------------------------
 

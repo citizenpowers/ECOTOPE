@@ -49,9 +49,10 @@ arrange(date) %>%
 fill(G378D_C_FLOW_cfs,G378C_C_FLOW_cfs,G378B_C_FLOW_cfs,G378A_C_FLOW_cfs) %>%
 mutate(G378_Flow=rowSums(.[2:5],na.rm=TRUE)) %>%
 group_by(date) %>%
-summarise(G378_inflow=sum(G378_Flow,na.rm=TRUE))
+mutate(G378_inflow=mean(G378_Flow,na.rm=TRUE)) %>%
+distinct(date,G378_inflow)  
        
-#Tidy Inflow
+#Tidy Outflow
 G379_Flow <- setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,05,31,0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
 bind_rows(G379D_C_BK) %>%
 bind_rows(G379C_C_BK) %>%
@@ -61,7 +62,8 @@ arrange(date) %>%
 fill(G379D_C_FLOW_cfs,G379C_C_FLOW_cfs,G379B_C_FLOW_cfs,G379A_C_FLOW_cfs) %>%
 mutate(G379_Flow=rowSums(.[2:5],na.rm=TRUE)) %>%
 group_by(date) %>%
-summarise(G379_outflow=sum(G379_Flow,na.rm=TRUE))
+mutate(G379_outflow=mean(G379_Flow,na.rm=TRUE)) %>%
+distinct(date,G379_outflow)  
 
 #Flow 30 min frequency
 Flow_Data <- left_join(G378_Flow,G379_Flow,by="date") %>%
