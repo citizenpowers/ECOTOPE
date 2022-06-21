@@ -87,8 +87,25 @@ filter(Position=="Downstream")
 
 pairwise.wilcox.test(Wilcoxon_Ecotope_TP$TPO4, Wilcoxon_Ecotope_TP$Ecotope, p.adjust.method="none")
 
+#Table of average weekly differences
+
+Difference_by_Ecotope_Table <- WQ_Field_Data  %>%  
+filter(Position=="Downstream") %>%
+select(Date, Ecotope, TPO4) %>%
+group_by(Date) %>%
+mutate(`Weekly mean TP`=mean(TPO4,na.rm=TRUE)) %>%
+pivot_wider(names_from="Ecotope",values_from="TPO4",values_fn=~mean(.x, na.rm = TRUE)) %>%
+mutate(`Bare-Chara`=Bare-Chara,`Bare-Mixed`=Bare-Mixed,`Bare-Typha`=Bare-Typha,`Bare-Naiad`=Bare-Naiad,`Chara-Mixed`=Chara-Mixed,`Chara-Naiad`=Chara-Naiad,
+`Chara- Typha`=Chara-Typha,`Mixed-Naiad`=Mixed-Naiad,`Mixed-Typha`=Mixed-Typha,`Typha-Naiad`=Typha-Naiad)  %>%
+pivot_longer(8:17,names_to="Comparison",values_to="Value")  
+  
+ggthemr_reset()
+Difference_boxplot <-ggplot(Difference_by_Ecotope_Table ,aes(Comparison,Value*1000,color=Comparison))+
+geom_boxplot()+  guides(x = guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+
+theme(panel.background = element_rect(fill = "dark blue")  )
 
 
-
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =8, height =6, units = "in")
 
 
