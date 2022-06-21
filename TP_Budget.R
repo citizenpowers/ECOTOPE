@@ -20,8 +20,10 @@ library(dbhydroR)
 
 # Import data -------------------------------------------------------------
 
-Water_budget<- read_csv("./Data/Water Budget/Water Budget.csv")
-WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
+
+Water_budget<- read_csv("./Data/Water Budget/Water Budget.csv") #import if TP budget needs to recalculated
+WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")  #import if TP budget needs to recalculated
+
 
 
 
@@ -67,16 +69,4 @@ mutate(`FWM Mixed`=`Cumulative TP Mixed`/(`Cumulative Outflow`*28.316847*60)*100
 
 write.csv(TP_Budget,"./Data/P Budget/TP_Budget.csv",row.names = FALSE)
 
-
-ggplot(Water_budget,aes(`Date Time`,`Outflow (cfs)`))+geom_point()
-
-
-Cumulative_TP <- TP_Budget %>%
-pivot_longer(19:23,names_to="Ecotope",values_to="Value")
-
-#All Analyses Concentration over time points and smooth
-ggplot(Cumulative_TP,aes(`Date Time`,`Value`,color=Ecotope))+geom_point()+
-scale_x_datetime()  
- 
-scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
 

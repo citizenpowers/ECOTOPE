@@ -29,6 +29,7 @@ WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
 WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
 WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
+TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
 
 # QC Blank Evaluation -----------------------------------------------------
 
@@ -254,3 +255,31 @@ pivot_longer(names_to="TEST_NAME",values_to="VALUE",6:33)
 
 ggplot(Ash_DF,aes(Ash,`VALUE`,fill=Ash))+geom_boxplot(color="black")+
 facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
+
+
+# TP Budget Figures -------------------------------------------------------
+
+Cumulative_TP <- TP_Budget %>%
+pivot_longer(19:23,names_to="Ecotope",values_to="Value") %>%
+filter(row_number() %% 4==1) #Select every 4th row 
+
+#All Analyses Concentration over time points and smooth
+FWM_TP_PLot <- ggplot(Cumulative_TP,aes(`Date Time`,`Value`,color=Ecotope))+geom_point()+
+scale_x_datetime(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
+
+
+ggthemr("flat dark",type="outer", layout="scientific")
+FWM_TP_PLot
+
+ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =8, height =6, units = "in")
+
+
+
+
+
+
+
+
+
