@@ -262,18 +262,18 @@ facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",dire
 # TP Budget Figures -------------------------------------------------------
 
 Cumulative_TP <- TP_Budget %>%
-pivot_longer(19:23,names_to="Ecotope",values_to="Value") %>%
+pivot_longer(25:31,names_to="Ecotope",values_to="Value") %>%
 filter(row_number() %% 4==1) #Select every 4th row 
 
 #All Analyses Concentration over time points and smooth
 FWM_TP_PLot <- ggplot(Cumulative_TP,aes(`Date Time`,`Value`,color=Ecotope))+geom_point()+
-scale_x_datetime(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
+scale_x_datetime(date_breaks="3 month",labels = date_format("%b %y"))+ ylab("P (kg)")+guides(x =  guide_axis(angle = 40),position="bottom")
 
 
 ggthemr("flat dark",type="outer", layout="scientific")
 FWM_TP_PLot
 
-ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =8, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =7, height =5, units = "in")
 
 
 

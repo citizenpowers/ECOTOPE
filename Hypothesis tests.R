@@ -28,6 +28,8 @@ WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
 WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
 WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
+TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
+
 
 # ---Test upstream vs downstream values for each ecotope------------------------------------
 #Wilcoxon Ranked Sign Test 
@@ -107,4 +109,14 @@ theme(panel.background = element_rect(fill = "grey90"),plot.background=element_r
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 differences Boxplot.jpeg",width =8, height =6, units = "in")
 
+
+# Hypothesis tests of FWM  --------------------------------------------
+
+FWM_Test <- TP_Budget %>%
+filter(`Outflow (cfs)`>0) %>%
+filter(!is.na(Chara) | !is.na(Bare) | !is.na(Typha) | !is.na(Mixed) | !is.na(Naiad)) %>%
+mutate(Date=as.Date(`Date Time`))  %>%
+group_by(Date) %>%
+summarise(n(),`FWM Chara`=mean())
+  
 
