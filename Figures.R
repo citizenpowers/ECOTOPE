@@ -20,6 +20,7 @@ library(devtools)
 library(artyfarty)
 library(ggpomological)
 library(ggthemr)
+library(interp)
 # Import Data -------------------------------------------------------------
 
 
@@ -209,6 +210,40 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 ggplot(WQ_Field_with_continuous_same_rows,aes(`Mean inflow (cfs)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
+# Water Depth vs Flow and TP ----------------------------------------------
+#Remove NAs
+contour_data <- WQ_Field_with_continuous_same_rows %>%
+drop_na(TPO4) %>%
+drop_na(`DCS (Field Data)`) %>%
+drop_na(`Mean outflow (cfs)`) 
+
+
+#Interpolate to grid form
+contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4,duplicate="mean"))
+griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),
+                            `CFS`= rep(contour_grid$y, each = ncol(contour_grid$z)),
+                            z = as.numeric(contour_grid$z)),!is.na(z)) %>%
+rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+
+
+TP_Contour_Plot <-ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4*1000)) +
+geom_contour_filled() +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+
+geom_point(data = contour_data)+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggthemr("flat dark",type="outer", layout="scientific")
+TP_Contour_Plot
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
+
+
+
+ggplot(contour_data,aes(`DCS (Field Data)`,`Mean outflow (cfs)`,z=TPO4))+geom_contour_filled() +
+#facet_wrap(~Ecotope)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+geom_density_2d()
 
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(WQ_Field_Data_Continuous_data,aes(`Temp`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
