@@ -210,6 +210,19 @@ ggplot(WQ_Field_with_continuous_same_rows,aes(`Mean inflow (cfs)`,`TPO4`))+geom_
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
+
+# Water Depth vs Flow and TP ----------------------------------------------
+contour_data <- WQ_Field_with_continuous_same_rows %>%
+drop_na(TPO4) %>%
+drop_na(`DCS (Field Data)`) %>%
+drop_na(`Mean outflow (cfs)`) 
+  
+
+ggplot(contour_data,aes(`DCS (Field Data)`,`Mean outflow (cfs)`,z=TPO4))+ geom_density_2d()+
+facet_wrap(~Ecotope)+scale_x_log()+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
+
+
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(WQ_Field_Data_Continuous_data,aes(`Temp`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+
