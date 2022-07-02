@@ -322,3 +322,18 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =7, heig
 
 
 
+
+
+# TP Differences ----------------------------------------------------------
+#Table with summary stats
+TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
+group_by(Ecotope) %>%  
+summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE))
+  
+#TPO4 Differences
+ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Ecotope,`Difference`*1000,fill=Ecotope))+
+scale_y_continuous(breaks=seq(-50,50,5))+ geom_hline(aes(yintercept = 0),linetype="dashed",color="white")+geom_boxplot()+
+ylab(expression(Upstream-Downstream~TP~(mu~g~L^-1)))+xlab("Ecotope")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream.jpeg",width =8, height =6, units = "in")
+
