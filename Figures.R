@@ -21,6 +21,7 @@ library(artyfarty)
 library(ggpomological)
 library(ggthemr)
 library(interp)
+
 # Import Data -------------------------------------------------------------
 
 
@@ -58,6 +59,9 @@ summarise(n=n())
 
 # Visualize WQ -------------------------------------------------------------
 
+#Histogram of distributions  -- Distributions approximately log normal
+ggplot(WQ_Field_Data,aes(log(TPO4*1000),color=Ecotope,fill=Ecotope))+geom_histogram()+facet_wrap(~Ecotope,scale="free")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 #All Analyses Concentration over time points and smooth
 all_analytes_plot <-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
@@ -327,14 +331,16 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =7, heig
 #Table with summary stats
 TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
 group_by(Ecotope) %>%  
-summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE))
+summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE),`mean upstream`=mean(`Upstream Values`,na.rm=TRUE),`mean downstream`=mean(`Downstream Values`,na.rm=TRUE))
   
+
+
 #TPO4 Differences
 ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Ecotope,`Difference`*1000,fill=Ecotope))+
 scale_y_continuous(breaks=seq(-50,50,5))+ geom_hline(aes(yintercept = 0),linetype="dashed",color="white")+geom_boxplot()+
 ylab(expression(Upstream-Downstream~TP~(mu~g~L^-1)))+xlab("Ecotope")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream.jpeg",width =8, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream.jpeg",width =5, height =5, units = "in")
 
 # TP Differences over time
 ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Date,`Difference`*1000,fill=Ecotope,color=Ecotope))+
