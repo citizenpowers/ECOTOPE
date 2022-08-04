@@ -74,24 +74,29 @@ scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+gui
 ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
 
 #TPO4 Concentration over time points and smooth
-TPO4_plot <-ggplot(WQ_Field_Data,aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
-geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,shape=Position),size=2)+
-geom_smooth(se=FALSE)+
-#scale_fill_manual(values = pal("ft"))+scale_color_manual(values = pal("ft"))+theme_ft()+
+TPO4_plot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope),size=2)+
+geom_smooth(se=FALSE)+theme(legend.position="bottom")+
 scale_shape_manual(values = c(21:24)) + 
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggthemr("flat dark",type="outer", layout="scientific")
 TPO4_plot
-
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER.jpeg",width =8, height =5.5, units = "in")
+
+
 
 #TPO4 boxplots
 TPO4_boxplot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Ecotope,TPO4*1000,color=Ecotope))+
 geom_boxplot(fill="#1F77B4")+ scale_y_continuous(breaks=seq(0,40,5),limits=c(0,40))+ guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggthemr("flat dark",type="outer", layout="scientific")
+ggthemr("light",type="outer", layout="scientific")
 TPO4_boxplot
+
+
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =8, height =6, units = "in")
 
@@ -247,6 +252,7 @@ geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+gu
 
 ggthemr("flat dark",type="outer", layout="scientific")
 TP_Contour_Plot
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
 
@@ -314,10 +320,14 @@ scale_x_datetime(date_breaks="3 month",labels = date_format("%b %y"))+ ylab("P (
 
 
 ggthemr("flat dark",type="outer", layout="scientific")
+ggthemr("flat",type="outer", layout="scientific")
+ggthemr("light",type="outer", layout="scientific")
+
 FWM_TP_PLot
 
 ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =7, height =5, units = "in")
 
+ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8, height =5.5, units = "in")
 
 
 
