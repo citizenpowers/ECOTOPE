@@ -187,7 +187,7 @@ facet_wrap(~Parameter,scales = "free_y")+scale_fill_brewer(palette = "Set2",dire
 
 #Turbidity log10 scale
 ggplot(filter(All_Sonde_long,`Parameter`=="Turbidity FNU") ,aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
-scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_log10(breaks=c(.1,1,10,100,1000),labels=comma)+scale_x_datetime(date_breaks="12 hours",labels = date_format("%b %d %I%p"))+theme_bw()+
+scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_log10(breaks=c(.1,1,10,100,1000),labels=comma)+scale_x_datetime(date_breaks="1 week",labels = date_format("%b %d"))+theme_bw()+
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
 #pH
@@ -214,6 +214,10 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 ggplot(filter(All_Sonde_long,Parameter=="Turbidity FNU"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+coord_cartesian(ylim = c(0,100))
 
+#FDOM  scale
+ggplot(filter(All_Sonde_long,`Parameter`=="fDOM RFU") ,aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
+scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = "Set3",direction = -1)+scale_y_continuous(limits=c(0,300),breaks=c(0,100,200,300),labels=comma)+scale_x_datetime(date_breaks="1 week",labels = date_format("%b %d"))+theme_bw()+
+theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
 # Helper Functions --------------------------------------------------------
 
