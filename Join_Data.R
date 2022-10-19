@@ -68,7 +68,7 @@ WQ_Field_Diff_Data <- WQ_Field_Data %>%
 left_join(pivot_wider(select(WQ_Upstream_Downstream_Tidy,Date,Ecotope,TEST_NAME,Difference),names_from =c(TEST_NAME),values_from=Difference,names_prefix = "Dif ",values_fn = mean) ,by=c("Date","Ecotope"))
 # Join continuous data -------------------------------
 
-Continuous_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,05,31,0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
+Continuous_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
 left_join(select(pivot_wider(Water_Depth_Data,names_from=Site,values_from=level,values_fn = mean),1:6),by="Date Time") %>%  #join water depth data
 mutate(across(where(is.numeric), ~if_else(is.na(.)==F,true = round(.,digits=2),  false = as.numeric(.))))  %>%               #round water depth data do 2 decimal points
 pivot_longer(names_to = "Ecotope",values_to = "DCS Levelogger", 2:6)  %>%     

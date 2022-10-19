@@ -18,29 +18,28 @@ library(ggrepel)
 library(zoo)
 library(dbhydroR)
 
-
-
+test<- as.character(Sys.Date())
+test1 <- "2022-10-19"
 
 # Import Data --------------------------------------------------------------
 
 #Inflow Stations
-G378D_C_BK <- get_hydro(dbkey = "64484", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G378C_C_BK <- get_hydro(dbkey = "64483", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G378B_C_BK <- get_hydro(dbkey = "64482", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G378A_C_BK <- get_hydro(dbkey = "64481", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
+G378D_C_BK <- get_hydro(dbkey = "64484", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
+G378C_C_BK <- get_hydro(dbkey = "64483", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
+G378B_C_BK <- get_hydro(dbkey = "64482", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
+G378A_C_BK <- get_hydro(dbkey = "64481", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
 
 #Outflow Stations
-G379D_C_BK <- get_hydro(dbkey = "64489", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G379C_C_BK <- get_hydro(dbkey = "64488", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G379B_C_BK <- get_hydro(dbkey = "64487", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-G379A_C_BK <- get_hydro(dbkey = "64486", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for inflow to Cell 2B of STA34
-
+G379D_C_BK <- get_hydro(dbkey = "64489", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379C_C_BK <- get_hydro(dbkey = "64488", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379B_C_BK <- get_hydro(dbkey = "64487", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379A_C_BK <- get_hydro(dbkey = "64486", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
 
 
 # Tidy Data ---------------------------------------------------------------
 
 #Tidy Inflow
-G378_Flow <- setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,06,01,0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
+G378_Flow <- setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
 bind_rows(G378D_C_BK) %>%
 bind_rows(G378C_C_BK) %>%
 bind_rows(G378B_C_BK) %>%
@@ -52,8 +51,8 @@ group_by(date) %>%
 mutate(G378_inflow=mean(G378_Flow,na.rm=TRUE)) %>%
 distinct(date,G378_inflow)  
        
-#Tidy Outflow
-G379_Flow <- setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2022,05,31,0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
+ #Tidy Outflow
+G379_Flow <- setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
 bind_rows(G379D_C_BK) %>%
 bind_rows(G379C_C_BK) %>%
 bind_rows(G379B_C_BK) %>%
@@ -65,7 +64,7 @@ group_by(date) %>%
 mutate(G379_outflow=mean(G379_Flow,na.rm=TRUE)) %>%
 distinct(date,G379_outflow)  
 
-#Flow 30 min frequency
+ #Flow 30 min frequency
 Flow_Data <- left_join(G378_Flow,G379_Flow,by="date") %>%
 mutate(period=year(date)*365*24*60+yday(date)*24*60+hour(date)*60+minute(date)) %>%   #there are double the amount of periods for daylight savings on 11/7/21- Issue unresolved
 mutate(period_30=floor(period/30)) %>%

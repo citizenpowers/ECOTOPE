@@ -17,8 +17,6 @@ library(readr)
 library(corrplot)
 library(GGally)
 library(devtools)
-library(artyfarty)
-library(ggpomological)
 library(ggthemr)
 library(interp)
 
@@ -36,6 +34,9 @@ TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
 # Theme -------------------------------------------------------------------
 
 ggthemr("flat dark",type="outer", layout="scientific")
+Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
+Presentation_theme2 <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
+
 
 # QC Blank Evaluation -----------------------------------------------------
 
@@ -75,31 +76,21 @@ ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",wi
 
 #TPO4 Concentration over time points and smooth
 TPO4_plot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
-geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope),size=2)+
-geom_smooth(se=FALSE)+theme(legend.position="bottom")+
-scale_shape_manual(values = c(21:24)) + 
+geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE)+
+Presentation_theme+scale_shape_manual(values = c(21:24)) + 
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
-ggthemr("flat dark",type="outer", layout="scientific")
-TPO4_plot
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER.jpeg",width =8, height =5.5, units = "in")
 
-
-
 #TPO4 boxplots
-TPO4_boxplot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Ecotope,TPO4*1000,color=Ecotope))+
-geom_boxplot(fill="#1F77B4")+ scale_y_continuous(breaks=seq(0,40,5),limits=c(0,40))+ guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+TPO4_boxplot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Ecotope,TPO4*1000,fill=Ecotope))+geom_boxplot()+
+scale_y_continuous(breaks=seq(0,40,5),limits=c(0,40))+ guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))+
+Presentation_theme
 
-ggthemr("flat dark",type="outer", layout="scientific")
-ggthemr("light",type="outer", layout="scientific")
-TPO4_boxplot
-
-
-
-ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =8, height =6, units = "in")
-
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =13.333, height =7.5, units = "in")
 
 #All Analytes Concentration boxplots
 ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
@@ -138,7 +129,7 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 
 #DCS Depth vs TP 
 ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
 geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 40),alpha=.5,fill="#787C99",color="#787C99")+geom_point(shape=21,size=2,color="grey70")+geom_smooth()+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
@@ -224,9 +215,9 @@ facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #outflow vs TPO4
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+
-ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`Mean outflow (cfs)`*.01,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (100 cfs)")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow.jpeg",width =5, height =6, units = "in")
 
@@ -247,18 +238,16 @@ rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
 
 TP_Contour_Plot <-ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4*1000)) +
-geom_contour_filled() +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+
+geom_contour_filled() +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
-ggthemr("flat dark",type="outer", layout="scientific")
-TP_Contour_Plot
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
 
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(filter(WQ_Field_Data_Continuous_data,Position=="Downstream"),aes(`Temp`,`TPO4`*1000,color=Ecotope,fill=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Temp (C)")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Temp.jpeg",width =5, height =6, units = "in")
@@ -315,17 +304,12 @@ pivot_longer(25:31,names_to="Ecotope",values_to="Value") %>%
 filter(row_number() %% 4==1) #Select every 4th row 
 
 #All Analyses Concentration over time points and smooth
-FWM_TP_PLot <- ggplot(Cumulative_TP,aes(`Date Time`,`Value`,color=Ecotope))+geom_point()+
+FWM_TP_PLot <- ggplot(Cumulative_TP,aes(`Date Time`,`Value`,color=Ecotope))+
+geom_line(aes(`Date Time`,`Outflow (cfs)`),color="white",linetype="dashed")+scale_y_continuous(sec.axis = sec_axis(~., name = "Outflow (cfs)"))+geom_point()+
+theme(legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 14),legend.title = element_text(size = 16))+  
 scale_x_datetime(date_breaks="3 month",labels = date_format("%b %y"))+ ylab("P (kg)")+guides(x =  guide_axis(angle = 40),position="bottom")
 
-
-ggthemr("flat dark",type="outer", layout="scientific")
-ggthemr("flat",type="outer", layout="scientific")
-ggthemr("light",type="outer", layout="scientific")
-
-FWM_TP_PLot
-
-ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =7, height =5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Cumulative TP.jpeg",width =13.333, height =7.5, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8, height =5.5, units = "in")
 
@@ -342,12 +326,11 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8,
 TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
 group_by(Ecotope) %>%  
 summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE),`mean upstream`=mean(`Upstream Values`,na.rm=TRUE),`mean downstream`=mean(`Downstream Values`,na.rm=TRUE))
-  
 
 
 #TPO4 Differences
 ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Ecotope,`Difference`*1000,fill=Ecotope))+
-scale_y_continuous(breaks=seq(-50,50,5))+ geom_hline(aes(yintercept = 0),linetype="dashed",color="white")+geom_boxplot()+
+scale_y_continuous(breaks=seq(-50,50,5),limits=c(-10,10))+ geom_hline(aes(yintercept = 0),linetype="dashed",color="white")+geom_boxplot()+Presentation_theme2+
 ylab(expression(Upstream-Downstream~TP~(mu~g~L^-1)))+xlab("Ecotope")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream.jpeg",width =5, height =5, units = "in")
@@ -372,13 +355,14 @@ mutate(`P Form`=factor(`P Form`,levels=c("Soluble Reactive P","Dissolved Organic
 #TP forms over time
 ggplot(TP_forms,aes(Date,Value*1000))+geom_col(aes(fill=`P Form`))+
 facet_wrap(~Ecotope)+scale_fill_discrete(limits = rev)+
+Presentation_theme +  
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time.jpeg",width =13.333, height =7.5, units = "in")
 
 #DOP over time
 ggplot(TP_forms,aes(Date,Value*1000,color=`P Form`))+geom_point()+geom_smooth()+
-facet_wrap(~Ecotope)+scale_fill_discrete(limits = rev)+
+facet_wrap(~Ecotope)+scale_fill_discrete(limits = rev)+Presentation_theme +  
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =13.333, height =7.5, units = "in")

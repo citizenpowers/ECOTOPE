@@ -104,8 +104,8 @@ pivot_longer(8:17,names_to="Comparison",values_to="Value")
   
 ggplot(Difference_by_Ecotope_Table ,aes(Comparison,Value*1000,fill=Comparison))+
 geom_boxplot()+  guides(x = guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))+geom_abline(intercept = 0, slope = 0,linetype="dashed")+
-scale_fill_brewer(palette = "Set3",direction = -1)+scale_y_continuous(breaks=seq(-20,30,2))+guides(fill="none")+labs(x="")+
-theme(panel.background = element_rect(fill = "grey90"),plot.background=element_rect(fill="grey90"))
+scale_fill_brewer(palette = "Set3",direction = -1)+scale_y_continuous(breaks=seq(-20,30,2))+guides(fill="none")+labs(x="")+Presentation_theme
+#theme(panel.background = element_rect(fill = "grey90"),plot.background=element_rect(fill="grey90"))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 differences Boxplot.jpeg",width =8, height =6, units = "in")
 
