@@ -19,6 +19,8 @@ library(GGally)
 
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 
+Ecotope_data_LIMSP <- read_excel("Data/WQ Data/Ecotope_data_LIMSP.xlsx")   #Import data from provisionalLIMSP
+
 
 # Tidy Data ---------------------------------------------------------------
 
@@ -37,9 +39,32 @@ WQ_Data_Tidy <-WQ_Data  %>%
   mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME)) 
 
 
+# Tidy provisional data
+WQ_Provisional_Tidy <- Ecotope_data_LIMSP %>%
+rename(STATION="LOCATION",TEST_NAME="ACODE",REMARK_CODE="ALL_QUALIFIERS",VALUE="RESULT_ONLY") %>%
+filter(STATION!="OCS",SAMPLE_TYPE=="SAMP",MATRIX=="SW") %>%  
+mutate(Date=as.Date(COLLECT_DATE)) %>%
+mutate(Ecotope=case_when(str_detect(STATION,"STA34C2B_C")~"Chara",
+                         str_detect(STATION,"STA1WC5B_C")~"Chara",
+                         str_detect(STATION,"STA34C2B_T")~"Typha",
+                         str_detect(STATION,"STA1WC5B_T")~"Typha",
+                         str_detect(STATION,"STA34C2B_N")~"Naiad",
+                         str_detect(STATION,"STA34C2B_M")~"Mixed",
+                         str_detect(STATION,"STA1WC5B_M")~"Mixed",
+                         str_detect(STATION,"STA34C2B_B")~"Bare",
+                         str_detect(STATION,"STA1WC5B_B")~"Bare"))  %>%
+mutate(Position=case_when(str_detect(STATION,"DWN")~"Downstream",
+                          str_detect(STATION,"Up")~"Upstream")) %>%
+mutate(STA=case_when(str_detect(STATION,"STA34")~"STA-3/4 Cell 2B",
+                            str_detect(STATION,"STA1W")~"STA-1W Cell 5B")) %>%
+mutate(TEST_NAME=if_else(TEST_NAME=="COND","SpCond",TEST_NAME)) %>%
+mutate(TEST_NAME=if_else(TEST_NAME=="TEMP","Temp",TEST_NAME)) %>%
+mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME))   
+
 
 # Save Data ---------------------------------------------------------------
 
-write.csv(WQ_Data_Tidy , "./Data/WQ Data/WQ_Data_Tidy.csv",row.names = FALSE)
+write.csv(WQ_Data_Tidy , "./Data/WQ Data/WQ_Data_Tidy.csv",row.names = FALSE) 
 
+write.csv(WQ_Provisional_Tidy , "./Data/WQ Data/WQ_Provisional_Tidy.csv",row.names = FALSE) 
 

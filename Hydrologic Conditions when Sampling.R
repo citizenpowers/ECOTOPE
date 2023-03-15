@@ -38,4 +38,4 @@ summarise(`DCS Mean`=mean(`DCS (Field Data)`,na.rm=TRUE),`Outflow Mean`=mean(`Me
 ggplot(Flow_Depth_TP,aes(`Outflow Mean`,`DCS Mean`,fill=as.factor(Date)))+geom_point(shape=21,size=3,color="black")+theme_bw()+ geom_vline(aes(xintercept = c(300)))+ geom_hline(yintercept = c(45,76))+
 scale_y_continuous(breaks=seq(0,130,10),limits=c(0,130))
 
-ggsave(plot = last_plot(),filename="./Figures/Sample Collection Matrix.jpeg",width =11, height =8 , units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Sample Collection Matrix.jpeg",width =11, height =8.5 , units = "in")

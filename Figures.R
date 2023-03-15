@@ -19,12 +19,14 @@ library(GGally)
 library(devtools)
 library(ggthemr)
 library(interp)
+library(tidyverse)
 
 # Import Data -------------------------------------------------------------
 
 
 WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
 WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
+WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Provisional_Tidy.csv")   #provisional data
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
 WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
@@ -75,10 +77,10 @@ scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+gui
 ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
 
 #TPO4 Concentration over time points and smooth
-TPO4_plot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
-geom_point(aes(Date,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
-geom_smooth(se=FALSE)+
-Presentation_theme+scale_shape_manual(values = c(21:24)) + 
+ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE)+facet_wrap(~fct_rev(STA),nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
+Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
@@ -345,20 +347,25 @@ geom_smooth(se=FALSE)+scale_x_date(date_breaks="1 month",labels = date_format("%
 TP_forms <- WQ_Data_Tidy %>%
 filter(TEST_NAME %in% c("TPO4","OPO4","TDPO4"),Position=="Downstream") %>%
 mutate(VALUE=ifelse(REMARK_CODE %in% "U",0,VALUE)) %>%   #substitute
-select(Date,TEST_NAME,VALUE,Ecotope,Position)  %>%
+select(Date,TEST_NAME,VALUE,STA,Ecotope,Position)  %>%
 pivot_wider(names_from="TEST_NAME",values_from="VALUE") %>%
 mutate(`Particulate P`=TPO4-TDPO4,`Dissolved Organic P`=TDPO4-OPO4,`Soluble Reactive P`=OPO4) %>%
-select(1:3,7:9) %>%
-pivot_longer(4:6,names_to="P Form",values_to="Value") %>%
+select(1:4,8:10) %>%
+pivot_longer(5:7,names_to="P Form",values_to="Value") %>%
 mutate(`P Form`=factor(`P Form`,levels=c("Soluble Reactive P","Dissolved Organic P","Particulate P")))  
 
-#TP forms over time
-ggplot(TP_forms,aes(Date,Value*1000))+geom_col(aes(fill=`P Form`))+
-facet_wrap(~Ecotope)+scale_fill_discrete(limits = rev)+
-Presentation_theme +  
-scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))
+TP_forms_monthly <- TP_forms %>%
+mutate(Month=month(Date,abbr=TRUE,label=TRUE)) %>%
+group_by(STA,Ecotope,Month,`P Form`) %>%
+summarise(n(),`Monthly Mean`=mean(Value*1000,na.rm=TRUE))
 
-ggsave(plot = last_plot(),filename="./Figures/P Forms over time.jpeg",width =13.333, height =7.5, units = "in")
+#TP forms over time
+ggplot(TP_forms_monthly,aes(Month,`Monthly Mean`))+geom_col(aes(fill=`P Form`))+
+facet_grid(fct_rev(STA)~Ecotope)+scale_fill_discrete(limits = rev)+
+Presentation_theme   +theme(axis.text.x=element_text(size=rel(0.75)))+
+guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
+
+ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =13.333, height =7.5, units = "in")
 
 #DOP over time
 ggplot(TP_forms,aes(Date,Value*1000,color=`P Form`))+geom_point()+geom_smooth()+
