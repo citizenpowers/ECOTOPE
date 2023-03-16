@@ -130,9 +130,9 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
-geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 40),alpha=.5,fill="#787C99",color="#787C99")+geom_point(shape=21,size=2,color="grey70")+geom_smooth()+
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
+geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#787C99",color="#787C99")+geom_point(shape=21,size=2,color="grey70")+geom_smooth()+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth.jpeg",width =5, height =6, units = "in")
@@ -217,16 +217,18 @@ facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #outflow vs TPO4
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`Mean outflow (cfs)`*.01,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
-ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (100 cfs)")+guides(fill="none",color="none")
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+ coord_cartesian(ylim=c(0,80))+
+geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
+geom_line(stat='smooth', method = "loess")  + 
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow.jpeg",width =5, height =6, units = "in")
 
 
 # Water Depth vs Flow and TP ----------------------------------------------
 #Remove NAs
-contour_data <- WQ_Field_with_continuous_same_rows %>%
+contour_data <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B") %>%
 drop_na(TPO4) %>%
 drop_na(`DCS (Field Data)`) %>%
 drop_na(`Mean outflow (cfs)`) 
@@ -238,7 +240,6 @@ griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),
                             z = as.numeric(contour_grid$z)),!is.na(z)) %>%
 rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
-
 TP_Contour_Plot <-ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4*1000)) +
 geom_contour_filled() +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
@@ -248,8 +249,8 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",w
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
 
 # TP vs physico-chemical parameters ----------------------------------------
-ggplot(filter(WQ_Field_Data_Continuous_data,Position=="Downstream"),aes(`Temp`,`TPO4`*1000,color=Ecotope,fill=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,50,5))+Presentation_theme2+
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Temp`,`TPO4`*1000,color=Ecotope,fill=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Temp (C)")+guides(fill="none",color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Temp.jpeg",width =5, height =6, units = "in")

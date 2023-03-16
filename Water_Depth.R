@@ -91,17 +91,15 @@ pivot_longer(names_to = "Site",values_to="level",2:8)
 
 #Tidy STA1W
 Inflow_outflow_data_1W <-  setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "min")),"date") %>%
+mutate(Chara=NA,Typha=NA,Mixed=NA,Bare=NA) %>%
 left_join(Inflow_Stage_BK_STA1W ,by="date") %>%  
 left_join(Outflow_Stage_BK_STA1W,by="date") %>%
 fill(`G306G_H_STG_ft NGVD29`,`G304F_T_STG_ft NGVD29`) %>%
 mutate(`Inflow Est. Water Depth`=(`G304F_T_STG_ft NGVD29`-8.8)/3.28084,`Outflow Est. Water Depth`=(`G306G_H_STG_ft NGVD29`-8.8)/3.28084)  %>%
-select(date,`Inflow Est. Water Depth`,`Outflow Est. Water Depth`)  %>%
-pivot_longer(names_to = "Site",values_to="level",2:3)  %>%
+select(date,Chara,Typha,Bare,Mixed,`Inflow Est. Water Depth`,`Outflow Est. Water Depth`)  %>%
+pivot_longer(names_to = "Site",values_to="level",2:7)  %>%
 rename(`Date Time`="date") %>%
 filter(if_else(minute(`Date Time`) %in% c(0,30),TRUE,FALSE)) 
-
-
-
 
 
 # Save data ---------------------------------------------------------------
