@@ -43,6 +43,9 @@ Naiad_Depth_20220531_Data <- mutate(read_csv("Data/Levelogger/20220531_Naiad.csv
 #Import Stage Data
 Inflow_Stage_BK <- get_hydro(dbkey = "T9942", date_min="2021-06-08",date_max=as.character(today()))  #DBHYDRO data for inflow to Cell 2B of STA34
 Outflow_Stage_BK <-get_hydro(dbkey = "T1049", date_min="2021-06-08",date_max=as.character(today()))  #DBHYDRO data for outflow of cell 2B
+Inflow_Stage_BK_STA1W <- get_hydro(dbkey = "41641", date_min="2022-10-18",date_max=as.character(today()))  #DBHYDRO data for inflow to Cell 5B of STA1W
+Outflow_Stage_BK_STA1W <-get_hydro(dbkey = "41623", date_min="2022-10-18",date_max=as.character(today()))  #DBHYDRO data for outflow of cell 5B
+
 
 
 # Tidy Data ---------------------------------------------------------------
@@ -68,6 +71,7 @@ filter(ifelse(Site=="Chara" & `Date Time`<= "2022-03-01 13:00:00",FALSE,TRUE)) %
 filter(`Date Time`>"2022-02-01 12:00:00") %>%
 filter(`Date Time`<"2022-05-31 09:00:00")  
 
+#Tidy STA34
 Inflow_outflow_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "min")),"date") %>%
 left_join(Inflow_Stage_BK ,by="date") %>%  
 left_join(Outflow_Stage_BK,by="date") %>%
@@ -78,20 +82,43 @@ pivot_longer(names_to = "Site",values_to="level",2:3)  %>%
 rename(`Date Time`="date") %>%
 filter(if_else(minute(`Date Time`) %in% c(0,30),TRUE,FALSE)) 
 
-#join Data
+#join Data STA34
 Water_Depth_Data <- bind_rows(Water_Depth_20210609_Data,Water_Depth_20211123_Data ,Water_Depth_20220531_Data) %>%
 bind_rows(Inflow_outflow_data) %>%
 select(`Date Time`,level,Site) %>%  
 pivot_wider(names_from = "Site", values_from="level") %>%
-pivot_longer(names_to = "Site",values_to="level",2:8) 
+pivot_longer(names_to = "Site",values_to="level",2:8)
+
+#Tidy STA1W
+Inflow_outflow_data_1W <-  setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "min")),"date") %>%
+left_join(Inflow_Stage_BK_STA1W ,by="date") %>%  
+left_join(Outflow_Stage_BK_STA1W,by="date") %>%
+fill(`G306G_H_STG_ft NGVD29`,`G304F_T_STG_ft NGVD29`) %>%
+mutate(`Inflow Est. Water Depth`=(`G304F_T_STG_ft NGVD29`-8.8)/3.28084,`Outflow Est. Water Depth`=(`G306G_H_STG_ft NGVD29`-8.8)/3.28084)  %>%
+select(date,`Inflow Est. Water Depth`,`Outflow Est. Water Depth`)  %>%
+pivot_longer(names_to = "Site",values_to="level",2:3)  %>%
+rename(`Date Time`="date") %>%
+filter(if_else(minute(`Date Time`) %in% c(0,30),TRUE,FALSE)) 
+
+
+
+
+
 # Save data ---------------------------------------------------------------
 
 write.csv(Water_Depth_Data,"./Data/Levelogger/Water_Depth_Data.csv",row.names = FALSE)  
+write.csv(Inflow_outflow_data_1W ,"./Data/Levelogger/Water_Depth_Data_STA1W.csv",row.names = FALSE)  
 
 # Figures -----------------------------------------------------------------
 #Water Depth over Time
 ggplot(Water_Depth_Data,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
 scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+coord_cartesian(xlim=as.POSIXct(c("2021-06-09 12:00:00","2022-05-31 12:00:00")))+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
+labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
+
+#Water Depth over Time 1W
+ggplot(Inflow_outflow_data_1W,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
+scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+coord_cartesian(xlim=as.POSIXct(c("2022-10-18 12:00:00","2023-03-15 12:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
 labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
 

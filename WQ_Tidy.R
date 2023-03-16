@@ -59,7 +59,9 @@ mutate(STA=case_when(str_detect(STATION,"STA34")~"STA-3/4 Cell 2B",
                             str_detect(STATION,"STA1W")~"STA-1W Cell 5B")) %>%
 mutate(TEST_NAME=if_else(TEST_NAME=="COND","SpCond",TEST_NAME)) %>%
 mutate(TEST_NAME=if_else(TEST_NAME=="TEMP","Temp",TEST_NAME)) %>%
-mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME))   
+mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME))   %>%
+mutate(TEST_NAME=if_else(TEST_NAME=="NA","Sodium",TEST_NAME))   
+
 
 
 # Save Data ---------------------------------------------------------------

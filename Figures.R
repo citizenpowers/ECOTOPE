@@ -77,7 +77,7 @@ scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+gui
 ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
 
 #TPO4 Concentration over time points and smooth
-ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=3)+
 geom_smooth(se=FALSE)+facet_wrap(~fct_rev(STA),nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
 Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
@@ -360,7 +360,7 @@ group_by(STA,Ecotope,Month,`P Form`) %>%
 summarise(n(),`Monthly Mean`=mean(Value*1000,na.rm=TRUE))
 
 #TP forms over time
-ggplot(TP_forms_monthly,aes(Month,`Monthly Mean`))+geom_col(aes(fill=`P Form`))+
+ggplot(filter(TP_forms_monthly,Ecotope!="Naiad"),aes(Month,`Monthly Mean`))+geom_col(aes(fill=`P Form`))+
 facet_grid(fct_rev(STA)~Ecotope)+scale_fill_discrete(limits = rev)+
 Presentation_theme   +theme(axis.text.x=element_text(size=rel(0.75)))+
 guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
@@ -368,9 +368,11 @@ guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =13.333, height =7.5, units = "in")
 
 #DOP over time
-ggplot(TP_forms,aes(Date,Value*1000,color=`P Form`))+geom_point()+geom_smooth()+
-facet_wrap(~Ecotope)+scale_fill_discrete(limits = rev)+Presentation_theme +  
-scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))
+ggplot(filter(TP_forms,STA=="STA-3/4 Cell 2B",Ecotope!="Naiad"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
+geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
+geom_line(stat='smooth', method = "loess")  + theme(axis.text.x=element_text(size=rel(0.75)))+
+facet_wrap(~Ecotope,nrow=1)+scale_fill_discrete()+Presentation_theme + scale_x_discrete(limits = 1:12, labels = month.abb)+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)),x="Month")+coord_cartesian(ylim = c(0, 30))
 
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =13.333, height =7.5, units = "in")
 
