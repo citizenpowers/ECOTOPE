@@ -20,6 +20,7 @@ library(devtools)
 library(ggthemr)
 library(interp)
 library(tidyverse)
+library(stringr)
 
 # Import Data -------------------------------------------------------------
 
@@ -47,6 +48,31 @@ filter(SAMPLE_TYPE=="FCEB") %>%
 group_by(TEST_NAME,REMARK_CODE) %>%
 summarise(n=n())
 
+
+
+# Evaluation of Samples with high TP  -------------------------------------
+#look for passible causes of TP samples from field notes
+
+High_TP_causes <-WQ_Field_with_continuous_same_rows %>%
+select(1:35,64:87) %>%
+mutate(`Possible Cause`=case_when(str_detect(tolower(Notes),"alg")==TRUE ~"Algae",
+                                  str_detect(tolower(Notes),"bird")==TRUE ~"Bird",
+                                  str_detect(tolower(Notes),"particle")==TRUE ~"Particles",
+                                  str_detect(tolower(Notes),"ash")==TRUE ~"Ash",
+                                  TRUE~"")) 
+
+Summary_possible_causes <- High_TP_causes %>%
+group_by(`Possible Cause`)  %>%
+summarise(n(),`Mean TP`=mean(TPO4,na.rm=TRUE))
+
+
+ggplot(filter(High_TP_causes ,Ecotope!="Naiad"),aes(Date,TPO4,label=`Possible Cause`))+geom_point()+
+geom_label_repel(hjust=1, vjust=1,color="black",na.rm=TRUE)
+Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+
+test <- High_TP_causes %>% select(1:7,TPO4,33:40,60)
 
 # Contamination Evaluation ------------------------------------------------
 
