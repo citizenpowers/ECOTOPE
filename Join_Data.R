@@ -40,7 +40,7 @@ Wind_data <- read_csv( "./Data/Weather Data/Wind_data.csv")
 
 # WQ and Field data---------------------------------------------------------------
 
-test <- pivot_wider(Field_data,names_from = "TEST_NAME",values_from="VALUE")
+
 
 WQ_Field_Data <- WQ_Data_Tidy %>% 
 filter(MATRIX=="SW",COLLECT_METHOD %in% c("G","GP"),) %>%
@@ -49,7 +49,7 @@ select(Date,STA,Ecotope,Position,TEST_NAME,VALUE,Hour,Minute)  %>%
 mutate(Minute=case_when(between(Minute,15,44)~30,!between(Minute,15,44)~0))  %>%    #round time to nearest 30 minutes so it can be joined with continuous sensor data
 pivot_wider(names_from = "TEST_NAME",values_from="VALUE") %>%
 select(-Temp,-DO,-pH,-SpCond) %>%  #these analytes are duplicated in the database although incompletely in WQ database  
-left_join(test,by=c("Date","STA","Ecotope","Position","Hour","Minute")) %>%
+left_join(pivot_wider(Field_data,names_from = "TEST_NAME",values_from="VALUE"),by=c("Date","STA","Ecotope","Position","Hour","Minute")) %>%
 relocate(Notes,.after=Minute)
 #pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used values_fn = mean to average duplicate values
 
