@@ -40,25 +40,30 @@ Wind_data <- read_csv( "./Data/Weather Data/Wind_data.csv")
 
 # WQ and Field data---------------------------------------------------------------
 
+test <- pivot_wider(Field_data,names_from = "TEST_NAME",values_from="VALUE")
+
 WQ_Field_Data <- WQ_Data_Tidy %>% 
 filter(MATRIX=="SW",COLLECT_METHOD %in% c("G","GP"),) %>%
 mutate(Hour=hour(COLLECT_DATE),Minute=minute(COLLECT_DATE)) %>%
 select(Date,STA,Ecotope,Position,TEST_NAME,VALUE,Hour,Minute)  %>%
 mutate(Minute=case_when(between(Minute,15,44)~30,!between(Minute,15,44)~0))  %>%    #round time to nearest 30 minutes so it can be joined with continuous sensor data
-bind_rows(Field_data) %>%
-pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used values_fn = mean to average duplicate values
+pivot_wider(names_from = "TEST_NAME",values_from="VALUE") %>%
+select(-Temp,-DO,-pH,-SpCond) %>%  #these analytes are duplicated in the database although incompletely in WQ database  
+left_join(test,by=c("Date","STA","Ecotope","Position","Hour","Minute")) %>%
+relocate(Notes,.after=Minute)
+#pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn = mean) #Used values_fn = mean to average duplicate values
 
 # Create DF of differences between upstream and downstream -----------------
 
 WQ_Upstream <- WQ_Field_Data  %>%
 filter(Position=="Upstream") %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",7:34)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",8:35)  %>%
 mutate(`Upstream Values`=VALUE)  %>%
 select(Date,STA,Ecotope,TEST_NAME,`Upstream Values`)
 
 WQ_DownStream <- WQ_Field_Data  %>%
 filter(Position=="Downstream") %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",7:34)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",8:35)  %>%
 mutate(`Downstream Values`=VALUE) %>%
 select(Date,STA,Ecotope,TEST_NAME,`Downstream Values`) 
 
@@ -100,7 +105,7 @@ Continuous_data_ST1W_STA34 <- bind_rows(Continuous_data_STA1W,Continuous_data)
 # Join Continuous Data to WQ and Field Data (continuous and wq data not on same rows)-------------------------------
 
 WQ_Field_Data_Continuous_data <- WQ_Field_Diff_Data %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",7:62)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",8:63)  %>%
 mutate(`Date Time`=ISOdate(year(Date),month(Date),day(Date),Hour,Minute,0,tz = "US/Eastern")) %>%
 select(-Date,-Hour,-Minute) %>%
 bind_rows(mutate(pivot_longer(Continuous_data,names_to = "TEST_NAME",values_to="VALUE",3:22),Position="Mid")) %>%  #Join Continuous data to WQ and field data
