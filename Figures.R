@@ -55,6 +55,7 @@ summarise(n=n())
 
 High_TP_causes <-WQ_Field_with_continuous_same_rows %>%
 select(1:35,64:87) %>%
+mutate(Date=as.Date(Date)) %>%  
 mutate(`Possible Cause`=case_when(str_detect(tolower(Notes),"alg")==TRUE ~"Algae",
                                   str_detect(tolower(Notes),"bird")==TRUE ~"Bird",
                                   str_detect(tolower(Notes),"particle")==TRUE ~"Particles",
@@ -63,16 +64,15 @@ mutate(`Possible Cause`=case_when(str_detect(tolower(Notes),"alg")==TRUE ~"Algae
 
 Summary_possible_causes <- High_TP_causes %>%
 group_by(`Possible Cause`)  %>%
-summarise(n(),`Mean TP`=mean(TPO4,na.rm=TRUE))
+summarise(n(),`Mean TP`=mean(TPO4,na.rm=TRUE),SD=sd(TPO4,na.rm=TRUE))
 
 
-ggplot(filter(High_TP_causes ,Ecotope!="Naiad"),aes(Date,TPO4,label=`Possible Cause`))+geom_point()+
-geom_label_repel(hjust=1, vjust=1,color="black",na.rm=TRUE)
+ggplot(filter(High_TP_causes ,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(Date,TPO4,color=Ecotope,fill=Ecotope,label=`Possible Cause`))+geom_point()+
+geom_label_repel(aes(Date,TPO4, label=`Possible Cause`),color="black",fill="white")+
 Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 
-test <- High_TP_causes %>% select(1:7,TPO4,33:40,60)
 
 # Contamination Evaluation ------------------------------------------------
 
@@ -260,14 +260,14 @@ drop_na(`DCS (Field Data)`) %>%
 drop_na(`Mean outflow (cfs)`) 
 
 #Interpolate to grid form
-contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4,duplicate="mean"))
+contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, log(TPO4*1000),duplicate="mean"))
 griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),
                             `CFS`= rep(contour_grid$y, each = ncol(contour_grid$z)),
                             z = as.numeric(contour_grid$z)),!is.na(z)) %>%
 rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
-TP_Contour_Plot <-ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4*1000)) +
-geom_contour_filled() +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = exp(TPO4))) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
