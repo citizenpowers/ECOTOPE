@@ -35,8 +35,6 @@ mutate(Ecotope=as.factor(Ecotope),Month=month((Date),abbr=TRUE,label=TRUE),Day=y
 drop_na(TPO4)
 
   
-  
-
 # Build GAM models --------------------------------------------------------
 #Single Variable Models
 GAM_Inflow <- gam(TPO4 ~s(Inflow),method="REML",select=TRUE,data =TP_GAM_DATA)
@@ -266,7 +264,7 @@ draw(GAM_Ecotope_DCS_Outflow_Temp_DWN)
 smooth_estimates(GAM_Ecotope_DCS_Outflow_Temp_DWN)
 
 
-summary(GAM_Ecotope_DCS_Outflow_Temp_DWN) %>%
+summary(GAM_Day_Ecotope_DCS_Outflow_Temp_RI_DWN_log_link) %>%
   kbl(caption="Table 1: Summary Statistics of Financial Well-Being  
                Score by Gender and Education",
       format= "html",

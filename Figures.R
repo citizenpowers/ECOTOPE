@@ -72,6 +72,7 @@ geom_label_repel(aes(Date,TPO4, label=`Possible Cause`),color="black",fill="whit
 Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
+ggsave(plot = last_plot(),filename="./Figures/Potential sources of Variance.jpeg",width =13.333, height =7.5, units = "in")
 
 
 # Contamination Evaluation ------------------------------------------------
