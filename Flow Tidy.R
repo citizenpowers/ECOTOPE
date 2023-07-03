@@ -9,12 +9,7 @@ library(tidyr)
 library(stringr)
 library(lubridate)
 library(scales)
-library(gghighlight)
-library(RColorBrewer)
-library(viridis)
 library(Hmisc)
-library(ggpmisc)
-library(ggrepel)
 library(zoo)
 library(dbhydroR)
 
@@ -33,7 +28,7 @@ G379C_C_BK <- get_hydro(dbkey = "64488", date_min="2021-06-01",date_max=as.chara
 G379B_C_BK <- get_hydro(dbkey = "64487", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
 G379A_C_BK <- get_hydro(dbkey = "64486", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
 
-#Inflow Stations STA-1W
+#Inflow Stations STA-3/4
 G378D_C_BK <- get_hydro(dbkey = "64484", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
 G378C_C_BK <- get_hydro(dbkey = "64483", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
 G378B_C_BK <- get_hydro(dbkey = "64482", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
@@ -158,7 +153,7 @@ filter(date < today()) %>%
 rename(`Date Time`="date",`Inflow (cfs)`="G304_inflow",`Outflow (cfs)`="G306_outflow") # %>%
 #mutate(`Inflow (cfs)`=if_else(`Inflow (cfs)`<0,0,`Inflow (cfs)`))  #Midflow data accuracy is questionable. All negative values changed to 0. 
 
-#Flow 30 min frequency STA-34
+#Flow 30 min frequency STA-1W
 Flow_Data_STA_1W <- left_join(G304_Flow,G306_Flow,by="date") %>%
 ungroup() %>%  
 mutate(period=year(date)*365*24*60+yday(date)*24*60+hour(date)*60+minute(date)) %>%   #there are double the amount of periods for daylight savings on 11/7/21- Issue unresolved

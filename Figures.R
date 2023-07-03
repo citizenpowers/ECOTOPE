@@ -22,7 +22,8 @@ library(interp)
 library(tidyverse)
 library(stringr)
 library(ggrepel)
-
+install.packages("remotes")
+remotes::install_github("cttobin/ggthemr")
 # Import Data -------------------------------------------------------------
 
 
@@ -52,9 +53,9 @@ summarise(n=n())
 
 
 # Evaluation of Samples with high TP  -------------------------------------
-#look for passible causes of TP samples from field notes
+#look for possible causes of TP samples from field notes
 
-High_TP_causes <-WQ_Field_with_continuous_same_rows %>%
+High_TP_causes <-WQ_Field_with_continuous_same_rows  %>%
 select(1:35,64:87) %>%
 mutate(Date=as.Date(Date)) %>%  
 mutate(`Possible Cause`=case_when(str_detect(tolower(Notes),"alg")==TRUE ~"Algae",
@@ -107,8 +108,8 @@ ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",wi
 #TPO4 Concentration over time points and smooth (STA1W and STA34)
 ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=3)+
-geom_smooth(se=FALSE)+facet_wrap(~fct_rev(STA),nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
-Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+geom_smooth(se=FALSE)+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+Presentation_theme+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
@@ -119,8 +120,8 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER.jpeg",width =8
 #TPO4 Concentration over time points and smooth ( STA34)
 ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<="2022-06-01"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=4)+
-geom_smooth(se=FALSE)+facet_wrap(~fct_rev(STA),nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
-Presentation_theme+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+geom_smooth(se=FALSE)+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
+scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+Presentation_theme+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark- STA34 only WY22.jpeg",width =13.333, height =7.5, units = "in")

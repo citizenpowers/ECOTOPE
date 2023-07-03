@@ -40,10 +40,8 @@ Wind_data <- read_csv( "./Data/Weather Data/Wind_data.csv")
 
 # WQ and Field data---------------------------------------------------------------
 
-
-
 WQ_Field_Data <- WQ_Data_Tidy %>% 
-filter(MATRIX=="SW",COLLECT_METHOD %in% c("G","GP"),) %>%
+filter(MATRIX=="SW",COLLECT_METHOD %in% c("G","GP")) %>%
 mutate(Hour=hour(COLLECT_DATE),Minute=minute(COLLECT_DATE)) %>%
 select(Date,STA,Ecotope,Position,TEST_NAME,VALUE,Hour,Minute)  %>%
 mutate(Minute=case_when(between(Minute,15,44)~30,!between(Minute,15,44)~0))  %>%    #round time to nearest 30 minutes so it can be joined with continuous sensor data
