@@ -188,7 +188,7 @@ Temp_DF <-  mutate(WQ_Field_with_continuous_same_rows,`Temp Category`=case_when(
                                                                                 between(`Temp`,20,30)~"20-30C",
                                                                                 `Temp`>30~"Greater than 30C"))
 #DCS depth vs TP for various temp categories
-ggplot(Temp_DF,aes(`Average DCS (Field Data)`,`TPO4`,fill=Ecotope))+
+ggplot(Temp_DF,aes(`DCS (Field Data)`,`TPO4`,fill=Ecotope))+
 facet_wrap(~`Temp Category`)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ 
 geom_point(shape=21,size=2)+geom_smooth(fill="grey30",method="lm")+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
@@ -198,7 +198,8 @@ scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = 
 Flowing_DF <-  mutate(WQ_Field_with_continuous_same_rows,Flow=case_when(is.na(`Mean inflow (cfs)`)~"No data",
                                                                    `Mean inflow (cfs)`<10~"Less than 10 cfs",
                                                                    `Mean inflow (cfs)`>10~"10+ cfs"))
-ggplot(Flowing_DF,aes(`Average DCS (Field Data)`,`TPO4`,fill=Ecotope))+
+
+ggplot(Flowing_DF,aes(`DCS (Field Data)`,`TPO4`,fill=Ecotope))+
 facet_wrap(~Flow)+scale_y_continuous(breaks=seq(0,.03,0.005),limits=c(0,.03))+geom_rect(aes(xmin = 45.72, ymin = 0, xmax = 76.2, ymax = .03),alpha=.5,fill="#99d8c9")+ 
 geom_point(shape=21,size=2)+geom_smooth(fill="grey30",method="lm")+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
