@@ -38,7 +38,8 @@ TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
 
 # Theme -------------------------------------------------------------------
 
-ggthemr("flat dark",type="outer", layout="scientific")
+ggthemr("flat dark",type="outer", layout="scientific")   #used for presntation figs
+ggthemr("light",type="outer", layout="scientific")  #used for SFER figs
 Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 24),legend.title = element_text(size = 20))
 Presentation_theme2 <- theme( strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
 
@@ -89,7 +90,7 @@ filter(SAMPLE_TYPE=="SAMP") %>%
 group_by(TEST_NAME) %>%
 summarise(n=n())
 
-# Visualize WQ -------------------------------------------------------------
+# TP over time -------------------------------------------------------------
 
 #Histogram of distributions  -- Distributions approximately log normal
 ggplot(WQ_Field_Data,aes(log(TPO4*1000),color=Ecotope,fill=Ecotope))+geom_histogram()+facet_wrap(~Ecotope,scale="free")+
@@ -105,20 +106,31 @@ scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+gui
 
 ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
 
-#TPO4 Concentration over time points and smooth (STA1W and STA34)
-ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
-geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=3)+
-geom_smooth(se=FALSE)+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
-scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+Presentation_theme+
-scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+#TPO4 Concentration over time points and smooth (STA1W and STA34) SFER 2023 Fig 1
+WQ_Fig_data <- WQ_Field_Data %>%
+mutate(`Figure Label Date`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
+                                STA=="STA-3/4 Cell 2B" & Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
+                                STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)),
+                                STA=="STA-1W Cell 5B"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
+mutate(`Study Period`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2022-07-01"~"Year 1: STA-3/4",
+                                STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~"Year 2: STA-3/4",
+                                STA=="STA-1W Cell 5B"~"Year 2: STA-1W"))  
+
+
+ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
+scale_shape_manual(values = c(21:24)) +#coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)),x="")+Presentation_theme
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER.jpeg",width =8, height =5.5, units = "in")
-
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER 2023.jpeg",width =8, height =6, units = "in")
 
 #TPO4 Concentration over time points and smooth ( STA34)
-ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<="2022-06-01"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=4)+
 geom_smooth(se=FALSE)+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
 scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+Presentation_theme+
@@ -126,6 +138,15 @@ scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  gu
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark- STA34 only WY22.jpeg",width =13.333, height =7.5, units = "in")
 
+
+# SFER Tables -------------------------------------------------------------
+
+#SFER table summary
+WQ_Field_Data %>%
+group_by(STA,Ecotope) %>%
+filter(Date>"2022-06-01")  %>%
+filter(Position=="Downstream") %>%
+summarise(n=n(),Samples=sum(!is.na(TPO4)),`Mean TP`=mean(TPO4,na.rm=T),`Median TP`=median(TPO4,na.rm=T))
 
 
 #TPO4 boxplots
@@ -171,12 +192,24 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-06-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,40))+
-geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#787C99",color="#787C99")+geom_point(shape=21,size=2,color="grey70")+geom_smooth()+
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
+geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth()+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth.jpeg",width =5, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth 2023 SFER.jpeg",width =8, height =6, units = "in")
+
+#DCS Depth vs TP wet season vs dry seeason
+ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+facet_grid(Season~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
+geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+
+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth(span=10)+
+geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season 2023 SFER.jpeg",width =8, height =6, units = "in")
+
+
 
 #DCS Depth vs Temp
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
@@ -253,41 +286,117 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #inflow vs TPO4
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream"),aes(`Mean inflow (cfs)`,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.05,0.005))+
-scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-#outflow vs TPO4
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-06-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2,color="grey70")+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+ coord_cartesian(ylim=c(0,40))+
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`Mean inflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
 geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
 geom_line(stat='smooth', method = "loess")  + 
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow.jpeg",width =5, height =6, units = "in")
+#outflow vs TPO4 in STA3/4
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2.5,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+scale_x_continuous(breaks=seq(0,1200,200))+
+geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +coord_cartesian(ylim=c(0,50),xlim=c(50,1300))+
+geom_line(stat='smooth', method = "loess")  + geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2023 SFER.jpeg",width =8, height =6, units = "in")
+
+#Flow vs TP wet seaon and dry season
+Wet_vs_dry <- WQ_Field_with_continuous_same_rows %>%
+mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))  
+
+ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2.5,color="grey70")+
+facet_grid(Season~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+scale_x_continuous(breaks=seq(0,1200,200))+
+geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +coord_cartesian(ylim=c(0,50),xlim=c(50,1300))+
+geom_line(stat='smooth', method = "loess")  + geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2023 SFER.jpeg",width =8, height =6, units = "in")
+
+
+
+
+
+
+#outflow vs TPO4 in STA1W (not enough data to use yet)
+ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B",Date<"2023-07-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2,color="grey70")+
+facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+scale_x_continuous(breaks=seq(0,1200,200))+
+geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +coord_cartesian(ylim=c(0,80),xlim=c(50,1300))+
+geom_line(stat='smooth', method = "loess")  + geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Outflow (cfs)")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2023 SFER.jpeg",width =8, height =6, units = "in")
 
 
 # Water Depth vs Flow and TP ----------------------------------------------
 #Remove NAs
-contour_data <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B") %>%
+contour_data <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Position=="Downstream") %>%
 drop_na(TPO4) %>%
 drop_na(`DCS (Field Data)`) %>%
 drop_na(`Mean outflow (cfs)`) 
 
-#Interpolate to grid form
-contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, log(TPO4*1000),duplicate="mean"))
+#Interpolate to grid from All stas
+contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
 griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),
                             `CFS`= rep(contour_grid$y, each = ncol(contour_grid$z)),
                             z = as.numeric(contour_grid$z)),!is.na(z)) %>%
 rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
-ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = exp(TPO4))) +
+ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
 geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
+
+#figs for individual ecotopes and all stas
+contour_data_chara <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Chara",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_typha <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Typha",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_mixed <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Mixed",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_bare <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Bare",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_grid_chara <- with(contour_data_chara, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+contour_grid_typha <- with(contour_data_typha, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+contour_grid_mixed <- with(contour_data_mixed, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+contour_grid_bare <- with(contour_data_bare, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+griddf_chara <- subset(data.frame(`Depth` = rep(contour_grid_chara$x, nrow(contour_grid_chara$z)), `CFS`= rep(contour_grid_chara$y, each = ncol(contour_grid_chara$z)), z = as.numeric(contour_grid_chara$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+griddf_typha <- subset(data.frame(`Depth` = rep(contour_grid_typha$x, nrow(contour_grid_typha$z)), `CFS`= rep(contour_grid_typha$y, each = ncol(contour_grid_typha$z)), z = as.numeric(contour_grid_typha$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+griddf_mixed <- subset(data.frame(`Depth` = rep(contour_grid_mixed$x, nrow(contour_grid_mixed$z)), `CFS`= rep(contour_grid_mixed$y, each = ncol(contour_grid_mixed$z)), z = as.numeric(contour_grid_mixed$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+griddf_bare <- subset(data.frame(`Depth` = rep(contour_grid_bare$x, nrow(contour_grid_bare$z)), `CFS`= rep(contour_grid_bare$y, each = ncol(contour_grid_bare$z)), z = as.numeric(contour_grid_bare$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+
+ggplot(griddf_chara, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_chara, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggplot(griddf_typha, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_typha, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggplot(griddf_mixed, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_mixed, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggplot(griddf_bare, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_bare, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+#Figs wet season vs dry season 
+contour_data_wet <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",between(month(Date),5,11)) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_dry <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",!between(month(Date),5,11)) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_grid_dry <- with(contour_data_dry, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+contour_grid_wet <- with(contour_data_wet, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+griddf_dry <- subset(data.frame(`Depth` = rep(contour_grid_dry$x, nrow(contour_grid_dry$z)), `CFS`= rep(contour_grid_dry$y, each = ncol(contour_grid_dry$z)), z = as.numeric(contour_grid_dry$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+griddf_wet <- subset(data.frame(`Depth` = rep(contour_grid_wet$x, nrow(contour_grid_wet$z)), `CFS`= rep(contour_grid_wet$y, each = ncol(contour_grid_wet$z)), z = as.numeric(contour_grid_wet$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+
+ggplot(griddf_dry, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_dry, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggplot(griddf_wet, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_point(data = contour_data_wet, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+
 
 # TP vs physico-chemical parameters ----------------------------------------
 ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-06-02"),aes(`Temp`,`TPO4`*1000,color=Ecotope,fill=Ecotope))+geom_smooth()+geom_point(shape=21,size=2,color="grey70")+
@@ -384,10 +493,6 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8,
 
 
 
-
-
-
-
 # TP Differences ----------------------------------------------------------
 #Table with summary stats
 TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
@@ -426,7 +531,7 @@ summarise(n(),`Monthly Mean`=mean(Value*1000,na.rm=TRUE))
 
 #TP forms over time
 ggplot(filter(TP_forms_monthly,Ecotope!="Naiad"),aes(Month,`Monthly Mean`))+geom_col(aes(fill=`P Form`))+
-facet_grid(fct_rev(STA)~Ecotope)+scale_fill_discrete(limits = rev)+
+facet_grid((STA)~Ecotope)+scale_fill_discrete(limits = rev)+
 Presentation_theme   +theme(axis.text.x=element_text(size=rel(0.75)))+
 guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
 
@@ -443,4 +548,90 @@ ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smoo
 
 
 
+
+
+# FWM Weight by Month ----------------------------------------------------
+Outflow_by_Month <-Water_budget %>%
+mutate(Month=month(`Date Time`,abbr = T,label=T),Year=year(`Date Time`),Date=as.Date(`Date Time`)) %>%
+mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4",
+                                Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
+
+group_by(`Study Period`,Month) %>%
+summarise(n(),`Mean Outflow (cfs)`=-1*mean(`Outflow (cfs)`,na.rm=TRUE))
+
+ggplot(Outflow_by_Month,aes(Month,`Mean Outflow (cfs)`,fill=`Study Period`,color=`Study Period`))+geom_col(position = position_dodge2(width = 0.98, preserve = "single"), binwidth=0) 
+
+
+TP_Load_by_day <-TP_Budget %>%
+mutate(Date=as.Date(`Date Time`)) %>%
+mutate(`Figure Label Date`=case_when( Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
+                                      Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
+                                      Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
+mutate(Day=day(`Figure Label Date`),Month=month(`Figure Label Date`,abbr = T,label=T)) %>%
+mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4",
+                                Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
+group_by(`Study Period`,`Figure Label Date`) %>%
+summarise(n(),`Daily Load Chara (kg)`=sum(`Load Chara`,na.rm=TRUE),`Daily Load Bare (kg)`=sum(`Load Bare`,na.rm=TRUE),`Daily Load Typha (kg)`=sum(`Load Typha`,na.rm=TRUE),`Daily Load Mixed (kg)`=sum(`Load Mixed`,na.rm=TRUE)) %>%
+pivot_longer(names_to = "Ecotope",values_to = "TP Load (kg)",4:7) %>%
+drop_na(`Study Period`)
+
+ggplot(TP_Load_by_day,aes(`Figure Label Date`,`TP Load (kg)`,fill=`Study Period`,color=`Study Period`))+geom_area(alpha=.7,position="dodge")+facet_wrap(~Ecotope,nrow=2)+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+labs(x="")+coord_cartesian(xlim = as.Date(c("2022-09-30","2023-09-01")))+
+guides(x =  guide_axis(angle = 40),position="bottom")+theme(legend.position="bottom")
+
+ggsave(plot = last_plot(),filename="./Figures/Seasonal TP laod by Ecotope.jpeg",width =8, height =6, units = "in")
+
+FWM_by_Month <-TP_Budget %>%
+mutate(Month=month(`Date Time`,abbr = T,label=T),Year=year(`Date Time`),Date=as.Date(`Date Time`)) %>%
+mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4",
+                                 Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
+select(1:2,11:24,39:42,-`Naiad Int`) %>%
+group_by(`Study Period`,Month) %>%
+summarise(n(),`Monthly Total Outflow`=sum(`Outflow (cfs)`,na.rm=TRUE),`Chara TP Sum`=sum(`Load Chara`,na.rm=TRUE),`Typha TP Sum`=sum(`Load Typha`,na.rm=TRUE),`Bare TP Sum`=sum(`Load Bare`,na.rm=TRUE),`Mixed TP Sum`=sum(`Load Mixed`,na.rm=TRUE))  %>%
+pivot_longer(names_to ="Ecotope",values_to = "Load TP",5:8) %>%
+mutate(`Monthly FWM TP`=`Load TP`/(`Monthly Total Outflow`*28.316847*60)*1000000) %>%
+drop_na(`Study Period`) %>%
+mutate(Season=if_else(Month %in% c("Jun","Jul","Aug","Sep","Oct","Nov")==TRUE,"Wet Season","Dry Season"))
+  
+ggplot(FWM_by_Month,aes(Month,`Monthly FWM TP`*1000,fill=`Ecotope`))+geom_col(position = "dodge")+
+facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
+
+FWM_by_Day <-TP_Budget %>%
+mutate(Month=month(`Date Time`,abbr = T,label=T),Year=year(`Date Time`),Date=as.Date(`Date Time`)) %>%
+mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4", Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
+mutate(`Date`=case_when( Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
+                                        Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
+                                        Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
+select(1:2,11:24,39:42,-`Naiad Int`) %>%
+group_by(`Study Period`,Date) %>%
+summarise(n(),`Daily Total Outflow`=sum(`Outflow (cfs)`,na.rm=TRUE),`Chara TP Sum`=sum(`Load Chara`,na.rm=TRUE),`Typha TP Sum`=sum(`Load Typha`,na.rm=TRUE),`Bare TP Sum`=sum(`Load Bare`,na.rm=TRUE),`Mixed TP Sum`=sum(`Load Mixed`,na.rm=TRUE))  %>%
+pivot_longer(names_to ="Ecotope",values_to = "Load TP",5:8) %>%
+mutate(`Daily FWM TP`=if_else(`Daily Total Outflow`==0,0,`Load TP`/(`Daily Total Outflow`*28.316847*60)*1000000000)) %>%
+drop_na(`Study Period`) %>%
+mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))
+
+FWM_Table_month <- FWM_by_Day %>%
+mutate(Month=month(Date)) %>%
+group_by(`Study Period`,Month,Ecotope) %>%
+summarise(n(),`Monthly FWM TP`=mean(`Daily FWM TP`,na.rm=TRUE),`Standard Deviation`=sd(`Daily FWM TP`,na.rm=TRUE))
+
+
+FWM_Table_Season <- FWM_by_Day %>%
+group_by(`Study Period`,Season,Ecotope) %>%
+summarise(n(),`Season FWM TP`=mean(`Daily FWM TP`,na.rm=TRUE),`Standard Deviation`=sd(`Daily FWM TP`,na.rm=TRUE))
+
+ggplot(FWM_by_Day,aes(Date,`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_point(shape=21)+
+facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
+
+ggplot(FWM_by_Day,aes(month(Date,label = TRUE),`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_jitter(shape=21,height =0)+
+facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
+
+ggplot(FWM_by_Day,aes(month(Date,label = TRUE),`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_col(position = "dodge")+ 
+geom_errorbar(data=FWM_Table_month ,aes(Month,group=Ecotope,ymax=max(`Monthly FWM TP`+`Standard Deviation`), ymin=min(`Monthly FWM TP`-`Standard Deviation`)),color="#785d37",inherit.aes = FALSE,position="dodge")+
+facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
 

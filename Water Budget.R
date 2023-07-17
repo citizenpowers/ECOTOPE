@@ -7,7 +7,6 @@ library(tidyr)
 library(stringr)
 library(lubridate)
 library(scales)
-library(gghighlight)
 library(RColorBrewer)
 library(viridis)
 library(Hmisc)
@@ -37,9 +36,9 @@ mutate(`Outflow (cfs)`=`Outflow (cfs)`*-1) %>%
 mutate(`Cumulative Inflow (acre-ft)`=cumsum(`Inflow (cfs)`)*60/43560) %>% #cfs*60 to acre-ft 
 mutate(`Cumulative Outflow (acre-ft)`=cumsum(`Outflow (cfs)`)*60/43560) %>% #cfs*60 to acre-ft 
 mutate(`Cumulative ET (inches)`=cumsum(ifelse(is.na(S7_E_EVAP_Inches), 0, S7_E_EVAP_Inches)) + S7_E_EVAP_Inches*0 ) %>%
-mutate(`Cumulative ET (inches)`=-`Cumulative ET (inches)`*2843/12/24/60) %>%   #convert inches to acre-ft. Need accurate measurement of 2B size. 2843 includes PSTA cells. ET data is given as daily average
+mutate(`Cumulative ET (acre-ft)`=-`Cumulative ET (inches)`*2843/12/24/60) %>%   #convert inches to acre-ft. Need accurate measurement of 2B size. 2843 includes PSTA cells. ET data is given as daily average
 mutate(`Cumulative Rain (inches)`=cumsum(ifelse(is.na(S7_R_RAIN_Inches), 0, S7_R_RAIN_Inches)) + S7_R_RAIN_Inches*0 ) %>%
-mutate(`Cumulative Rain (inches)`=`Cumulative Rain (inches)`*2843/12)  #convert inches to acre-ft. Need accurate measurement of 2B size. 2843 includes PSTA cells
+mutate(`Cumulative Rain (acre-ft)`=`Cumulative Rain (inches)`*2843/12)  #convert inches to acre-ft. Need accurate measurement of 2B size. 2843 includes PSTA cells
 
 
 
@@ -51,12 +50,16 @@ write.csv(Water_budget,"./Data/Water Budget/Water Budget.csv",row.names = FALSE)
 
 #Long DF to visualise Water budget by sources
 Water_budget_long <- Water_budget %>%
-gather("Source","Contribution Volume (ac-ft)",`Cumulative Inflow (acre-ft)`,`Cumulative Outflow (acre-ft)`,`Cumulative ET (inches)`,`Cumulative Rain (inches)`) %>%
-mutate(Source= factor(Source,levels=c("Cumulative Inflow (acre-ft)","Cumulative Outflow (acre-ft)","Cumulative ET (inches)","Cumulative Rain (inches)")))   
+mutate(`Storage`=`Cumulative Inflow (acre-ft)`+`Cumulative Outflow (acre-ft)`+`Cumulative ET (acre-ft)`+`Cumulative Rain (acre-ft)`)  %>%
+gather("Source","Contribution Volume (ac-ft)",`Cumulative Inflow (acre-ft)`,`Cumulative Outflow (acre-ft)`,`Cumulative ET (acre-ft)`,`Cumulative Rain (acre-ft)`) %>%
+mutate(Source= factor(Source,levels=c("Cumulative Inflow (acre-ft)","Cumulative Outflow (acre-ft)","Cumulative ET (acre-ft)","Cumulative Rain (acre-ft)")))   
+
+test <- Water_budget_long %>% filter(`Date Time`<"2021-12-01 00:01:00") 
+
 
 #Water by source
-ggplot(Water_budget_long,aes(`Date Time`,`Contribution Volume (ac-ft)`,fill=Source,color=Source))+geom_col( position = "stack")+theme_bw()+
-geom_line(aes(`Date Time`,sum(`Contribution Volume (ac-ft)`)),color="red")+
+ggplot(test,aes(`Date Time`,`Contribution Volume (ac-ft)`,fill=Source,color=Source))+geom_col( position = "stack")+theme_bw()+
+geom_line(aes(`Date Time`,Storage,color="red"))+
 scale_fill_viridis( discrete = TRUE,option="D")+scale_color_viridis( discrete = TRUE,option="D")+theme(axis.text.x=element_text(angle=90,hjust=1))+
 scale_y_continuous(breaks=pretty_breaks(n=10),label=comma)+
 #scale_x_date(limits =as.Date(c("2021-06-01","2022-05-01")),date_breaks = "3 months", date_labels = "%b %y")+

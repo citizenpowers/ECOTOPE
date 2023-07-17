@@ -27,7 +27,8 @@ WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with
 
 # Tidy data for modeling ----------------------Categorical variables need to be changed to factors----------------------------
 
-TP_GAM_DATA <- WQ_Field_with_continuous_same_rows %>%
+TP_GAM_DATA <- WQ_Field_with_continuous_same_rows %>% 
+filter(Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02")  %>%
 rename(DCS="DCS (Field Data)",Water_Column="Water Column (Field Data)",Inflow="Mean inflow (cfs)",Outflow="Mean outflow (cfs)") %>% #models will not accept variables with blank spaces as input 
 mutate(Date=as.Date(Date))%>%
 select(STA,Ecotope,Position,Date,Hour,DCS,Water_Column,Inflow,Outflow,Temp,TPO4)  %>%
@@ -60,6 +61,7 @@ GAM_Day_Water_column_Outflow_Temp_RI <- gam(TPO4 ~s(Day)+s(Water_Column)+s(Outfl
 GAM_Day_EcotopeWater_column_Outflow_Temp_RI <- gam(TPO4 ~s(Day)+s(Water_Column)+s(Outflow)+s(Temp),method="REML",data =TP_GAM_DATA)  #Random Intercept
 GAM_Day_Ecotope_Water_column_Outflow_Temp_RI <- gam(TPO4 ~Ecotope+s(Day)+s(Water_Column)+s(Outflow)+s(Temp),method="REML",data =TP_GAM_DATA)  #Random Intercept
 GAM_Day_Ecotope_Water_column_Outflow_Temp_RS <- gam(TPO4 ~Ecotope+s(Day)+s(Day,by=Ecotope,bs="fs", m=1)+s(Water_Column)+s(Outflow)+s(Temp),method="REML",data =TP_GAM_DATA)  #Random smooth
+GAM_Day_Ecotope_Water_column_Outflow_Temp_DCS_RI <- gam(TPO4 ~Ecotope+s(Day)+s(Water_Column)+s(Outflow)+s(Temp)+s(DCS),method="REML",data =TP_GAM_DATA)  #Random Intercept
 
 
 # Model Evaluation --------------------------------------------------------
@@ -107,6 +109,8 @@ summary(GAM_Day_Ecotope_Water_column_Outflow_Temp_RI)  #Ecotope Day water column
 plot(GAM_Day_Ecotope_Water_column_Outflow_Temp_RI , shade = TRUE, pages = 1, scale = 0, seWithMean = TRUE,all.terms=TRUE)
 summary(GAM_Day_Ecotope_Water_column_Outflow_Temp_RS)  #Ecotope Day water column outflow and temp explain 85.2% deviance Randoms smooth
 plot(GAM_Day_Ecotope_Water_column_Outflow_Temp_RS , shade = TRUE, pages = 1, scale = 0, seWithMean = TRUE,all.terms=TRUE)
+summary(GAM_Day_Ecotope_Water_column_Outflow_Temp_DCS_RI)  #Ecotope Day water column outflow and temp and DCS explain 64.9% deviance Randoms smooth
+plot(GAM_Day_Ecotope_Water_column_Outflow_Temp_DCS_RI , shade = TRUE, pages = 1, scale = 0, seWithMean = TRUE,all.terms=TRUE)
 
 #Concurvity checks
 concurvity(GAM_Day_Water_column_Outflow_Temp_RI)

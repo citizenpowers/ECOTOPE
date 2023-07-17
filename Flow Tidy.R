@@ -24,15 +24,14 @@ G378A_C_BK <- get_hydro(dbkey = "64481", date_min="2021-06-01",date_max=as.chara
 
 #Outflow Stations STA-3/4
 G379D_C_BK <- get_hydro(dbkey = "64489", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
-G379C_C_BK <- get_hydro(dbkey = "64488", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379C_C_BK_pt1 <- get_hydro(dbkey = "64488", date_min="2021-06-01",date_max="2022-06-01")  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379C_C_BK_pt2 <- get_hydro(dbkey = "64488", date_min="2022-06-02",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379C_C_BK <- bind_rows(G379C_C_BK_pt1,G379C_C_BK_pt2)
 G379B_C_BK <- get_hydro(dbkey = "64487", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
-G379A_C_BK <- get_hydro(dbkey = "64486", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379A_C_BK_pt1 <- get_hydro(dbkey = "64486", date_min="2021-06-01",date_max="2021-06-01")  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379A_C_BK_pt2 <- get_hydro(dbkey = "64486", date_min="2022-06-02",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 2B of STA34
+G379A_C_BK <- bind_rows(G379A_C_BK_pt1,G379A_C_BK_pt2)
 
-#Inflow Stations STA-3/4
-G378D_C_BK <- get_hydro(dbkey = "64484", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
-G378C_C_BK <- get_hydro(dbkey = "64483", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
-G378B_C_BK <- get_hydro(dbkey = "64482", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
-G378A_C_BK <- get_hydro(dbkey = "64481", date_min="2021-06-01",date_max=as.character(Sys.Date()))  #DBHYDRO data for inflow to Cell 2B of STA34
 
 #Outflow Stations STA-1W
 G306A_C_BK <- get_hydro(dbkey = "64290", date_min="2022-10-18",date_max=as.character(Sys.Date()))  #DBHYDRO data for Outflow to Cell 5B of STA1W

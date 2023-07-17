@@ -31,7 +31,7 @@ Water_Depth_Data_STA1W <- read_csv("Data/Levelogger/Water_Depth_Data_STA1W.csv")
 All_light_data <- read_csv("./Data/HOBO/All_light_data.csv")
 All_Sonde_long <- read.csv("Data/Sonde/All_Sonde_long.csv",encoding = "Latin-1",check.names=FALSE)
 WQ_Data_Tidy <- read_csv("Data/WQ Data/WQ_Data_Tidy.csv")  #all WQ data 
-WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Provisional_Tidy.csv")   #provisional data
+#WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Provisional_Tidy.csv")   #provisional data
 Field_data <- read_csv("Data/Field Data/Field_data.csv")
 Flow_Data <- read_csv("Data/Flow Data/Flow.csv")
 Flow_Data_STA1W <- read_csv("./Data/Flow Data/Flow_STA_1W.csv")
