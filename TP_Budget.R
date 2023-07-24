@@ -50,9 +50,9 @@ left_join(G379_Tidy,by="Date Time") %>%
 arrange(`Date Time`) %>%
 #filter(`Date Time`>"2021-06-01 00:00:00") %>% #Year 1
 #filter(`Date Time`<"2022-06-01 24:00:00") %>% #Year 1
-filter(`Date Time`>"2022-09-15 24:00:00" ) %>% #Year 2 
-filter(`Date Time`<"2023-07-02 24:00:00") %>%
-#filter(`Date Time`<"2022-06-01 24:00:00" | `Date Time`>"2022-09-15 24:00:00" ) %>% #Filter out days when there was no monitoring. for period of record calculations 
+#filter(`Date Time`>"2022-09-15 24:00:00" ) %>% #Year 2 
+#filter(`Date Time`<"2023-07-02 24:00:00") %>%
+filter(`Date Time`<"2022-06-01 24:00:00" | `Date Time`>"2022-09-15 24:00:00" ) %>% #Filter out days when there was no monitoring. for period of record calculations 
 mutate(`Outflow (cfs)`=`Outflow (cfs)`*-1) %>% #discharged values are negative to reflect water leaving the cell. Converted to positive for TP budget 
 mutate(`Cumulative Outflow`=cumsum(`Outflow (cfs)`))  %>%
 mutate(`Chara Int`=na.approx(Chara,na.rm = TRUE,rule=2)) %>%
