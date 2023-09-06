@@ -19,6 +19,7 @@ Ecotope_data_LIMSP <- read_excel("Data/WQ Data/Ecotope_data_LIMSP.xlsx")   #Impo
 WQ_Data_Tidy <-WQ_Data  %>%
 filter(STATION!="OCS",SAMPLE_TYPE=="SAMP",MATRIX=="SW") %>%  
 mutate(Date=as.Date(COLLECT_DATE)) %>%
+filter(Date!="2023-07-25" & Date!="2023-07-26")  %>%   #spatial sampling days
 mutate(Ecotope=case_when(str_detect(STATION,"STA34C2B_C")~"Chara",
                          str_detect(STATION,"STA34C2B_T")~"Typha",
                          str_detect(STATION,"STA34C2B_N")~"Naiad",
