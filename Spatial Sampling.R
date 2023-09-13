@@ -1,4 +1,4 @@
-#Objective of this script is to evaluate spatial differences in TPO4 accross ecotope
+#Objective of this script is to evaluate spatial differences in TPO4 across ecotope
 
 library(dplyr)
 library(tidyr)
@@ -20,7 +20,8 @@ Coordinates_all_sites <- read_excel("Data/Spatial Data/Coordinates all sites.xls
 
 # Theme  ------------------------------------------------------------------
 
-ggthemr("flat dark",type="outer", layout="scientific")   #used for presntation figs
+Presentation_theme<- ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
+Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 24),legend.title = element_text(size = 20))
 
 
 # Tidy Data ---------------------------------------------------------------
@@ -57,6 +58,9 @@ rename(Site="FID")
 WQ_and_Spatial <- Spatial_Tidy %>%
 left_join(Coordinates_tidy, by=c("Ecotope", "Site"))
 
+WQ_and_Spatial_long <- WQ_and_Spatial %>%
+pivot_longer(names_to = "Vegetation",values_to = "Value",11:19)
+
 
 # Save Data ---------------------------------------------------------------
 
@@ -70,17 +74,21 @@ ggplot(Spatial_Tidy,aes(VALUE,color=Ecotope,fill=Ecotope))+geom_histogram(binwid
 #boxplots
 ggplot(Spatial_Tidy,aes(VALUE,color=Ecotope,fill=Ecotope))+geom_boxplot()+theme_bw()
 #Chara COverage vs TP
-ggplot(Spatial_Tidy,aes(Chara,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()+facet_wrap(~Ecotope)
-ggplot(Spatial_Tidy,aes(Chara,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()
+ggplot(Spatial_Tidy,aes(Chara,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+facet_wrap(~Ecotope)+geom_smooth()
+ggplot(Spatial_Tidy,aes(Chara,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)
 #Nuphar COverage vs TP
 ggplot(Spatial_Tidy,aes(Nuphar,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()+facet_wrap(~Ecotope)
 ggplot(Spatial_Tidy,aes(Nuphar,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()
 #Typha COverage vs TP
-ggplot(Spatial_Tidy,aes(Typha,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()+facet_wrap(~Ecotope)
+ggplot(Spatial_Tidy,aes(Typha,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+facet_wrap(~Ecotope)+geom_smooth()
 ggplot(Spatial_Tidy,aes(Typha,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()
 #Bare COverage vs TP
-ggplot(Spatial_Tidy,aes(Bare,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()+facet_wrap(~Ecotope)
+ggplot(Spatial_Tidy,aes(Bare,`Diff from mean label`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+facet_wrap(~Ecotope)+geom_smooth()
 ggplot(Spatial_Tidy,aes(Bare,`Difference from mean`,color=Ecotope,fill=Ecotope))+geom_point(size=2)+theme_bw()
+
+
+ggplot(WQ_and_Spatial_long ,aes(Value,`Diff from mean label`,fill=Vegetation))+geom_point(size=3,shape=21)+theme_bw()
+
 
 
 # Maps --------------------------------------------------------------------
@@ -88,5 +96,8 @@ ggplot(Spatial_Tidy,aes(Bare,`Difference from mean`,color=Ecotope,fill=Ecotope))
 ggplot(WQ_and_Spatial ,aes(x=Long, y=Lat,size=VALUE))+geom_point()
 
 ggplot(WQ_and_Spatial ,aes(x=Lat, y=Long,color=Ecotope,size=`Diff from mean label`))+geom_point()+scale_size(range=c(-2,8))+scale_size_continuous(breaks=breaks_pretty(6))
+
+ggplot(WQ_and_Spatial ,aes(y=Long,x=`Diff from mean label`,color=Ecotope))+geom_point()+geom_smooth(method = "lm")
+
 
                                                                                                                                                   
