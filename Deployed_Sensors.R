@@ -15,159 +15,10 @@ library(zoo)
 
 
 
+
 # Import data -------------------------------------------------------------
 
-#Deployment 1
-Bare_Sonde <- read_csv("Data/Sonde/EXOdata_Bare_ECOTOPE_060921.csv")  #deployment 1
-Chara_Sonde <- read_csv("Data/Sonde/EXOdata_Chara_ECOTOPE_060921.csv")   #deployment 1
-Cattail_Sonde <- read_csv("Data/Sonde/EXOdata_Cattail_ECOTOPE_060921.csv")   #deployment 1
-Southern_N_Sonde <- read_csv("Data/Sonde/EXOdata_Southern_N_ECOTOPE_060921.csv")  #deployment 1
-Mixed_Sonde <- read_csv("Data/Sonde/EXOdata_Mixed_ECOTOPE_060921.csv")   #deployment 1
-
-#Deployment 2
-Bare_Sonde_082621 <- read_csv("Data/Sonde/pdynSTA34A41_ecotopeBare - 082621 174830.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
-Cattail_Sonde_082621 <- read_csv("Data/Sonde/Cattail - 083121 133214.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
-Chara_Sonde_082621 <-  read_csv("Data/Sonde/Chara - 083121 133903.csv")  #file contains data from PDYNAMICS site and ECOTOPE site
-Mixed_Sonde_082621 <-  read_csv("Data/Sonde/Mixed- 083121 134557.csv")   #file contains data from PDYNAMICS site and ECOTOPE site
-Naiad_Sonde_082621<- read_csv("Data/Sonde/Southern Naiad- 083121 135134.csv")  #file contains data from PDYNAMICS site and ECOTOPE site
-
-#Deployment 3
-Bare_091521 <- read_csv("Data/Sonde/20210915_bare.csv")
-Mixed_091521 <- read_csv("Data/Sonde/20210915_mixed.csv")
-Chara_091521 <- read_csv("Data/Sonde/20210915_chara.csv")
-Naiad_091521 <- read_csv("Data/Sonde/20210915_naiad.csv")
-Typha_091521 <- read_csv("Data/Sonde/20210915_typha.csv")
-
-#Deployment 4
-Bare_112421 <- read_csv("Data/Sonde/20220111_Bare.csv", skip = 8)
-Naiad_112421 <- read_csv("Data/Sonde/20220111_Naiad.csv",skip = 8)
-Mixed_112421 <- read_csv("Data/Sonde/20220111_Mixed.csv",skip = 8)
-Typha_112421 <- read_csv("Data/Sonde/20220111_Typha.csv",skip = 8)
-Chara_112421 <- read_csv("Data/Sonde/20220111_Chara.csv",skip = 8)
-
-#Deployment 5
-chara_20220502 <- read_csv("Data/Sonde/20220502_chara.csv",skip = 8)
-Bare_20220502 <- read_csv("Data/Sonde/20220502_bare.csv",skip = 8)
-Typha_20220502 <- read_csv("Data/Sonde/20220502_typha.csv",skip = 8)
-Mixed_20220502 <- read_csv("Data/Sonde/20220502_mix.csv",skip = 8)
-Naiad_20220502 <- read_csv("Data/Sonde/20220502_naiad.csv",skip = 8)
-
-#Deployment 6
-chara_20220531 <- read_csv("Data/Sonde/20220531_chara.csv")
-Bare_20220531 <- read_csv("Data/Sonde/20220531_bare.csv")
-Typha_20220531 <- read_csv("Data/Sonde/20220531_Typha.csv")
-Mixed_20220531 <- read_csv("Data/Sonde/20220531_mix.csv")
-Naiad_20220531 <- read_csv("Data/Sonde/20220531_naiad.csv")
-
-# Tidy Data from deployment 1---------------------------------------------------------------
-
-All_Sonde_wide_1 <- bind_rows(Column_Name_fixer(Bare_Sonde),Column_Name_fixer(Chara_Sonde), Column_Name_fixer(Cattail_Sonde), Column_Name_fixer(Mixed_Sonde),Column_Name_fixer(Southern_N_Sonde)) %>%
-Date_fixer() %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
-filter(`Date Time`<="2021-06-28 12:00:00")  #Sondes deployment ended
-
-
-# Tidy data from deployment 2 ---------------------------------------------
-
-Bare_Sonde_2 <-Column_Name_fixer(Date_fixer(Bare_Sonde_082621)) %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
-slice(1993:2325) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-mutate(Site="STA3/4C2B_Ecotope_Bare")
-  
-Cattail_Sonde_2 <-Column_Name_fixer(Cattail_Sonde_082621)  %>%
-Date_fixer()  %>%
-mutate(`Site`="Typha")  %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>% 
-slice(3875:4847)
-  
-Chara_Sonde_2 <- Column_Name_fixer(Chara_Sonde_082621) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
-slice(1994:2328) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1994 and collected at 2328
-mutate(Site="STA3/4C2B_Ecotope_Chara")
-
-Mixed_Sonde_2 <- Column_Name_fixer(Mixed_Sonde_082621) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
-slice(1995:2326) %>% #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1995 and collected at 2326
-mutate(Site="STA3/4C2B_Ecotope_Mixed")
-
-Naiad_Sonde_2 <- Column_Name_fixer(Naiad_Sonde_082621) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "))) %>%
-mutate(across(4:11, ~ as.numeric(.))) %>%
-slice(1992:2325) %>%  #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1992 and collected at 1995
-mutate(Site="STA3/4C2B_Ecotope_Naiad")
-
-All_Sonde_wide_2 <- bind_rows(Bare_Sonde_2,Naiad_Sonde_2,Mixed_Sonde_2,Chara_Sonde_2,Cattail_Sonde_2)
-
-
-
-# PDYNAMICS Data ----------------------------------------------------------
-PDYNAMICS_STA34C2B56_070721_081717_Data <-Column_Name_fixer(Cattail_Sonde_082621)  %>%
-Date_fixer()  %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>% #can't find break in data when sonde was moved from PDYNAMICS to ECOTOPE
-slice(1:3875)
-
-# write.csv(PDYNAMICS_STA34C2B56_070721_081717_Data ,"PDYNAMICS_STA34C2B56_070721_081717.csv")
-
-PDYNAMICS_STA34C2A41_DATA <-Column_Name_fixer(Bare_Sonde_082621) %>%
-mutate(`Date Time`=mdy_hms(paste(Date," ",Time," ",AMPM))) %>%
-slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-# write.csv(PDYNAMICS_STA34C2A41_DATA,"PDYNAMICS_STA34C2A41_071721_081717.csv")
-
-PDYNAMICS_STA34C2A27_DATA <-Naiad_Sonde_082621 %>%
-mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
-slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-# write.csv(PDYNAMICS_STA34C2A27_DATA,"PDYNAMICS_STA34C2A27_071721_081717.csv")
-
-PDYNAMICS_STA34C2B33_DATA <-Mixed_Sonde_082621 %>%
-mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
-slice(1:1992) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-# write.csv(PDYNAMICS_STA34C2B33_DATA,"PDYNAMICS_STA34C2B33_070721_081717.csv")
-
-PDYNAMICS_STA34C2A9_DATA <-Chara_Sonde_082621 %>%
-mutate(`Date Time`=mdy_hms(paste(`Date (MM/DD/YYYY)`," ",`Time (HH:MM:SS)`," "))) %>%
-slice(1:1990) #sonde was switched from PDYNAMICS site to ECOTOPE site at  row 1991 and collected at 2325
-
-# write.csv(PDYNAMICS_STA34C2A9_DATA,"PDYNAMICS_STA34C2A9_070721_081717.csv")
-
-# Deployment 3 ------------------------------------------------------------
-
-All_Sonde_wide_3 <- bind_rows(Column_Name_fixer(Bare_091521),Column_Name_fixer(Chara_091521), Column_Name_fixer(Typha_091521), Column_Name_fixer(Naiad_091521),Column_Name_fixer(Mixed_091521)) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
-filter(`Date Time`>"2021-09-15 09:30:00",`Date Time`<"2021-11-09 11:30:00")  #Time sondes were deployed
-
-
-# Deployment 4 ------------------------------------------------------------
-All_Sonde_wide_4 <- bind_rows(Column_Name_fixer(Bare_112421),Column_Name_fixer(Naiad_112421),Column_Name_fixer(Mixed_112421),Column_Name_fixer(Typha_112421),Column_Name_fixer(Chara_112421)) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
-filter(`Date Time`>"2021-11-23 12:00:00",`Date Time`<"2022-01-11 10:00:00")  #Time sondes were deployed
-
-
-# Deployment 5 ------------------------------------------------------------
-
-All_Sonde_wide_5 <- bind_rows(Column_Name_fixer(chara_20220502),Column_Name_fixer(Bare_20220502),Column_Name_fixer(Typha_20220502),Column_Name_fixer(Mixed_20220502),Column_Name_fixer(Naiad_20220502)) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
-filter(`Date Time`>"2022-02-01 12:00:00",`Date Time`<"2022-04-26 09:00:00")  #Time sondes were deployed
-
-
-# Deployment 6 ------------------------------------------------------------
-
-
-All_Sonde_wide_6 <- bind_rows(Column_Name_fixer(chara_20220531),Column_Name_fixer(Bare_20220531),Column_Name_fixer(Typha_20220531),Column_Name_fixer(Mixed_20220531),Column_Name_fixer(Naiad_20220531)) %>%
-mutate(`Date Time`=mdy_hms(paste(`Date`," ",`Time`," "),tz="America/New_York"))  %>%
-filter(`Date Time`>"2022-05-04 11:00:00",`Date Time`<"2022-05-31 11:00:00")  #Time sondes were deployed
-
-
-# Join Event Data ---------------------------------------------------------
-
-All_Sonde_wide <-bind_rows(All_Sonde_wide_1,All_Sonde_wide_2,All_Sonde_wide_3,All_Sonde_wide_4,All_Sonde_wide_5,All_Sonde_wide_6 ) %>%
-Site_fixer()
-
-All_Sonde_long <- All_Sonde_wide %>%
-rename(`Ecotope`="Site") %>% select(`Date Time`,Ecotope,5:19,`pH Sonde`,`DO %`,-AMPM) %>%
-pivot_longer(names_to = "Parameter",values_to="Value",3:17) 
+All_Sonde_long <- read_csv("Data/Sonde/Ecotope_deployed_sonde_data_qualified.csv")   #Sonde Data joined and qualified using qualifier script
 
 
 # Save Data ---------------------------------------------------------------
@@ -191,8 +42,8 @@ scale_fill_brewer(palette = "Set3",direction = -1)+scale_color_brewer(palette = 
 theme(legend.position="bottom",axis.text.x=element_text(angle=90,hjust=1,size=8))  
 
 #pH
-ggplot(filter(All_Sonde_long,Parameter=="pH Sonde"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
-scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+coord_cartesian(ylim = c(6,11))+theme_bw()
+ggplot(filter(All_Sonde_long,Parameter=="pH",`Remark Code` %in% c("?","J")==FALSE),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21)+
+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #Temp
 ggplot(filter(All_Sonde_long,Parameter=="Temp C°"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
@@ -203,11 +54,11 @@ ggplot(filter(All_Sonde_long,Parameter=="SpCond µS/cm"),aes(`Date Time`,Value,c
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DO 
-ggplot(filter(All_Sonde_long,Parameter=="DO mg/L"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="DO (mg/L)",`Remark Code` %in% c("?","J")==FALSE),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DO%
-ggplot(filter(All_Sonde_long,Parameter=="DO %"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
+ggplot(filter(All_Sonde_long,Parameter=="DO (mg/L)"),aes(`Date Time`,Value,color=Ecotope,fill=Ecotope))+geom_point(shape=21,alpha=.5)+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #Turbidity
