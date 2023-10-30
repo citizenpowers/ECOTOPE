@@ -43,10 +43,10 @@ Mixed_Depth_20230524_Data <- mutate(read_csv("Data/Levelogger/20230524 Mixed.csv
 Chara_Depth_20230524_Data <- mutate(read_csv("Data/Levelogger/20230524 Chara.csv",  skip = 11),Site="Chara") %>% rename(level="STA34C2B")
 
 #Import Stage Data
-Inflow_Stage_BK <- get_hydro(dbkey = "T9942", date_min="2021-06-08",date_max=as.character(today()))  #DBHYDRO data for inflow to Cell 2B of STA34
-Outflow_Stage_BK <-get_hydro(dbkey = "T1049", date_min="2021-06-08",date_max=as.character(today()))  #DBHYDRO data for outflow of cell 2B
-Inflow_Stage_BK_STA1W <- get_hydro(dbkey = "41641", date_min="2022-10-18",date_max=as.character(today()))  #DBHYDRO data for inflow to Cell 5B of STA1W
-Outflow_Stage_BK_STA1W <-get_hydro(dbkey = "41623", date_min="2022-10-18",date_max=as.character(today()))  #DBHYDRO data for outflow of cell 5B
+Inflow_Stage_BK <- get_hydro(dbkey = "T9942", date_min="2021-06-08",date_max="2023-10-01")  #DBHYDRO data for inflow to Cell 2B of STA34
+Outflow_Stage_BK <-get_hydro(dbkey = "T1049", date_min="2021-06-08",date_max="2023-10-01")  #DBHYDRO data for outflow of cell 2B
+Inflow_Stage_BK_STA1W <- get_hydro(dbkey = "41641", date_min="2022-10-18",date_max="2023-10-01")  #DBHYDRO data for inflow to Cell 5B of STA1W
+Outflow_Stage_BK_STA1W <-get_hydro(dbkey = "41623", date_min="2022-10-18",date_max="2023-10-01")  #DBHYDRO data for outflow of cell 5B
 
 
 
@@ -121,19 +121,19 @@ write.csv(Inflow_outflow_data_1W ,"./Data/Levelogger/Water_Depth_Data_STA1W.csv"
 # Figures -----------------------------------------------------------------
 #Water Depth over Time
 ggplot(Water_Depth_Data,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
-scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b%y"))+coord_cartesian(xlim=as.POSIXct(c("2021-06-09 12:00:00","2023-05-24 12:00:00")))+
+scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b%y"))+coord_cartesian(xlim=as.POSIXct(c("2021-06-09 12:00:00","2023-10-01 12:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
 labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
 
 #Water Depth over Time 1W
 ggplot(Inflow_outflow_data_1W,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
-scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+coord_cartesian(xlim=as.POSIXct(c("2022-10-18 12:00:00","2023-03-15 12:00:00")))+
+scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 month",labels = date_format("%b"))+coord_cartesian(xlim=as.POSIXct(c("2022-10-18 12:00:00","2023-10-01 12:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
 labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
 
 #Water Depth 1 week
 ggplot(Water_Depth_Data,aes(`Date Time`,level*100,color=Site,fill=Site))+geom_line(size=1)+
-scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 day",labels = date_format("%b %d"),limits = as.POSIXct(c("2021-09-15 00:00:00","2021-09-22 00:00:00")))+
+scale_y_continuous(breaks = pretty_breaks(n=10))+scale_x_datetime(date_breaks="1 day",labels = date_format("%b %d"),limits = as.POSIXct(c("2021-09-15 00:00:00","2023-10-01 12:00:00")))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()+
 labs(title="Water Depth at Sites",y="Water Depth (cm)",x="Date")
 
