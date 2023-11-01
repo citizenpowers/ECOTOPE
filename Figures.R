@@ -38,7 +38,7 @@ TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
 
 # Theme -------------------------------------------------------------------
 
-ggthemr("flat dark",type="outer", layout="scientific")   #used for presntation figs
+ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
 ggthemr("light",type="outer", layout="scientific")  #used for SFER figs
 Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 24),legend.title = element_text(size = 20))
 Presentation_theme2 <- theme( strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
@@ -121,7 +121,7 @@ ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 
 geom_point(aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
 geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
 geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
-scale_shape_manual(values = c(21:24)) +#coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_shape_manual(values = c(21:24)) +coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
 scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
 scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
 Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(TP~(mu~g~L^-1)),x="")
@@ -133,7 +133,8 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER 2023.jpeg",wid
 #TPO4 Concentration over time points and smooth ( STA34)
 ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope),size=4)+
-geom_smooth(se=FALSE)+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
+#geom_smooth(se=FALSE)+
+facet_wrap(~STA,nrow=2)+geom_hline(aes(yintercept = 13),color="white",linetype="dashed")+
 scale_shape_manual(values = c(21:24)) + #scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+Presentation_theme+
 scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
@@ -167,7 +168,7 @@ Presentation_theme
 ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =13.333, height =7.5, units = "in")
 
 #All Analytes Concentration boxplots
-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
+ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",9:38),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
 facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+theme_bw()+scale_color_brewer(palette = "Set2",direction = -1)
 
 #All Analytes Differences (Up-Down)- points and smooth 
@@ -202,7 +203,7 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
-ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+ggplot(filter(WQ_Field_Data ,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
 geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth()+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")

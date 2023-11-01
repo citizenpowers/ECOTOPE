@@ -20,6 +20,7 @@ Ecotope_data_LIMSP <- read_excel("Data/WQ Data/Ecotope_data_LIMSP.xlsx")   #Impo
 WQ_Data_Tidy <-WQ_Data  %>%
 filter(STATION!="OCS",SAMPLE_TYPE=="SAMP",MATRIX=="SW") %>%  
 mutate(Date=as.Date(COLLECT_DATE)) %>%
+filter(Date %in% c("2023-08-15", "2023-07-25", "2023-07-25") ==FALSE)  %>%   # Remove spatial sampling data from time series data  
 filter(Date!="2023-07-25" & Date!="2023-07-26")  %>%   #spatial sampling days
 mutate(Ecotope=case_when(str_detect(STATION,"STA34C2B_C")~"Chara",
                          str_detect(STATION,"STA34C2B_T")~"Typha",
@@ -61,6 +62,11 @@ mutate(TEST_NAME=if_else(TEST_NAME=="TEMP","Temp",TEST_NAME)) %>%
 mutate(TEST_NAME=if_else(TEST_NAME=="PH","pH",TEST_NAME))   %>%
 mutate(TEST_NAME=if_else(TEST_NAME=="NA","Sodium",TEST_NAME))   
 
+#Tidy Spatial Data
+Spatial_Data_Tidy <-WQ_Data  %>%
+mutate(Date=as.Date(COLLECT_DATE)) %>%
+filter(Date %in% c("2023-08-15", "2023-07-26", "2023-07-25"))  #Data from spatial sampling days only
+
 
 
 # Save Data ---------------------------------------------------------------
@@ -68,4 +74,6 @@ mutate(TEST_NAME=if_else(TEST_NAME=="NA","Sodium",TEST_NAME))
 write.csv(WQ_Data_Tidy , "./Data/WQ Data/WQ_Data_Tidy.csv",row.names = FALSE) 
 
 write.csv(WQ_Provisional_Tidy , "./Data/WQ Data/WQ_Provisional_Tidy.csv",row.names = FALSE) 
+
+write.csv(Spatial_Data_Tidy , "./Data/WQ Data/Spatial_Data_Tidy.csv",row.names = FALSE) 
 
