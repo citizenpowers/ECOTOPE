@@ -557,8 +557,16 @@ guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)),x="Month")+
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =13.333, height =7.5, units = "in")
 
 
+WQ_Data_Tidy %>%
+filter(TEST_NAME=="OPO4",STA=="STA-3/4 Cell 2B") %>%
+#group_by(Ecotope) %>%
+mutate(VALUE=VALUE*1000) %>%  
+summarise(n(),mean=mean(VALUE, na.rm=TRUE),max=max(VALUE,na.rm=TRUE),min=min(VALUE,na.rm=TRUE),`non-detects`=sum(if_else(`REMARK_CODE`=="U",1,0),na.rm=TRUE),`Nondetect %`=percent(`non-detects`/n()))  
 
+opo4_data <-WQ_Data_Tidy %>%
+filter(TEST_NAME=="OPO4",STA=="STA-3/4 Cell 2B") 
 
+ggplot(opo4_data,aes(VALUE*1000))+geom_histogram()
 
 # FWM Weight by Month ----------------------------------------------------
 Outflow_by_Month <-Water_budget %>%
