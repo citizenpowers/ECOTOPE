@@ -78,7 +78,7 @@ left_join(pivot_wider(select(WQ_Upstream_Downstream_Tidy,Date,STA,Ecotope,TEST_N
 # Join continuous data -------------------------------
 
 #STA3/4 Continuous data join
-Continuous_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
+Continuous_data <-  setNames(as.data.frame(seq(from=ISOdate(2021,6,01,0,0,0,tz = "US/Eastern"), to=ISOdate(2023,9,30,0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
 left_join(select(pivot_wider(Water_Depth_Data,names_from=Site,values_from=level,values_fn = mean),1:8),by="Date Time") %>%  #join water depth data
 mutate(across(where(is.numeric), ~if_else(is.na(.)==F,true = round(.,digits=2),  false = as.numeric(.))))  %>%               #round water depth data do 2 decimal points
 pivot_longer(names_to = "Ecotope",values_to = "DCS Levelogger", 2:6)  %>%     
@@ -92,7 +92,7 @@ left_join(Wind_data,by="Date Time") %>% #join wind data
 mutate(STA="STA-3/4 Cell 2B")
 
 #STA1W Continuous data join
-Continuous_data_STA1W <-  setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
+Continuous_data_STA1W <-  setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(2023,9,30,0,0,0,tz = "US/Eastern"),by = "30 min")),"Date Time") %>%
 left_join(select(pivot_wider(Water_Depth_Data_STA1W,names_from=Site,values_from=level,values_fn = mean),1:7),by="Date Time") %>%  #join water depth data
 mutate(across(where(is.numeric), ~if_else(is.na(.)==F,true = round(.,digits=2),  false = as.numeric(.))))  %>%               #round water depth data do 2 decimal points
 pivot_longer(names_to = "Ecotope",values_to = "DCS Levelogger", 2:5) %>%
@@ -102,13 +102,13 @@ mutate(STA="STA-1W Cell 5B")
 #join sta1W and STA34 continuous data
 Continuous_data_ST1W_STA34 <- bind_rows(Continuous_data_STA1W,Continuous_data)
 
-# Join Continuous Data to WQ and Field Data (continuous and wq data not on same rows)-------------------------------
+# Join Continuous Data to WQ and Field Data (continuous and wq data not on same rows)------------------------------- Needs to be fixed
 
 WQ_Field_Data_Continuous_data <- WQ_Field_Diff_Data %>%
-pivot_longer(names_to = "TEST_NAME",values_to="VALUE",8:63)  %>%
+pivot_longer(names_to = "TEST_NAME",values_to="VALUE",10:67)  %>%
 mutate(`Date Time`=ISOdate(year(Date),month(Date),day(Date),Hour,Minute,0,tz = "US/Eastern")) %>%
 select(-Date,-Hour,-Minute) %>%
-bind_rows(mutate(pivot_longer(Continuous_data,names_to = "TEST_NAME",values_to="VALUE",3:22),Position="Mid")) %>%  #Join Continuous data to WQ and field data
+bind_rows(mutate(pivot_longer(Continuous_data_ST1W_STA34,names_to = "TEST_NAME",values_to="VALUE",9:27),Position="Mid")) %>%  #Join Continuous data to WQ and field data
 pivot_wider(names_from =c(TEST_NAME),values_from=VALUE,values_fn=mean)  
 
 colnames(WQ_Field_Data_Continuous_data) <-enc2utf8(colnames(WQ_Field_Data_Continuous_data))  
@@ -122,8 +122,8 @@ left_join(select(mutate(Continuous_data_ST1W_STA34,Date=as.Date(`Date Time`),Hou
 
 # Save Data ---------------------------------------------------------------
 write.csv(WQ_Upstream_Downstream_Tidy, "./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv",row.names = FALSE)
-write.csv(WQ_Field_Data_Continuous_data,"./Data/Joined Data/WQ_Field_Data_Continuous_data.csv",row.names = FALSE)
-write.csv(Continuous_data,"./Data/Joined Data/Continuous_data.csv",row.names = FALSE)
+write.csv(WQ_Field_Data_Continuous_data,"./Data/Joined Data/WQ_Field_Data_Continuous_data.csv",row.names = FALSE)  #needs fixed
+write.csv(Continuous_data_ST1W_STA34,"./Data/Joined Data/Continuous_data.csv",row.names = FALSE)
 write.csv(WQ_Field_Data,"./Data/Joined Data/WQ_Field_Data.csv",row.names = FALSE)
 write.csv(WQ_Field_with_continuous_same_rows,"./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",row.names = FALSE)
 

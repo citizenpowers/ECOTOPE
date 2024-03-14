@@ -22,6 +22,7 @@ library(interp)
 library(tidyverse)
 library(stringr)
 library(ggrepel)
+library(cowplot)
 install.packages("remotes")
 remotes::install_github("cttobin/ggthemr")
 # Import Data -------------------------------------------------------------
@@ -29,7 +30,7 @@ remotes::install_github("cttobin/ggthemr")
 
 WQ_Upstream_Downstream_Tidy <- read_csv("./Data/WQ Data/WQ_Upstream_Downstream_Tidy.csv")
 WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Data_Tidy.csv")
-WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Provisional_Tidy.csv")   #provisional data
+#WQ_Data_Tidy <- read_csv("./Data/WQ Data/WQ_Provisional_Tidy.csv")   #provisional data
 WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_Data_Continuous_data <- read.csv("Data/Joined Data/WQ_Field_Data_Continuous_data.csv",check.names=FALSE)
 WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
@@ -96,15 +97,18 @@ summarise(n=n())
 ggplot(WQ_Field_Data,aes(log(TPO4*1000),color=Ecotope,fill=Ecotope))+geom_histogram()+facet_wrap(~Ecotope,scale="free")+
 guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
 
-#All Analyses Concentration over time points and smooth
-all_analytes_plot <-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+
-#scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+
-#scale_color_pomological()+ scale_fill_pomological()  +theme_pomological_fancy()+  #pomological theme
-#scale_fill_manual(values = pal("ft"))+scale_color_manual(values = pal("ft"))+ theme_ft()+ #sparkly stones theme
-scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
+#All Analyses Concentration over time points and smooth  STA3/4 only
+all_analytes_plot_STA34 <-ggplot(filter(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",10:38),STA=="STA-3/4 Cell 2B"),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
 
-ggsave(plot = last_plot(),filename="./Figures/All WQ Analytes over time.jpeg",width =13.333, height =7.5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/all_analytes_plot_STA34.jpeg",width =13.333, height =7.5, units = "in")
+
+all_analytes_plot_STA1W <-ggplot(filter(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",10:38),STA=="STA-1W Cell 5B"),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
+facet_wrap(~TEST_NAME,scales = "free_y")+scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
+
+ggsave(plot = last_plot(),filename="./Figures/all_analytes_plot_STA1W.jpeg",width =13.333, height =7.5, units = "in")
+
+
 
 #TPO4 Concentration over time points and smooth (STA1W and STA34) SFER 2023 Fig 1
 WQ_Fig_data <- WQ_Field_Data %>%
@@ -116,19 +120,34 @@ mutate(`Study Period`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2022-07-01"~"Yea
                                 STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~"Year 2: STA-3/4",
                                 STA=="STA-1W Cell 5B"~"Year 2: STA-1W"))  
 
-
-ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+#TP time series STA34
+TPO4_over_tim_STA34 <-ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
 geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ 
+scale_shape_manual(values = c(21:24)) +#coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
+scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
+Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none",color="none")+labs(y=NULL,x=NULL)##labs(y=expression(TP~(mu~g~L^-1)),x="")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time- STA34 -SFER 2024.jpeg",width =8, height =6, units = "in")
+
+#TP time series STA1W
+TPO4_over_tim_STA1W <- ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B"),aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(`Figure Label Date`,TPO4*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE,alpha=.3)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
 geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
 scale_shape_manual(values = c(21:24)) +coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
 scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
 scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
-Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(TP~(mu~g~L^-1)),x="")
+Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=NULL,x=NULL)##+labs(y=expression(TP~(mu~g~L^-1)),x="")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark.jpeg",width =13.333, height =7.5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time- STA1W -SFER 2024.jpeg",width =8, height =8, units = "in")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER 2023.jpeg",width =8, height =6, units = "in")
+plot_grid(TPO4_over_tim_STA34, TPO4_over_tim_STA1W, ncol=1,rel_heights=c(4.5,3),axis=c("l"),label_y="tst")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-SFER 2024.jpeg",width =8, height =8, units = "in")
+
 
 #TPO4 Concentration over time points and smooth ( STA34)
 ggplot(filter(WQ_Data_Tidy,Position=="Downstream",TEST_NAME=="TPO4",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(Date,VALUE*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
@@ -144,19 +163,26 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark- STA34 on
 # SFER Tables -------------------------------------------------------------
 
 #SFER table summary
-WQ_Field_Data %>%
+Annual_TP <- WQ_Field_Data %>%
+filter(Ecotope!="Naiad") %>%  
 group_by(STA,Ecotope) %>%
-filter(Date>"2022-06-01")  %>%
+#filter(Date>"2022-06-01")  %>%
 filter(Position=="Downstream") %>%
-summarise(n=n(),Samples=sum(!is.na(TPO4)),`Mean TP`=mean(TPO4,na.rm=T),`Median TP`=median(TPO4,na.rm=T))
+summarise(Samples=sum(!is.na(TPO4)),`Annual Mean TP`=mean(TPO4,na.rm=T)*1000,`SD`=sd(TPO4,na.rm=T)*1000)
 
 #Dry vs wets season table 
-test <-WQ_Field_Data %>%
-filter(Position=="Downstream") %>%
+Seasonal_TP_Summary <- WQ_Field_Data %>%
+filter(Position=="Downstream",Ecotope!="Naiad") %>%
 mutate(Month=month(Date),Season=if_else(between(Month,6,11),"Wet Season","Dry Season")) %>%
 group_by(STA,Ecotope,Season) %>%
-summarise(n=n(),Samples=sum(!is.na(TPO4)),`Mean TP`=mean(TPO4,na.rm=T)*1000,`Median TP`=median(TPO4,na.rm=T)*1000)
+summarise(Samples=sum(!is.na(TPO4)),`Mean TP`=mean(TPO4,na.rm=T)*1000,`SD`=sd(TPO4,na.rm=T)*1000) %>%
+pivot_wider(names_from="Season",values_from=c("Samples","Mean TP","SD")) %>%
+left_join(Annual_TP, by=c("STA","Ecotope")) %>%
+mutate(across(where(is.numeric) , ~round(.x,digits=1)))  %>%
+mutate(`Dry Season TP`=paste(`Mean TP_Dry Season`,"±",`SD_Dry Season`," (",`Samples_Dry Season`,")"),`Wet Season TP`=paste(`Mean TP_Wet Season`,"±",`SD_Wet Season`," (",`Samples_Wet Season`,")"),`Annual TP`=paste(`Mean TP`,"±",`SD`," (",`Samples`,")")) %>%
+arrange(Ecotope)  
 
+write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary.csv",row.names = FALSE) #SFER table
 
 
 
@@ -506,12 +532,13 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8,
 # TP Differences ----------------------------------------------------------
 #Table with summary stats
 TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
-group_by(Ecotope) %>%  
-summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE),`mean upstream`=mean(`Upstream Values`,na.rm=TRUE),`mean downstream`=mean(`Downstream Values`,na.rm=TRUE))
+group_by(STA,Ecotope) %>%  
+summarise(n(),`Median diff`=median(Difference,na.rm=TRUE),`mean diff`=mean(Difference,na.rm=TRUE),`mean upstream`=mean(`Upstream Values`,na.rm=TRUE),`mean downstream`=mean(`Downstream Values`,na.rm=TRUE))%>%
+  mutate(across(where(is.numeric) ,~.x*1000, ~round(.x,digits=1)))    
 
 
 #TPO4 Differences
-ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Ecotope,`Difference`*1000,fill=Ecotope))+
+ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4",Ecotope!="Naiad"),aes(Ecotope,`Difference`*1000,fill=Ecotope))+facet_wrap(~STA,ncol=1)+
 scale_y_continuous(breaks=seq(-50,50,5),limits=c(-10,10))+ geom_hline(aes(yintercept = 0),linetype="dashed",color="white")+geom_boxplot()+Presentation_theme2+
 ylab(expression(Upstream-Downstream~TP~(mu~g~L^-1)))+xlab("Ecotope")+guides(fill="none",color="none")
 
@@ -519,8 +546,32 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstre
 
 # TP Differences over time
 ggplot(filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4"),aes(Date,`Difference`*1000,fill=Ecotope,color=Ecotope))+
-geom_point(aes(Date,Difference*1000,color=Ecotope,fill=Ecotope),size=2,shape=21)+
+geom_point(aes(Date,Difference*1000,color=Ecotope,fill=Ecotope),size=2,shape=21)+facet_wrap(~STA,ncol=1)+
 geom_smooth(se=FALSE)+scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+
+#TPO4 Concentration over time points and smooth (STA1W and STA34) SFER 2023 Fig 1
+WQ_Fig_Up_Down <- WQ_Upstream_Downstream_Tidy %>%
+  mutate(`Figure Label Date`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
+                                       STA=="STA-3/4 Cell 2B" & Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
+                                       STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)),
+                                       STA=="STA-1W Cell 5B"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
+  mutate(`Study Period`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2022-07-01"~"Year 1: STA-3/4",
+                                  STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~"Year 2: STA-3/4",
+                                  STA=="STA-1W Cell 5B"~"Year 2: STA-1W"))  
+
+#TP differnce over time 
+ggplot(filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4"),aes(`Figure Label Date`,Difference*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(`Figure Label Date`,Difference*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
+geom_hline(aes(yintercept = 0),color="#785d37",linetype="longdash")+ 
+scale_shape_manual(values = c(21:24)) +coord_cartesian(ylim=c(-15,20))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
+scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
+Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(TP~(mu~g~L^-1)),x="Date")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream time series.jpeg",width =8, height =8, units = "in")
+
 
 # #TP forms over time -----------------------------------------------------
 #create DF of P forms
@@ -545,16 +596,16 @@ facet_grid((STA)~Ecotope)+scale_fill_discrete(limits = rev)+
 Presentation_theme   +theme(axis.text.x=element_text(size=rel(0.75)))+
 guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
 
-ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =13.333, height =7.5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =8, height =8, units = "in")
 
 #DOP over time
-ggplot(filter(TP_forms,STA=="STA-3/4 Cell 2B",Ecotope!="Naiad"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
+ggplot(filter(TP_forms,Ecotope!="Naiad"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
 geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
 geom_line(stat='smooth', method = "loess")  + theme(axis.text.x=element_text(size=rel(0.75)))+
-facet_wrap(~Ecotope,nrow=1)+scale_fill_discrete()+Presentation_theme + scale_x_discrete(limits = 1:12, labels = month.abb)+
+facet_grid(STA~Ecotope)+scale_fill_discrete()+Presentation_theme + scale_x_discrete(limits = 1:12, labels = month.abb)+
 guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)),x="Month")+coord_cartesian(ylim = c(0, 30))
 
-ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =13.333, height =7.5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =8, height =8, units = "in")
 
 
 WQ_Data_Tidy %>%
