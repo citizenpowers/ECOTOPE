@@ -37,8 +37,7 @@ WQ_Data <- read_excel("Data/WQ Data/WQ Data.xlsx",sheet = "Sheet1")
 WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with_continuous_same_rows.csv",check.names=FALSE)
 WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
 TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
-TP_Budget_34_yr1 <- read_csv("./Data/P Budget/TP_Budget_Daily_STA34_Study_Year_1.csv")
-TP_Budget_34_yr2 <- read_csv("./Data/P Budget/TP_Budget_Daily_STA34_Study_Year_2.csv")
+TP_Budget_Daily_Combined <- read_csv("./Data/P Budget/TP_Budget_Daily_Combined.csv")
 FWM_Weekly<- read_csv("./Data/P Budget/FWM_Weekly.csv")
 
 # Theme -------------------------------------------------------------------
@@ -488,7 +487,6 @@ facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",dire
 
 
 
-
 # TP Differences ----------------------------------------------------------
 #Table with summary stats
 TP_Diff_Summary_Stats <- filter(WQ_Upstream_Downstream_Tidy,TEST_NAME=="TPO4") %>%
@@ -621,7 +619,7 @@ ggsave(plot = last_plot(),filename="./Figures/Cumulative TP-SFER.jpeg",width =8,
 
 
 
-# FWM Weight by Month ----------------------------------------------------
+# FWM Weight over time  ----------------------------------------------------
 
 
 
@@ -631,21 +629,32 @@ ggplot(TP_Budget_Daily_Combined,aes(`Figure Label Date`,`Load`,fill=`Study Perio
 scale_x_date(date_breaks="1 month",labels = date_format("%b"))+labs(x="")+coord_cartesian(xlim=as.Date(c("2000-01-01","2000-12-14")))+
 guides(x =  guide_axis(angle = 40),position="bottom")+ylab("Daily TP Load (Kg)")+theme(legend.position="bottom")
 
-#P FWM over time
-ggplot(filter(TP_Budget_Daily_Combined,Ecotope!="Naiad"),aes(`Date`,`Daily_FWM`*1000,fill=`Study Period`,color=`Study Period`))+
+#P FWM over time STA3/4
+ggplot(filter(TP_Budget_Daily_Combined,Ecotope!="Naiad",STA=="STA-3/4"),aes(`Date`,`Daily_FWM`*1000,fill=`Study Period`,color=`Study Period`))+
 geom_col(aes(`Date`,y=`Outflow (cfs)`/40),alpha=.3,fill="azure3",color="azure3")+ 
-geom_line(aes(`Date`,`Running_FWM`*1000),size=1,linetype="dashed",color="grey50")+ 
+geom_line(aes(`Date`,`Running_FWM`*1000),size=1,linetype="dashed",color="#3a6589")+ 
 geom_line(size=1.25)+scale_color_manual(values=c("#ffb84d","#62bba5"))+  
-facet_wrap(~Ecotope,nrow=4,labeller = label_parsed)+
+facet_wrap(~Ecotope,labeller = label_parsed)+
 scale_y_continuous( sec.axis = sec_axis(~ . * 40, name = "Discharge (CFS)"))+
 geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ geom_hline(aes(yintercept = 0),color="#785d37")+ 
-scale_x_date(date_breaks="3 months",labels = date_format("%y %b"))+labs(x="")+
+scale_x_date(date_breaks="3 months",labels = date_format("%b %Y"))+labs(x="")+
 guides(x =  guide_axis(angle = 40),position="bottom")+ylab(expression(FWM~TP~(mu~g~L^-1)))+theme(legend.position="bottom")
 
-ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative- SFER24.jpeg",width =7, height =8, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-34- SFER24.jpeg",width =12, height =8, units = "in")
 
+#P FWM over time 1W
+ggplot(filter(TP_Budget_Daily_Combined,Ecotope!="Naiad",STA=="STA-1W"),aes(`Date`,`Daily_FWM`*1000,fill=`Study Period`,color=`Study Period`))+
+geom_col(aes(`Date`,y=`Outflow (cfs)`/10),alpha=.3,fill="azure3",color="azure3")+ 
+geom_line(aes(`Date`,`Running_FWM`*1000),linewidth=1,linetype="dashed",color="#3a6589")+ 
+geom_line(size=1.25)+scale_color_manual(values=c("#ffb84d","#62bba5"))+  
+facet_wrap(~Ecotope,labeller = label_parsed)+
+scale_y_continuous( sec.axis = sec_axis(~ . * 10, name = "Discharge (CFS)"))+
+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ geom_hline(aes(yintercept = 0),color="#785d37")+ 
+scale_x_date(date_breaks="3 months",labels = date_format("%b %Y"))+labs(x="")+
+guides(x =  guide_axis(angle = 40),position="bottom")+ylab(expression(FWM~TP~(mu~g~L^-1)))+theme(legend.position="bottom")
 
-ggthemr::swatch()
+ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-1W- SFER24.jpeg",width =12, height =8, units = "in")
+
 swatch(c("#785d37","#62bba5","#ffb84d","#aaa488","#b2432f","#3a6589","#9b5672","#908150","#373634"))
 
 #P FWM over time
@@ -674,81 +683,3 @@ ggsave(plot = last_plot(),filename="./Figures/Daily FWM TP.jpeg",width =13.333, 
 
 
 
-
-
-
-
-##### When combined 
-TP_Load_by_day <-TP_Budget %>%
-mutate(Date=as.Date(`Date Time`)) %>%
-mutate(`Figure Label Date`=case_when( Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
-                                      Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
-                                      Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
-mutate(Day=day(`Figure Label Date`),Month=month(`Figure Label Date`,abbr = T,label=T)) %>%
-mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4", Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
-group_by(`Study Period`,`Figure Label Date`) %>%
-summarise(n(),`Daily Total Outflow`=sum(`Outflow (cfs)`),`Daily Load Chara (kg)`=sum(`Load Chara`,na.rm=TRUE),`Daily Load Bare (kg)`=sum(`Load Bare`,na.rm=TRUE),`Daily Load Typha (kg)`=sum(`Load Typha`,na.rm=TRUE),`Daily Load Mixed (kg)`=sum(`Load Mixed`,na.rm=TRUE)) %>%
-pivot_longer(names_to = "Ecotope",values_to = "TP Load (kg)",5:8) %>%
-drop_na(`Study Period`) %>%
-mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","italic(Typha)")))
-
-ggplot(TP_Load_by_day,aes(`Figure Label Date`,`TP Load (kg)`,fill=`Study Period`,color=`Study Period`))+geom_area(alpha=.7,position="dodge")+facet_wrap(~Ecotope,nrow=2,labeller = label_parsed)+
-scale_x_date(date_breaks="1 month",labels = date_format("%b"))+labs(x="")+coord_cartesian(xlim = as.Date(c("2022-09-30","2023-09-01")))+
-guides(x =  guide_axis(angle = 40),position="bottom")+ylab("Daily TP Load (Kg)")+theme(legend.position="bottom")
-
-ggsave(plot = last_plot(),filename="./Figures/Seasonal TP load by Ecotope.jpeg",width =8, height =6, units = "in")
-
-
-FWM_by_Day <-TP_Load_by_day %>%
-mutate(`Daily FWM TP`=`TP Load (kg)`/(`Daily Total Outflow`*28.316847*60)*1000000000) %>%  
-drop_na(`Study Period`) %>%
-mutate(Season=if_else(between(month(`Figure Label Date`),6,11)==TRUE,"Wet Season","Dry Season"))
-
-
-
-ggplot(TP_Budget,aes(`Date Time`,Chara))+geom_point()+coord_cartesian(ylim=c(0,0.025))+geom_line(aes(`Date Time`,`Chara Int`))
-ggplot(FWM_by_Day,aes(`Figure Label Date`,`Daily FWM TP`,color=`Ecotope`))+geom_point() +facet_wrap(~`Study Period`,nrow=2)
-
-
-
-
-
-FWM_Table_month <- FWM_by_Day %>%
-mutate(Month=month(Date)) %>%
-group_by(`Study Period`,Month,Ecotope) %>%
-summarise(n(),`Monthly FWM TP`=mean(`Daily FWM TP`,na.rm=TRUE),`Standard Deviation`=sd(`Daily FWM TP`,na.rm=TRUE))
-
-FWM_Table_Season <- FWM_by_Day %>%
-group_by(Season,Ecotope) %>%
-summarise(n(),`Season FWM TP`=mean(`Daily FWM TP`,na.rm=TRUE),`Standard Deviation`=sd(`Daily FWM TP`,na.rm=TRUE))
-
-ggplot(FWM_by_Day,aes(`Figure Label Date`,`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_point(shape=21)+
-facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
-scale_x_date(date_breaks="1 month",labels = date_format("%b"))+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
-
-ggplot(FWM_by_Day,aes(month(Date,label = TRUE),`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_jitter(shape=21,height =0)+
-facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
-
-ggplot(FWM_by_Day,aes(month(Date,label = TRUE),`Daily FWM TP`,fill=`Ecotope`,color=`Ecotope`))+geom_col(position = "dodge")+ 
-geom_errorbar(data=FWM_Table_month ,aes(Month,group=Ecotope,ymax=max(`Monthly FWM TP`+`Standard Deviation`), ymin=min(`Monthly FWM TP`-`Standard Deviation`)),color="#785d37",inherit.aes = FALSE,position="dodge")+
-facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme
-
-
-
-FWM_by_Month <-TP_Budget %>%
-  mutate(Month=month(`Date Time`,abbr = T,label=T),Year=year(`Date Time`),Date=as.Date(`Date Time`)) %>%
-  mutate(`Study Period`=case_when(Date <"2022-06-01"~"Year 1: STA-3/4", Date >"2022-09-01" & Date <"2023-06-30"~"Year 2: STA-3/4"))   %>% 
-  select(1:2,11:24,39:42,-`Naiad Int`) %>%
-  group_by(`Study Period`,Month) %>%
-  summarise(n(),`Monthly Total Outflow`=sum(`Outflow (cfs)`,na.rm=TRUE),`Chara TP Sum`=sum(`Load Chara`,na.rm=TRUE),`Typha TP Sum`=sum(`Load Typha`,na.rm=TRUE),`Bare TP Sum`=sum(`Load Bare`,na.rm=TRUE),`Mixed TP Sum`=sum(`Load Mixed`,na.rm=TRUE))  %>%
-  pivot_longer(names_to ="Ecotope",values_to = "Load TP",5:8) %>%
-  mutate(`Monthly FWM TP`=`Load TP`/(`Monthly Total Outflow`*28.316847*60)*1000000) %>%
-  drop_na(`Study Period`) %>%
-  mutate(Season=if_else(Month %in% c("Jun","Jul","Aug","Sep","Oct","Nov")==TRUE,"Wet Season","Dry Season"))
-
-ggplot(FWM_by_Month,aes(Month,`Monthly FWM TP`*1000,fill=`Ecotope`))+geom_col(position = "dodge")+
-  facet_wrap(~`Study Period`,nrow=2,scales = "free_y")+geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+
-  guides(x =  guide_axis(angle = 40))+labs(y=expression(FWMC-TP~(mu~g~L^-1)))+Presentation_theme

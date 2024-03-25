@@ -56,7 +56,7 @@ Water_budget_1W <- Flow_Data_1_min_1W %>%
 arrange(`Date Time`) %>%
 left_join(select(mutate(Belle_GL_ETPI_DA,`Date Time`=ymd_hms(paste(`date`,"08:00:00"))),`Date Time`,`BELLE GL_ETPI_Inches`),by="Date Time")  %>%
 left_join(rename(S5A_R_BK,`Date Time`="date" ),by="Date Time") %>%
-#left_join(rename(Belle_GL__R_BK,`Date Time`="date" ,S5A_R_RAIN_Inches="BELLE GL_RAIN_Inches"),by="Date Time") %>%
+#left_join(rename(Belle_GL__R_BK,`Date Time`="date" ,S5A_R_RAIN_Inches="BELLE GL_RAIN_Inches"),by="Date Time") %>%  If using the rain measurement made at Belle glade
 fill(`S5A_R_RAIN_Inches`,`BELLE GL_ETPI_Inches`) %>%  
 mutate(`Outflow (cfs)`=`Outflow (cfs)`*-1) %>%  
 mutate(`Cumulative Inflow (acre-ft)`=cumsum(`Inflow (cfs)`)*60/43560) %>% #cfs*60 to acre-ft 
