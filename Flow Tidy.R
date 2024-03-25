@@ -88,7 +88,7 @@ mutate(G379_outflow=mean(G379_Flow,na.rm=TRUE)) %>%
 distinct(date,G379_outflow)  
 
 #Tidy Outflow STA-1W
-G306_Flow <- setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
+G306_Flow <- setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(2023,10,01,0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
 left_join(G306A_C_BK) %>%
 left_join(G306B_C_BK) %>%
 left_join(G306C_C_BK) %>%
@@ -107,7 +107,7 @@ mutate(G306_outflow=mean(G306_Flow,na.rm=TRUE)) %>%
 distinct(date,G306_outflow)  
 
 #Tidy Inflow STA-1W
-G304_Flow <- setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(year(today()),month(today()),day(today()),0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
+G304_Flow <- setNames(as.data.frame(seq(from=ISOdate(2022,10,18,0,0,0,tz = "US/Eastern"), to=ISOdate(2023,10,01,0,0,0,tz = "US/Eastern"),by = "1 min")),"date") %>%
 left_join(G304A_C_BK) %>%
 left_join(G304B_C_BK) %>%
 left_join(G304C_C_BK) %>%
