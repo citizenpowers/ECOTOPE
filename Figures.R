@@ -1,5 +1,7 @@
 rm(list = ls())
 
+
+remotes::install_github("cttobin/ggthemr",force = TRUE)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -24,8 +26,7 @@ library(stringr)
 library(ggrepel)
 library(cowplot)
 library(hues)
-install.packages("remotes")
-remotes::install_github("cttobin/ggthemr",force = TRUE)
+
 # Import Data -------------------------------------------------------------
 
 
@@ -189,36 +190,6 @@ write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary.csv",r
 
 
 
-#TPO4 boxplots
-TPO4_boxplot <-ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(Ecotope,TPO4*1000,fill=Ecotope))+geom_boxplot()+
-scale_y_continuous(breaks=seq(0,40,5),limits=c(0,40))+ guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))+
-Presentation_theme
-
-ggsave(plot = last_plot(),filename="./Figures/TPO4 Boxplot-flat dark.jpeg",width =13.333, height =7.5, units = "in")
-
-#All Analytes Concentration boxplots
-ggplot(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",9:38),aes(Ecotope,`VALUE`,fill=Ecotope))+geom_boxplot(color="black")+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+theme_bw()+scale_color_brewer(palette = "Set2",direction = -1)
-
-#All Analytes Differences (Up-Down)- points and smooth 
-ggplot(pivot_longer(WQ_Field_Diff_Data,names_to="TEST_NAME",values_to="VALUE",34:61),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-#All analytes Differences (Up-Down)- columns
-ggplot(filter(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",6:33),TEST_NAME=="TPO4"),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_col(position = "dodge")+#geom_line(size=1)+geom_point()+
-scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-#TPO4 only Differences (Up-Down)- points and smooth
-ggplot(filter(pivot_longer(WQ_Field_Diff_Data,names_to="TEST_NAME",values_to="VALUE",34:61),TEST_NAME=="Dif TPO4"),aes(Date,VALUE,color=Ecotope,fill=Ecotope))+geom_smooth(size=1,se=FALSE)+geom_point()+
-scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-#All analytes Differences (Up-Down)- Box plots
-ggplot(pivot_longer(WQ_Field_Diff_Data,names_to="TEST_NAME",values_to="VALUE",34:61),aes(Ecotope,VALUE,fill=Ecotope))+geom_boxplot()+geom_hline(yintercept=0)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-#All analytes Differences (Up-Down) by magnitude of average (Up+dowwn)/2- Points and smooth
-ggplot(WQ_Upstream_Downstream_Tidy,aes((`Upstream Values`+`Downstream Values`)/2,`Difference`,fill=Ecotope,color=Ecotope))+geom_point(shape=21)+geom_smooth(se=FALSE)+geom_hline(yintercept=0)+
-facet_wrap(~TEST_NAME,scales = "free")+scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 
 # Water depth vs TP -----------------------------------------------------
@@ -232,22 +203,38 @@ scale_x_datetime(date_breaks="1 month",labels = date_format("%b %y"),limits = as
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
 #DCS Depth vs TP 
-ggplot(filter(WQ_Field_Data ,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2022-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
-facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
-geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth()+
+ggplot(filter(WQ_Field_Data ,Position=="Downstream",Ecotope!="Naiad"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+facet_grid(STA~Ecotope,scales="free")+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
+geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = Inf),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth()+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth 2023 SFER.jpeg",width =8, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth 2024 SFER.jpeg",width =8, height =6, units = "in")
 
-#DCS Depth vs TP wet season vs dry seeason
-ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+#Flow vs TP wet seaon and dry season
+Wet_vs_dry <- WQ_Field_with_continuous_same_rows %>%
+mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))  %>%
+mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","Naiad","italic(Typha)")))
+
+#DCS Depth vs TP wet season vs dry season STA34
+ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
 facet_grid(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
 geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+
 geom_point(shape=21,size=2.5,color="grey70")+geom_smooth(span=10)+
 geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season 2023 SFER.jpeg",width =8, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season STA34- 2024 SFER.jpeg",width =8, height =6, units = "in")
+
+#DCS Depth vs TP wet season vs dry season STA-1W
+ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
+facet_grid(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
+geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = Inf),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+
+geom_point(shape=21,size=2.5,color="grey70")+geom_smooth(span=10)+
+geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season STA1W- 2024 SFER.jpeg",width =8, height =6, units = "in")
+
 
 #DCS Depth vs Temp
 ggplot(WQ_Field_Data_Continuous_data,aes(`Average DCS (Field Data)`,`Temp`))+geom_point(shape=21,size=2)+geom_smooth()+theme_bw()+
@@ -367,31 +354,29 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2023 SFER.jpeg",wi
 
 # Water Depth vs Flow and TP ----------------------------------------------
 #Remove NAs
-contour_data <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Position=="Downstream") %>%
+contour_data <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Position=="Downstream",TPO4<.50) %>%
 drop_na(TPO4) %>%
 drop_na(`DCS (Field Data)`) %>%
 drop_na(`Mean outflow (cfs)`) 
 
-#Interpolate to grid from All stas
-contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
-griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),
-                            `CFS`= rep(contour_grid$y, each = ncol(contour_grid$z)),
-                            z = as.numeric(contour_grid$z)),!is.na(z)) %>%
+#Interpolate to grid from STA-3/4
+contour_grid <- with(contour_data, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean",method="linear"))
+griddf <- subset(data.frame(`Depth` = rep(contour_grid$x, nrow(contour_grid$z)),`CFS`= rep(contour_grid$y, each = ncol(contour_grid$z)), z = as.numeric(contour_grid$z)),!is.na(z)) %>%
 rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
 ggplot(griddf, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
-geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
+geom_contour_filled(binwidth =3) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER 2024.jpeg",width =8.5, height =11, units = "in")
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth.jpeg",width =13.333, height =7.5, units = "in")
 
-#figs for individual ecotopes and all stas
-contour_data_chara <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Chara",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
-contour_data_typha <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Typha",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
-contour_data_mixed <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Mixed",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
-contour_data_bare <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Bare",Position=="Downstream",between(month(Date),5,11),TPO4<.050) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+#figs for individual ecotopes and all STA3/4 during wetseason
+contour_data_chara <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Chara",Position=="Downstream",STA=="STA-3/4 Cell 2B",between(month(Date),5,11),TPO4<.030) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_typha <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Typha",Position=="Downstream",STA=="STA-3/4 Cell 2B",between(month(Date),5,11),TPO4<.030) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_mixed <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Mixed",Position=="Downstream",STA=="STA-3/4 Cell 2B",between(month(Date),5,11),TPO4<.030) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_bare <- filter(WQ_Field_with_continuous_same_rows,Ecotope=="Bare",Position=="Downstream",STA=="STA-3/4 Cell 2B",between(month(Date),5,11),TPO4<.030) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
 contour_grid_chara <- with(contour_data_chara, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
 contour_grid_typha <- with(contour_data_typha, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
 contour_grid_mixed <- with(contour_data_mixed, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
@@ -401,25 +386,24 @@ griddf_typha <- subset(data.frame(`Depth` = rep(contour_grid_typha$x, nrow(conto
 griddf_mixed <- subset(data.frame(`Depth` = rep(contour_grid_mixed$x, nrow(contour_grid_mixed$z)), `CFS`= rep(contour_grid_mixed$y, each = ncol(contour_grid_mixed$z)), z = as.numeric(contour_grid_mixed$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 griddf_bare <- subset(data.frame(`Depth` = rep(contour_grid_bare$x, nrow(contour_grid_bare$z)), `CFS`= rep(contour_grid_bare$y, each = ncol(contour_grid_bare$z)), z = as.numeric(contour_grid_bare$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
 
-ggplot(griddf_chara, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
-geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
-geom_point(data = contour_data_chara, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+all_grids <- mutate(griddf_chara,Ecotope="Chara") %>%
+bind_rows(mutate(griddf_typha,Ecotope="Typha")) %>%
+bind_rows(mutate(griddf_mixed,Ecotope="Mixed")) %>%
+bind_rows(mutate(griddf_bare,Ecotope="Bare")) 
 
-ggplot(griddf_typha, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
-geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
-geom_point(data = contour_data_typha, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+all_points <- filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",STA=="STA-3/4 Cell 2B",Ecotope!="Naiad",between(month(Date),5,11),TPO4<.30)
+  
+ggplot(all_grids, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+facet_wrap(~Ecotope)+
+geom_contour_filled(binwidth =2) +  xlab("")+ylab("")+Presentation_theme+theme(legend.position="right")+
+xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+
+geom_point(data = all_points, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
-ggplot(griddf_mixed, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
-geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
-geom_point(data = contour_data_mixed, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
-
-ggplot(griddf_bare, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
-geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
-geom_point(data = contour_data_bare, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth by Ecotope-SFER 2024.jpeg",width =8.5, height =11, units = "in")
 
 #Figs wet season vs dry season 
-contour_data_wet <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",between(month(Date),5,11)) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
-contour_data_dry <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",!between(month(Date),5,11)) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
+contour_data_wet <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",between(month(Date),5,11),STA=="STA-3/4 Cell 2B",TPO4<.040) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`)
+contour_data_dry <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",Position=="Downstream",!between(month(Date),5,11),STA=="STA-3/4 Cell 2B",TPO4<.040) %>% drop_na(TPO4) %>% drop_na(`DCS (Field Data)`) %>% drop_na(`Mean outflow (cfs)`) 
 contour_grid_dry <- with(contour_data_dry, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
 contour_grid_wet <- with(contour_data_wet, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
 griddf_dry <- subset(data.frame(`Depth` = rep(contour_grid_dry$x, nrow(contour_grid_dry$z)), `CFS`= rep(contour_grid_dry$y, each = ncol(contour_grid_dry$z)), z = as.numeric(contour_grid_dry$z)),!is.na(z)) %>%rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
@@ -433,6 +417,26 @@ ggplot(griddf_wet, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
 geom_contour_filled(binwidth =2,na.fill = TRUE) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="right")+
 geom_point(data = contour_data_wet, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
 
+
+# Flow vs Depth  and TP (STA-1W)  -----------------------------------------
+
+contour_data_1W <- filter(WQ_Field_with_continuous_same_rows,Ecotope!="Naiad",STA=="STA-1W Cell 5B",Position=="Downstream") %>%
+  drop_na(TPO4) %>%
+  drop_na(`DCS (Field Data)`) %>%
+  drop_na(`Mean outflow (cfs)`) 
+
+#Interpolate to grid from STA-1W
+contour_grid_1W <- with(contour_data_1W, interp::interp(`DCS (Field Data)`, `Mean outflow (cfs)`, TPO4*1000,duplicate="mean"))
+griddf_1W <- subset(data.frame(`Depth` = rep(contour_grid_1W$x, nrow(contour_grid_1W$z)),
+                               `CFS`= rep(contour_grid_1W$y, each = ncol(contour_grid_1W$z)),
+                               z = as.numeric(contour_grid_1W$z)),!is.na(z)) %>%
+  rename(`DCS (Field Data)`="Depth",`Mean outflow (cfs)`="CFS",TPO4="z")
+
+ggplot(griddf_1W, aes(`DCS (Field Data)`,`Mean outflow (cfs)` , z = TPO4)) +
+  geom_contour_filled(binwidth =3) +  xlab("Depth to Consolidated Substrate (cm)")+ylab("Outflow (cfs)")+Presentation_theme+theme(legend.position="bottom")+
+  geom_point(data = contour_data_1W, aes(`DCS (Field Data)`,`Mean outflow (cfs)`))+guides(fill=guide_legend(title=expression(TP~(mu~g~L^-1))))
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Flow vs Depth-SFER.jpeg",width =8, height =5.5, units = "in")
 
 
 # TP vs physico-chemical parameters ----------------------------------------
