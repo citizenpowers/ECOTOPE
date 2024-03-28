@@ -1,7 +1,7 @@
 rm(list = ls())
 
 
-remotes::install_github("cttobin/ggthemr",force = TRUE)
+#remotes::install_github("cttobin/ggthemr",force = TRUE)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
@@ -39,7 +39,7 @@ WQ_Field_with_continuous_same_rows <- read.csv("./Data/Joined Data/WQ_Field_with
 WQ_Field_Data <- read_csv("./Data/Joined Data/WQ_Field_Data.csv")
 TP_Budget <- read_csv("./Data/P Budget/TP_Budget.csv")
 TP_Budget_Daily_Combined <- read_csv("./Data/P Budget/TP_Budget_Daily_Combined.csv")
-FWM_Weekly<- read_csv("./Data/P Budget/FWM_Weekly.csv")
+FWM_Weekly<- read_csv("./Data/P Budget/FWM_Weekly.csv")  #needs update
 
 # Theme -------------------------------------------------------------------
 
@@ -687,3 +687,13 @@ ggsave(plot = last_plot(),filename="./Figures/Daily FWM TP.jpeg",width =13.333, 
 
 
 
+
+
+# Nutrient Ratios ---------------------------------------------------------
+
+Nutrient_Ratios_tidy <- WQ_Field_with_continuous_same_rows %>%
+select(1:30) %>%
+mutate(`N to P`=if_else(is.finite(TN),TN/TPO4,NULL)) %>%
+mutate(`Anions`=if_else(is.finite(CL),CL/35.453+SO4/96.06*2+ALKA/100.08*2,NULL)) %>%
+mutate(`Cations`=if_else(is.finite(CA),CA/40.07*2+K/39.09+MG/24.3*2+`NA`/22.99,NULL)) %>%
+mutate(`Ion Ratio`=if_else(is.finite(Anions),Anions/Cations,NULL))
