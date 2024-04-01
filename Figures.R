@@ -688,12 +688,34 @@ ggsave(plot = last_plot(),filename="./Figures/Daily FWM TP.jpeg",width =13.333, 
 
 
 
-
-# Nutrient Ratios ---------------------------------------------------------
+#Ion balance and nutrient Ratios  ---------------------------------------------------------
 
 Nutrient_Ratios_tidy <- WQ_Field_with_continuous_same_rows %>%
 select(1:30) %>%
-mutate(`N to P`=if_else(is.finite(TN),TN/TPO4,NULL)) %>%
+mutate(`N to P`=if_else(is.finite(TN),(TN/14)/(TPO4/30.97),NULL)) %>%
 mutate(`Anions`=if_else(is.finite(CL),CL/35.453+SO4/96.06*2+ALKA/100.08*2,NULL)) %>%
 mutate(`Cations`=if_else(is.finite(CA),CA/40.07*2+K/39.09+MG/24.3*2+`NA`/22.99,NULL)) %>%
 mutate(`Ion Ratio`=if_else(is.finite(Anions),Anions/Cations,NULL))
+
+#Ion balance by ecotope and STA 
+ggplot(Nutrient_Ratios_tidy,aes(Ecotope,`Ion Ratio`,fill=Ecotope))+facet_wrap(~STA,ncol=1)+
+geom_boxplot()+Presentation_theme2+scale_y_continuous(labels=scales::percent_format(accuracy=1))+
+xlab("Ecotope")+guides(fill="none",color="none")
+
+#N to P ratio by ecotope and STA 
+ggplot(filter(Nutrient_Ratios_tidy,Ecotope!="Naiad"),aes(Ecotope,`N to P`,fill=Ecotope))+facet_wrap(~STA,ncol=1)+
+geom_boxplot()+Presentation_theme2+
+xlab("Ecotope")+guides(fill="none",color="none")
+
+#N to P ratio by ecotope and STA  over time
+ggplot(filter(Nutrient_Ratios_tidy,Ecotope!="Naiad"),aes(ymd(Date),`N to P`,fill=Ecotope,color=Ecotope))+facet_wrap(~STA,ncol=1)+
+geom_point(shape=21)+Presentation_theme2+scale_x_date(date_breaks="3 months",labels = date_format("%Y %b"))+ geom_smooth(se=FALSE)+
+xlab("Ecotope")+guides(x =  guide_axis(angle = 40))
+
+#N to P ratio vs TP by ecotope and STA  
+ggplot(filter(Nutrient_Ratios_tidy,Ecotope!="Naiad"),aes(`N to P`,TPO4*1000,fill=Ecotope,color=Ecotope))+facet_wrap(~STA,ncol=1)+
+geom_point(shape=21)+Presentation_theme2+labs(y=expression(TP~(mu~g~L^-1)))+scale_y_continuous(breaks=seq(0,60,10),limits=c(0,60))+
+guides(x =  guide_axis(angle = 40))+geom_smooth(aes(`N to P`,TPO4*1000),se=F,color="grey",fill="grey")
+
+ggsave(plot = last_plot(),filename="./Figures/N to P ratio vs TP by ecotope and STA.jpeg",width =12, height =8, units = "in")
+
