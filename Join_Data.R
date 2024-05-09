@@ -54,14 +54,14 @@ relocate(Notes,.after=Minute) %>% relocate(`Sample Type`,.after=Notes)
 # Create DF of differences between upstream and downstream -----------------
 
 WQ_Upstream <- WQ_Field_Data  %>%
-filter(Position=="Upstream") %>%
+filter(Position=="Upstream",`Sample Type`!="REP" | is.na(`Sample Type`)) %>%
 mutate(across(10:38,as.numeric))  %>%     #change data type to numeric
 pivot_longer(names_to = "TEST_NAME",values_to="VALUE",10:38)  %>%
 mutate(`Upstream Values`=VALUE)  %>%
 select(Date,STA,Ecotope,TEST_NAME,`Upstream Values`)
 
 WQ_DownStream <- WQ_Field_Data  %>%
-filter(Position=="Downstream") %>%
+filter(Position=="Downstream",`Sample Type`!="REP" | is.na(`Sample Type`)) %>%
   mutate(across(10:38,as.numeric))  %>%     #change data type to numeric
 pivot_longer(names_to = "TEST_NAME",values_to="VALUE",10:38)  %>%
 mutate(`Downstream Values`=VALUE) %>%
