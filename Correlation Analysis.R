@@ -52,7 +52,7 @@ mutate(Date=as.Date(time)) %>% rename(Sunrise="day_frac",Sunrise_time="time")
 Sunset  <-sunriset(matrix(c(-80.6676, 26.6845), nrow=1),seq(from=as.POSIXct("2021-05-31"), to=as.POSIXct("2023-10-01") , by="days"), direction="sunset", POSIXct.out=TRUE) %>%
 mutate(Date=as.Date(time)) %>% rename(Sunset="day_frac",Sunset_time="time") 
 
-Season_Flow_Water_Depth <-Correlation_Data_Tidy %>%    
+Season_Flow_Water_Depth <-Correlation_Data_Tidy_sta1W %>%    
 mutate(Date=as.Date(Date)) %>%
 left_join(Sunrise,by="Date") %>%
 left_join(Sunset,by="Date") %>%
@@ -180,7 +180,7 @@ ggsave(plot = last_plot(),filename="./Figures/Correlogram STA34- WQ Analytes 2.j
 #Correlation Plot with GGALLY of analyte 
 ggpairs(Season_Flow_Water_Depth,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
 
-ggsave(plot = last_plot(),filename="./Figures/Correlogram_All_Data_Flow_Season_Depth.jpeg",width =16, height =9, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Correlogram_STA_1W_Flow_Season_Depth.jpeg",width =16, height =9, units = "in")
 
 # Visualize ---------------------------------------------------------------
 
