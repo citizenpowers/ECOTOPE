@@ -16,6 +16,7 @@ library(readxl)
 library(corrplot)
 library(GGally)
 library(ggthemr)
+library(suntools)
 
 # Import Data -------------------------------------------------------------
 
@@ -44,9 +45,21 @@ filter(Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B")
 Correlation_Data_Tidy_sta1W <- WQ_Field_with_continuous_same_rows %>% 
 filter(Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B")  
 
+#Calculate correlation using daylength as proxy for season
+Sunrise <-sunriset(matrix(c(-80.6676, 26.6845), nrow=1),seq(from=as.POSIXct("2021-05-31"), to=as.POSIXct("2023-10-01") , by="days"), direction="sunrise", POSIXct.out=TRUE)%>%
+mutate(Date=as.Date(time)) %>% rename(Sunrise="day_frac",Sunrise_time="time") 
+
+Sunset  <-sunriset(matrix(c(-80.6676, 26.6845), nrow=1),seq(from=as.POSIXct("2021-05-31"), to=as.POSIXct("2023-10-01") , by="days"), direction="sunset", POSIXct.out=TRUE) %>%
+mutate(Date=as.Date(time)) %>% rename(Sunset="day_frac",Sunset_time="time") 
+
+Season_Flow_Water_Depth <-Correlation_Data_Tidy %>%    
+mutate(Date=as.Date(Date)) %>%
+left_join(Sunrise,by="Date") %>%
+left_join(Sunset,by="Date") %>%
+mutate(`Daylight Fraction`=Sunset-Sunrise) %>%
+select(Ecotope,TPO4,`DCS (Field Data)`,`Mean outflow (cfs)`,`Daylight Fraction`) 
 
 # Correlation ---------(All STAs)----------------------------
-
 
 #Calculate DF of TPO4 and Physical Parameters
 TP_Physical_Correlation <- Correlation_Data_Tidy %>%
@@ -160,6 +173,14 @@ ggsave(plot = last_plot(),filename="./Figures/Correlogram STA34- WQ Analytes 2.j
 
 
 
+
+
+# Season Flow and Water Depth Correlation ---------------------------------
+
+#Correlation Plot with GGALLY of analyte 
+ggpairs(Season_Flow_Water_Depth,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
+
+ggsave(plot = last_plot(),filename="./Figures/Correlogram_All_Data_Flow_Season_Depth.jpeg",width =16, height =9, units = "in")
 
 # Visualize ---------------------------------------------------------------
 
