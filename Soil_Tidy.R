@@ -43,7 +43,7 @@ mutate(`Bulk Density`=ifelse(!is.na(`Bulk Density`),`Bulk Density`,`Wet Weight`*
                            str_detect(STATION,"STA1WC5B_M")~"Mixed",
                            str_detect(STATION,"STA1WC5B_B")~"Bare"))  %>%
 mutate(`Storage (g/m^2)`=ifelse(UNITS=="mg/Kg",`Bulk Density`*as.numeric(CORE_LENGTH)*VALUE/100,`Bulk Density`*as.numeric(CORE_LENGTH)*VALUE*10000))
-
+#Storage for units in mg/kg calculated differently than those as a percentage. 
 
 
 # Save Data ---------------------------------------------------------------
