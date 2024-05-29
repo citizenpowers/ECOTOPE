@@ -27,6 +27,8 @@ library(ggrepel)
 library(cowplot)
 library(hues)
 
+
+
 # Import Data -------------------------------------------------------------
 
 
@@ -43,7 +45,7 @@ FWM_Weekly<- read_csv("./Data/P Budget/FWM_Weekly.csv")  #needs update
 WQ_and_Spatial <- read_csv("./Data/Spatial Data/WQ_and_Spatial.csv") #needed for veg maps
 WQ_and_Spatial_long <-read_csv("./Data/Spatial Data/WQ_and_Spatial_long.csv") #needed for veg maps
 Soils_data <- read_csv("./Data/Soils Data/Soils_Data_Tidy.csv") #needed for soils figures
-
+Soils_Summary_Stat_Sig <- read_csv( "./Data/Soils Data/Soils_Summary_Stat_Sig.csv")
 # Theme -------------------------------------------------------------------
 
 ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
@@ -219,7 +221,7 @@ scale_shape_manual(values = c(21:24)) +#coord_cartesian(ylim=c(0,80))+#scale_y_c
 scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
 Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(TN~(mu~g~L^-1)),x=expression(TP~(mu~g~L^-1)))
 
-# SFER Tables -------------------------------------------------------------
+# WQ SFER Tables -------------------------------------------------------------
 
 #SFER table summary
 Annual_TP <- WQ_Fig_data %>%
@@ -244,8 +246,6 @@ arrange(Ecotope)
 write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary.csv",row.names = FALSE) #SFER table
 
 write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary_by_year.csv",row.names = FALSE) #SFER table
-
-
 
 
 # Water depth vs TP -----------------------------------------------------
@@ -891,7 +891,7 @@ labs(x="Project",y="Blanks above or equal to MDL (%)",title = "Ammonia Blank Hit
 
 
 
-# Soil Figures ------------------------------------------------------------
+# Soil Figures and  SFER Table -------------------------------------------------------------------------------------------------
 
 #Boxplots all analytes concentration
 ggplot(filter(Soils_data,Ecotope!="Naiad"),aes(MATRIX,y=VALUE,fill=Ecotope,))+
@@ -901,9 +901,33 @@ labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma()
 ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =12, height =15, units = "in")
 
 #Boxplots all analytes
-ggplot(filter(Soils_data,Ecotope!="Naiad",!TEST_NAME %in% c("ASH","MOISTURE") ),aes(MATRIX,y=`Storage (g/m^2)`,fill=Ecotope,))+
+ggplot(filter(Soils_data,Ecotope!="Naiad",!TEST_NAME %in% c("ASH","MOISTURE") ),aes(MATRIX,y=`Storage (g/m^2)`,fill=Ecotope))+
 geom_boxplot(alpha=.5)+facet_wrap(~`TEST_NAME`,scale="free")+
 labs(y=expression(P~(g~m^-2)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
 
 ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =12, height =15, units = "in")
+
+#Soils Concentration figure
+ggplot(Soils_Concentration_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
+geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
+labs(y=expression((mg~kg^-1)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+
+#Soils Storage figure
+ggplot(Soils_Storage_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
+geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
+labs(y=expression((g~m^-2)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+    
+#Soils physical parameters figure
+ggplot(Soils_Physical_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
+geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
+labs(y=expression((g~cm^-3)~","~(cm)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+
+#Soils all parameters combined
+ggplot(Soils_Summary_Stat_Sig,aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
+geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
+geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
+facet_wrap(~`Facet Label`,scale="free")+
+labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
+
 
