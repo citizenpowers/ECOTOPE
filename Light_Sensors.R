@@ -123,22 +123,8 @@ group_by(Date,Ecotope,Position,Hour) %>%
 summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
   
 
-All_light_data_by_hour_table <-All_light_data %>%
-mutate(Hour=hour(`Date Time`),Date=as.Date(`Date Time`)) %>%
-group_by(Ecotope,Position,Hour) %>%
-summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
-
 
 # Save Data ---------------------------------------------------------------
 
 write.csv(select(All_light_data,-`Temp C°`) ,"./Data/HOBO/All_light_data.csv",row.names = FALSE) 
 
-# Figures -----------------------------------------------------------------
-ggplot(All_light_data,aes(`Date Time`,`Light Intensity Lux`,color=Position,fill=Position))+geom_point(shape=21,alpha=.5)+
-facet_wrap(~Ecotope,scales = "free_y")+  scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-ggplot(All_light_data_by_hour,aes(as.factor(Hour),`Hourly Light Intensity`,color=Position,fill=Position))+geom_boxplot()+
-facet_wrap(~Ecotope)+  scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
-
-ggplot(All_light_data_by_hour_table,aes(as.factor(Hour),`Hourly Light Intensity`,color=Position,fill=Position))+geom_col(position = "dodge")+
-facet_wrap(~Ecotope)+  scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()

@@ -46,6 +46,9 @@ WQ_and_Spatial <- read_csv("./Data/Spatial Data/WQ_and_Spatial.csv") #needed for
 WQ_and_Spatial_long <-read_csv("./Data/Spatial Data/WQ_and_Spatial_long.csv") #needed for veg maps
 Soils_data <- read_csv("./Data/Soils Data/Soils_Data_Tidy.csv") #needed for soils figures
 Soils_Summary_Stat_Sig <- read_csv( "./Data/Soils Data/Soils_Summary_Stat_Sig.csv")
+All_light_data <- read_csv("Data/HOBO/All_light_data.csv")
+
+
 # Theme -------------------------------------------------------------------
 
 ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
@@ -503,7 +506,7 @@ ylab(expression(TP~(mu~g~L^-1)))+xlab("Temp (C)")+guides(fill="none",color="none
 ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Temp.jpeg",width =5, height =6, units = "in")
 
 
-ggplot(WQ_Field_Data_Continuous_data,aes(SpCond,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
+ggplot(WQ_Field_with_continuous_same_rows,aes(SpCond,`TPO4`))+geom_point(shape=21,size=2)+geom_smooth()+
 facet_wrap(~Ecotope)+scale_y_continuous(breaks=seq(0,.03,0.005))+
 scale_fill_brewer(palette = "Set2",direction = -1)+scale_color_brewer(palette = "Set2",direction = -1)+theme_bw()
 
@@ -930,4 +933,25 @@ geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),
 facet_wrap(~`Facet Label`,scale="free")+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
 
+ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =15.4, height =11.9, units = "in")
+
+
+Soils_Summary_Stat_Sig %>% 
+mutate(`Veg_type`=ifelse(Ecotope=="Typha","EAV","SAV")) %>%
+filter(TEST_NAME=="Magnesium",Units=="(g/m^2)")  %>%
+group_by(`Veg_type`,MATRIX) %>%
+summarise(n(),mean=mean(Mean))
+
+
+
+
+# Light Sensor Figures ----------------------------------------------------
+
+ggplot(All_light_data,aes(`Date Time`,`Light Intensity Lux`,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+  geom_point()+
+  geom_smooth(se=FALSE)+facet_wrap(Position~Ecotope,scales = "free_y")
+
+  scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
+  scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
+  Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none",color="none")+labs(y=NULL,x=NULL)##labs(y=expression(TP~(mu~g~L^-1)),x="")
 
