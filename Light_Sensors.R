@@ -114,13 +114,14 @@ filter(`Date Time`>"2022-05-12 12:00:00",`Date Time`<"2022-05-31 10:00:00")
 # Join Data ---------------------------------------------------------------
 
 All_light_data <- bind_rows(Light_Data_060921,Light_Data_081721,Light_Data_20211123,Light_Data_20220503,Light_Data_20220531) %>% rename(`Ecotope`="Site") 
+  
 
 # Analyze data ------------------------------------------------------------
 
 All_light_data_by_hour <-All_light_data %>%
 mutate(Hour=hour(`Date Time`),Date=as.Date(`Date Time`)) %>%
 group_by(Date,Ecotope,Position,Hour) %>%
-summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))  
+summarise(`Hourly Light Intensity`=mean(`Light Intensity Lux`,na.rm = TRUE))
   
 
 

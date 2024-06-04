@@ -622,7 +622,7 @@ guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
 
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =8, height =8, units = "in")
 
-#DOP over time
+#P over time
 ggplot(filter(TP_forms,Ecotope!="Naiad"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
 geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
 geom_line(stat='smooth', method = "loess")  + theme(axis.text.x=element_text(size=rel(0.75)))+
@@ -944,14 +944,34 @@ summarise(n(),mean=mean(Mean))
 
 
 
-
 # Light Sensor Figures ----------------------------------------------------
 
-ggplot(All_light_data,aes(`Date Time`,`Light Intensity Lux`,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
-  geom_point()+
-  geom_smooth(se=FALSE)+facet_wrap(Position~Ecotope,scales = "free_y")
+All_light_data_season <- All_light_data %>%
+mutate(Month=month(`Date Time`),Season=if_else(between(Month,6,11),"Wet Season","Dry Season"))
 
-  scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
-  scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
-  Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none",color="none")+labs(y=NULL,x=NULL)##labs(y=expression(TP~(mu~g~L^-1)),x="")
+
+#Seasonal Light intensity by ecotope  (Issue with Bare dry season- investigate)
+ggplot(filter(All_light_data_season,Ecotope!="Naiad"),aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,color=Position,fill=Position))+
+geom_jitter(alpha=0.04)+  
+geom_smooth(aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,linetype=Position,color=Position),size=1)+
+facet_grid(~Ecotope)+
+scale_x_datetime(labels = date_format("%I:%M:%p"),breaks=as.POSIXct(c("2000-01-01 00:00:00","2000-01-01 04:00:00","2000-01-01 08:00:00","2000-01-01 12:00:00","2000-01-01 16:00:00","2000-01-01 20:00:00","2000-01-01 24:00:00"),tz = "GMT"))+ 
+scale_y_continuous(label=comma)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y=expression(Light~(Lumen~m^-2)),x="Time")
+
+ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
+
+
+
+#Seasonal Light intensity by ecotope  (Issue with Bare dry season- investigate)
+ggplot(filter(All_light_data_season,Ecotope!="Naiad"),aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,color=Position,fill=Position))+
+geom_jitter(alpha=0.04)+  
+geom_smooth(aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,linetype=Position,color=Position),size=1)+
+facet_grid(Season~Ecotope)+
+scale_x_datetime(labels = date_format("%I:%M:%p"),breaks=as.POSIXct(c("2000-01-01 00:00:00","2000-01-01 04:00:00","2000-01-01 08:00:00","2000-01-01 12:00:00","2000-01-01 16:00:00","2000-01-01 20:00:00","2000-01-01 24:00:00"),tz = "GMT"))+ 
+scale_y_continuous(label=comma)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y=expression(Light~(Lumen~m^-2)),x="Time")
+
+ggsave(plot = last_plot(),filename="./Figures/Light Intenstity Seasonal.jpeg",width =12, height =8, units = "in")
+
 
