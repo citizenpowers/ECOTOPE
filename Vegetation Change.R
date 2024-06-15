@@ -46,7 +46,7 @@ Mixed_20221219_fixed <- Mixed_20221219 %>%  mutate(Vegetation=case_when(gridcode
 Mixed_20230525_fixed <- Mixed_20230525 %>%  mutate(Vegetation=case_when(gridcode==1~"Bare",gridcode==23~"SAV",gridcode==8~"Typha"))
 Mixed_20230723_fixed <- Mixed_20230723 %>%  mutate(Vegetation=case_when(gridcode==1~"Bare",gridcode==4~"SAV",gridcode==13~"Typha"))
 Mixed_20231012_fixed <- Mixed_20231012 %>%  mutate(Vegetation=case_when(gridcode==1~"Bare",gridcode==5~"SAV",gridcode==10~"SAV",gridcode==16~"Typha"))
-Mixed_20211117_fixed <- Mixed_20211117 %>%  mutate(Vegetation=case_when(gridcode==1~"Bare",gridcode==8~"SAV",gridcode==13~"Typha"))
+Mixed_20211117_fixed <- Mixed_20211117 %>%  mutate(Vegetation=case_when(gridcode==1~"SAV",gridcode==8~"Typha",gridcode==13~"Bare"))
 
 
 #join data

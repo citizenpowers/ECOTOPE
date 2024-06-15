@@ -47,7 +47,9 @@ WQ_and_Spatial_long <-read_csv("./Data/Spatial Data/WQ_and_Spatial_long.csv") #n
 Soils_data <- read_csv("./Data/Soils Data/Soils_Data_Tidy.csv") #needed for soils figures
 Soils_Summary_Stat_Sig <- read_csv( "./Data/Soils Data/Soils_Summary_Stat_Sig.csv")
 All_light_data <- read_csv("Data/HOBO/All_light_data.csv")
-
+All_Sonde_long <- read_csv("Data/Sonde/All_Sonde_long.csv")
+All_Sonde_wide <- read_csv("Data/Sonde/All_Sonde_wide.csv")
+Veg_tidy_long <- read_csv("Data/Vegetation Change/Bare_tidy_long.csv")
 
 # Theme -------------------------------------------------------------------
 
@@ -973,5 +975,45 @@ scale_y_continuous(label=comma)+
 Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y=expression(Light~(Lumen~m^-2)),x="Time")
 
 ggsave(plot = last_plot(),filename="./Figures/Light Intenstity Seasonal.jpeg",width =12, height =8, units = "in")
+
+
+
+
+# Physico-chemical parameters ---------------------------------------------
+
+Physico_parameters_long <- WQ_Field_Data %>%
+select(Date, STA,Ecotope,Position,Hour,Minute,Temp,pH,DO,SpCond) %>%
+pivot_longer(values_to="Value",names_to="Parameter",7:10)
+
+#All Physico-chemical characterizations by ecotope
+ggplot(filter(Physico_parameters_long,Ecotope!="Naiad"),aes(Date,Value,color=Ecotope))+
+geom_point()+  
+geom_smooth(se=F)+
+facet_grid(Parameter~STA,scale="free_y")+
+scale_x_date()+ 
+scale_y_continuous(label=comma)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs()
+
+ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
+
+#SpCond by ecotope
+ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="SpCond"),aes(Date,Value,color=Ecotope,shape=Position))+
+geom_point()+ geom_line()+ #geom_smooth(se=F,span=.5)+
+facet_wrap(~STA,scale="free_y")+
+scale_x_date()+ scale_y_continuous(label=comma)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs()
+
+ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
+
+
+# Vegetation Change -------------------------------------------------------
+
+#Bare site was switched after 2023-06-20 sampling to new site
+ggplot(filter(Veg_tidy_long,Units=="Percentage"),aes(Date,value,color=Vegetation))+
+geom_line(size=2)+geom_vline(aes(xintercept=as.Date("2023-06-20")),color="grey80",size=2,linetype="dashed") + 
+facet_wrap(Ecotope~Units,scale="free_y")+
+scale_x_date(date_breaks="3 month",labels = date_format("%b %Y"))+ 
+scale_y_continuous(label=percent)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y="Vegetation Coverage (%)")
 
 
