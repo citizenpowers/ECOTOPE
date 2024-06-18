@@ -1010,10 +1010,11 @@ ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, 
 
 #Bare site was switched after 2023-06-20 sampling to new site
 ggplot(filter(Veg_tidy_long,Units=="Percentage"),aes(Date,value,color=Vegetation))+
-geom_line(size=2)+geom_vline(aes(xintercept=as.Date("2023-06-20")),color="grey80",size=2,linetype="dashed") + 
-facet_wrap(Ecotope~Units,scale="free_y")+
-scale_x_date(date_breaks="3 month",labels = date_format("%b %Y"))+ 
-scale_y_continuous(label=percent)+
+geom_line(size=2)+#geom_vline(aes(xintercept=as.Date("2023-06-20")),color="grey80",size=2,linetype="dashed") + 
+facet_wrap(~Ecotope,nrow=2)+
+scale_x_date(date_breaks="1 month",labels = date_format("%b %Y"))+ 
+scale_y_continuous(label=percent,limits=c(0,1))+
 Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y="Vegetation Coverage (%)")
 
+ggsave(plot = last_plot(),filename="./Figures/Vegetation Change.jpeg",width =12, height =8, units = "in")
 
