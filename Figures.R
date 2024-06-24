@@ -1042,3 +1042,12 @@ Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y="Vegetation Cove
 
 ggsave(plot = last_plot(),filename="./Figures/Vegetation Change.jpeg",width =12, height =8, units = "in")
 
+#Bare site was switched after 2023-06-20 sampling to new site
+ggplot(filter(Veg_tidy_long,Units=="Percentage"),aes(month(Date),value,color=Vegetation))+
+geom_smooth(size=2,se=FALSE)+ 
+facet_wrap(~Ecotope,nrow=2)+coord_cartesian(xlim=c(1,12))+
+scale_x_discrete(limits = 1:12,labels = month.abb,breaks=seq(1,12,1))+scale_y_continuous(label=percent,limits=c(0,1))+
+Presentation_theme+ guides(x =  guide_axis(angle = 40))+labs(y="Vegetation Coverage (%)")
+
+ggsave(plot = last_plot(),filename="./Figures/Vegetation Change-annual pattern.jpeg",width =12, height =8, units = "in")
+
