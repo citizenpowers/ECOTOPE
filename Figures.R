@@ -2,11 +2,10 @@ rm(list = ls())
 
 
 #remotes::install_github("cttobin/ggthemr",force = TRUE)
-library(dplyr)
-library(ggplot2)
-library(tidyr)
-library(stringr)
-library(lubridate)
+#library(dplyr)
+#library(ggplot2)
+#library(stringr)
+#library(lubridate)
 library(scales)
 library(RColorBrewer)
 library(viridis)
@@ -15,7 +14,7 @@ library(ggpmisc)
 library(ggrepel)
 library(zoo)
 library(readxl)
-library(readr)
+#library(readr)
 library(corrplot)
 library(GGally)
 library(devtools)
@@ -26,8 +25,6 @@ library(stringr)
 library(ggrepel)
 library(cowplot)
 library(hues)
-
-
 
 # Import Data -------------------------------------------------------------
 
@@ -57,7 +54,6 @@ ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation 
 ggthemr("light",type="outer", layout="scientific")  #used for SFER figs
 Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 24),legend.title = element_text(size = 20))
 Presentation_theme2 <- theme( strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
-
 
 # QC Blank Evaluation -----------------------------------------------------
 
@@ -932,7 +928,7 @@ ggplot(Soils_Summary_Stat_Sig,aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MAT
 geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
 geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
 geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
-facet_wrap(~`Facet Label`,scale="free")+
+facet_wrap(~`Facet Label`,scale="free",nrow=6)+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
 
 ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =15.4, height =11.9, units = "in")
@@ -983,27 +979,55 @@ ggsave(plot = last_plot(),filename="./Figures/Light Intenstity Seasonal.jpeg",wi
 
 Physico_parameters_long <- WQ_Field_Data %>%
 select(Date, STA,Ecotope,Position,Hour,Minute,Temp,pH,DO,SpCond) %>%
-pivot_longer(values_to="Value",names_to="Parameter",7:10)
+pivot_longer(values_to="Value",names_to="Parameter",7:10) 
 
-#All Physico-chemical characterizations by ecotope
-ggplot(filter(Physico_parameters_long,Ecotope!="Naiad"),aes(Date,Value,color=Ecotope))+
-geom_point()+  
-geom_smooth(se=F)+
-facet_grid(Parameter~STA,scale="free_y")+
-scale_x_date()+ 
-scale_y_continuous(label=comma)+
-Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs()
+# #trying to create a gap in hte dataframe where do dat was collected
+bind_rows(data.frame(Date=as.Date(c("2022-06-01","2022-06-01","2022-06-01","2022-06-01","2022-09-01","2022-09-01","2022-09-01","2022-09-01")),STA="STA-3/4 Cell 2B",Ecotope="Chara",Parameter=c("DO","pH","Temp","SpCond"),Value=NA)) %>%
+bind_rows(data.frame(Date=as.Date(c("2022-06-01","2022-06-01","2022-06-01","2022-06-01","2022-09-01","2022-09-01","2022-09-01","2022-09-01")),STA="STA-3/4 Cell 2B",Ecotope="Bare",Parameter=c("DO","pH","Temp","SpCond"),Value=NA)) %>%
+bind_rows(data.frame(Date=as.Date(c("2022-06-01","2022-06-01","2022-06-01","2022-06-01","2022-09-01","2022-09-01","2022-09-01","2022-09-01")),STA="STA-3/4 Cell 2B",Ecotope="Typha",Parameter=c("DO","pH","Temp","SpCond"),Value=NA)) %>%
+bind_rows(data.frame(Date=as.Date(c("2022-06-01","2022-06-01","2022-06-01","2022-06-01","2022-09-01","2022-09-01","2022-09-01","2022-09-01")),STA="STA-3/4 Cell 2B",Ecotope="Mixed",Parameter=c("DO","pH","Temp","SpCond"),Value=NA)) 
 
-ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
+DO_mod <-  mutate(filter(Physico_parameters_long,Parameter=="DO"),Date=as.numeric(Date)) %>%
+                group_by(Ecotope) %>% 
+                arrange(Ecotope, Date) %>% 
+                nest() %>%
+                mutate(pred.response = purrr::map(data, function(x)stats::loess(Value~Date, span= 0.6, data = x))) %>%
+                                                      #stats::predict(data.frame(Date = seq(min(x$Date), max(x$Date), 1))))) %>%
+                unnest(cols = c(data, pred.response))
+                
+          
+                
+#DO by ecotope
+DO_plot <- ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="DO"),aes(month(Date)+day(Date)/31,Value,color=Ecotope,fill=Ecotope))+
+geom_point()+  geom_smooth(se=T,span = .6)+
+facet_wrap(~STA)+scale_x_discrete(limits = 1:12, labels = month.abb)+
+labs(y=expression(DO~(mg~L^-1)),x=NULL)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+theme(legend.position="none", axis.text.x=element_blank())
 
 #SpCond by ecotope
-ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="SpCond"),aes(Date,Value,color=Ecotope,shape=Position))+
-geom_point()+ geom_line()+ #geom_smooth(se=F,span=.5)+
-facet_wrap(~STA,scale="free_y")+
-scale_x_date()+ scale_y_continuous(label=comma)+
-Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs()
+SpCond_plot <-ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="SpCond"),aes(month(Date)+day(Date)/31,Value,color=Ecotope,fill=Ecotope))+
+geom_point()+  geom_smooth(method="loess",se=T)+
+facet_wrap(~STA)+scale_x_discrete(limits = 1:12, labels = month.abb)+
+labs(y=expression(SpCond~(us~cm^-1)),x=NULL)+scale_y_continuous(label=comma)+coord_cartesian(ylim=c(500,1500))+
+Presentation_theme+ guides(x =  guide_axis(angle = 40))+theme(legend.position="none", axis.text.x=element_blank(),strip.background = element_blank(),strip.text.x = element_blank())
 
-ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
+#pH by ecotope
+pH_plot <-ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="pH"),aes(month(Date)+day(Date)/31,Value,color=Ecotope,fill=Ecotope))+
+geom_point()+  geom_smooth(method="loess",se=T)+
+facet_wrap(~STA)+scale_x_discrete(limits = 1:12, labels = month.abb)+
+labs(y=expression(pH),x=NULL)+scale_y_continuous(label=comma)+coord_cartesian(ylim=c(6,10))+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+theme(legend.position="none", axis.text.x=element_blank(),strip.background = element_blank(),strip.text.x = element_blank())
+
+#Temp by ecotope
+Temp_plot <-ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",Parameter=="Temp"),aes(month(Date)+day(Date)/31,Value,color=Ecotope,fill=Ecotope))+
+geom_point()+  geom_smooth(method="loess",se=T)+
+facet_wrap(~STA)+scale_x_discrete(limits = 1:12, labels = month.abb)+
+labs(y=expression(Temp~("°C")),x=NULL)+scale_y_continuous(label=comma)+#coord_cartesian(ylim=c(6,10))+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+theme(strip.background = element_blank(),strip.text.x = element_blank())
+
+plot_grid(DO_plot,SpCond_plot,pH_plot,Temp_plot,nrow=4,align="v",rel_heights = c(1, .85, .85, 1.2))
+
+ggsave(plot = last_plot(),filename="./Figures/Physico-Chemical.jpeg",width =8.5, height =11, units = "in")
 
 
 # Vegetation Change -------------------------------------------------------
