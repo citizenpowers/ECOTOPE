@@ -50,7 +50,7 @@ Veg_tidy_long <- read_csv("Data/Vegetation Change/Bare_tidy_long.csv")
 
 # Theme -------------------------------------------------------------------
 
-ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
+#ggthemr("flat dark",type="outer", layout="scientific")   #used for presentation figs
 ggthemr("light",type="outer", layout="scientific")  #used for SFER figs
 Presentation_theme <- theme(strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=16),axis.title = element_text(size = 20),legend.text = element_text(size = 24),legend.title = element_text(size = 20))
 Presentation_theme2 <- theme( strip.text = element_text(size=20) ,legend.position="bottom",axis.text=element_text(size=14),axis.title = element_text(size = 16),legend.text = element_text(size = 20),legend.title = element_text(size = 20))
@@ -103,23 +103,6 @@ summarise(n=n())
 
 # TP over time -------------------------------------------------------------
 
-#Histogram of distributions  -- Distributions approximately log normal
-ggplot(WQ_Field_Data,aes(log(TPO4*1000),color=Ecotope,fill=Ecotope))+geom_histogram()+facet_wrap(~Ecotope,scale="free")+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
-
-#All Analyses Concentration over time points and smooth  STA3/4 only
-all_analytes_plot_STA34 <-ggplot(filter(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",10:38),STA=="STA-3/4 Cell 2B"),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
-
-ggsave(plot = last_plot(),filename="./Figures/all_analytes_plot_STA34.jpeg",width =13.333, height =7.5, units = "in")
-
-all_analytes_plot_STA1W <-ggplot(filter(pivot_longer(WQ_Field_Data,names_to="TEST_NAME",values_to="VALUE",10:38),STA=="STA-1W Cell 5B"),aes(Date,`VALUE`,color=Ecotope,fill=Ecotope))+geom_point()+geom_smooth(se=FALSE)+
-facet_wrap(~TEST_NAME,scales = "free_y")+scale_x_date(date_breaks="3 month",labels = date_format("%b %y"))+ ylab(" ")+guides(x =  guide_axis(angle = 40))
-
-ggsave(plot = last_plot(),filename="./Figures/all_analytes_plot_STA1W.jpeg",width =13.333, height =7.5, units = "in")
-
-
-
 #TPO4 Concentration over time points and smooth (STA1W and STA34) SFER 2023 Fig 1
 WQ_Fig_data <- WQ_Field_Data %>%
 mutate(`Figure Label Date`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
@@ -169,6 +152,39 @@ scale_x_date(date_breaks="1 month",labels = date_format("%b %y"))+guides(x =  gu
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 over time-flat dark- STA34 only WY22.jpeg",width =13.333, height =7.5, units = "in")
 
+
+
+# Is TP data normally distributed? -----------------------------------------
+
+#all downstream data density distribution
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(TPO4))+geom_density()+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+#all downstream data QQplots+geom_qq()+stat_qq_line()
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(sample=TPO4))+geom_qq()+stat_qq_line()+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+#test for normality
+shapiro.test(filter(WQ_Field_Data,Position=="Downstream")$TPO4)
+
+#Density plot of distributions by ecotope 
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(TPO4,color=Ecotope,fill=Ecotope))+geom_density()+facet_wrap(STA~Ecotope,scale="free")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+#qq plots of Raw data
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(sample=TPO4,color=Ecotope,fill=Ecotope))+geom_qq()+stat_qq_line()+facet_wrap(STA~Ecotope,scale="free")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+
+#Histogram of distributions  -- Distributions approximately log normal
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(log(TPO4*1000),color=Ecotope,fill=Ecotope))+geom_density()+facet_wrap(STA~Ecotope,scale="free")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+#qq plots of log transformed data
+ggplot(filter(WQ_Field_Data,Position=="Downstream"),aes(sample=log(TPO4),color=Ecotope,fill=Ecotope))+geom_qq()+stat_qq_line()+facet_wrap(STA~Ecotope,scale="free")+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(TP~(mu~g~L^-1)))
+
+#Data has log normal distribution
 
 # Analytes other than P ---------------------------------------------------
 
