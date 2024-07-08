@@ -761,6 +761,32 @@ ggsave(plot = last_plot(),filename="./Figures/Daily FWM TP.jpeg",width =13.333, 
 
 
 
+
+# Proportion of flow in wet and dry season.  ------------------------------
+
+Study_total <- TP_Budget_Daily_Combined %>%
+filter(Ecotope=="Bare") %>%  
+group_by(STA) %>%
+summarise(`Total Flow (acre ft)`=sum(`Outflow (cfs)`,na.rm=TRUE)*1.98)  
+
+Seasonal_total <- TP_Budget_Daily_Combined %>%
+filter(Ecotope=="Bare") %>%  
+mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))  %>%
+group_by(STA,Season) %>%
+summarise(n(),`Seasonal Flow (acre ft)`=sum(`Outflow (cfs)`,na.rm=TRUE)*1.98)  %>%
+left_join(Study_total,by=c("STA"))  %>%
+mutate(`Percent of flow`=percent(`Seasonal Flow (acre ft)`/`Total Flow (acre ft)`))  
+
+Monthly_flow <- TP_Budget_Daily_Combined %>%
+filter(Ecotope=="Bare") %>%  
+mutate(Month=month(Date,abb=T,label=T))  %>%
+group_by(STA,Month) %>%
+summarise(`Month Flow (acre ft)`=sum(`Outflow (cfs)`,na.rm=TRUE)*1.98)   %>%  
+left_join(Study_total,by=c("STA"))  %>%
+mutate(`Percent of flow`=percent(as.numeric(`Month Flow (acre ft)`)/`Total Flow (acre ft)`))    
+
+
+
 # Ion balance and nutrient Ratios  ---------------------------------------------------------
 
 Nutrient_Ratios_tidy <- WQ_Field_with_continuous_same_rows %>%
@@ -947,7 +973,7 @@ geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),
 facet_wrap(~`Facet Label`,scale="free",nrow=6)+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =15.4, height =11.9, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =11.9, height =15.4, units = "in")
 
 
 Soils_Summary_Stat_Sig %>% 
