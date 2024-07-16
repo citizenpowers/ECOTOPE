@@ -197,6 +197,15 @@ scale_x_date(date_breaks="1 month",labels = date_format("%b"))+
 scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
 Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none",color="none")+labs(y=expression(K~(mu~g~L^-1)),x="")
 
+#Alkalinity time series
+ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Figure Label Date`,ALKA*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
+geom_point(aes(`Figure Label Date`,K*1000,color=Ecotope,fill=Ecotope),size=3)+
+geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
+scale_shape_manual(values = c(21:24)) +#coord_cartesian(ylim=c(0,80))+#scale_y_continuous(breaks=seq(0,100,10),limits=c(0,100))+
+scale_x_date(date_breaks="1 month",labels = date_format("%b"))+ 
+scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
+Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(K~(mu~g~L^-1)),x="")
+
 #Potassium vs TP scatterplot
 ggplot(filter(WQ_Fig_data,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(TPO4*1000,K*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(TPO4*1000,K*1000,color=Ecotope,fill=Ecotope),size=3)+
@@ -951,19 +960,34 @@ labs(y=expression(P~(g~m^-2)),x=NULL)+Presentation_theme+scale_y_continuous(labe
 ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =12, height =15, units = "in")
 
 #Soils Concentration figure
-ggplot(Soils_Concentration_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
-geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
-labs(y=expression((mg~kg^-1)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+ggplot(filter(Soils_Summary_Stat_Sig,Units=="(mg/kg)"),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
+geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
+geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
+facet_wrap(~`Facet Label`,scale="free",nrow=2)+
+labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/Soils Concentration.jpeg",width =16, height =7, units = "in")
 
 #Soils Storage figure
-ggplot(Soils_Storage_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
-geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
-labs(y=expression((g~m^-2)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+ggplot(filter(Soils_Summary_Stat_Sig,Units=="(g/m^2)"),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
+geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
+geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
+facet_wrap(~`Facet Label`,scale="free",nrow=2)+
+labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
     
+ggsave(plot = last_plot(),filename="./Figures/Soils Content.jpeg",width =16, height =7, units = "in")
+
 #Soils physical parameters figure
-ggplot(Soils_Physical_Summary,aes(MATRIX,y=Mean,fill=Ecotope))+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position="dodge",color="grey50")+
-geom_col(alpha=.5,position="dodge",color="grey50")+facet_wrap(~`TEST_NAME`,scale="free")+
-labs(y=expression((g~cm^-3)~","~(cm)),x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+ggplot(filter(Soils_Summary_Stat_Sig,Units %in% c("(g/cm^3)","(cm)")),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
+geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
+geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
+facet_wrap(~`Facet Label`,scale="free",nrow=1)+
+labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
+
+ggsave(plot = last_plot(),filename="./Figures/Soils Physical Parameters.jpeg",width =16, height =5, units = "in")
 
 #Soils all parameters combined
 ggplot(Soils_Summary_Stat_Sig,aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
