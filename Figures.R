@@ -960,7 +960,7 @@ labs(y=expression(P~(g~m^-2)),x=NULL)+Presentation_theme+scale_y_continuous(labe
 ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =12, height =15, units = "in")
 
 #Soils Concentration figure
-ggplot(filter(Soils_Summary_Stat_Sig,Units=="(mg/kg)"),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
+ggplot(filter(Soils_Summary_Stat_Sig,Units %in% c("(mg/kg)","%")),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
 geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
 geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
 geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
