@@ -37,8 +37,8 @@ Chara_20231012<- read.table("Data/Vegetation Change/20231012_Chara.txt",sep=",",
 Typha_20211117<- read.table("Data/Vegetation Change/20211117_Typha.txt",sep=",",header=T)  #Area in sq meters
 Typha_20220630<- read.table("Data/Vegetation Change/20220630_Typha.txt",sep=",",header=T)  #Area in sq meters
 Typha_20221219<- read.table("Data/Vegetation Change/20221219_Typha.txt",sep=",",header=T)  #Area in sq meters
-Typha_20230725<- read.table("Data/Vegetation Change/20230725_Typha.txt",sep=",",header=T)  #Area in sq meters
-Typha_20231012<- read.table("Data/Vegetation Change/20231012_Typha.txt",sep=",",header=T)  #Area in sq meters
+Typha_20230725<- read.table("Data/Vegetation Change/20230723_Typha.txt",sep=",",header=T)  #Area in sq meters
+Typha_20231012<- read.table("Data/Vegetation Change/20231031_Typha.txt",sep=",",header=T)  #Area in sq meters
 
 
 # Tidy Data ---------------------------------------------------------------
@@ -77,10 +77,16 @@ Chara_20220323_fixed <- Chara_20220323 %>%  mutate(Vegetation=case_when(gridcode
 Chara_20211117_fixed <- Chara_20211117 %>%  mutate(Vegetation=case_when(gridcode==1~NA,gridcode==2~"Bare",gridcode==4~"SAV",gridcode==7~"SAV",gridcode==12~"Typha",gridcode==13~"FAV"))
 
 #20231031 SAV-12,Typha-1,Bare-14 
-#20230726 1-Typha, 6-Bare, 8-SAV,12-FAV
+#20230725 1-Typha, 6-Bare, 8-SAV,12-FAV
 #20220630 1-Typha, 6-SAV,9-Bare,11-FAV 
 #20221219 1-Typha, 3-SAV, 6-NA 
 #20211117 1-Typha, 5-NA, 6-SAV, 10-FAV
+Typha_20211117_fixed <- Typha_20211117 %>%  mutate(Vegetation=case_when(gridcode==1~"Typha",gridcode==5~NA,gridcode==6~"SAV",gridcode==10~"FAV"))
+Typha_20221219_fixed <- Typha_20221219 %>%  mutate(Vegetation=case_when(gridcode==1~"Typha",gridcode==6~NA,gridcode==3~"SAV"))
+Typha_20230725_fixed <- Typha_20230725 %>%  mutate(Vegetation=case_when(gridcode==1~"Typha",gridcode==6~"Bare",gridcode==12~"FAV"))
+Typha_20220630_fixed <- Typha_20220630 %>%  mutate(Vegetation=case_when(gridcode==1~"Typha",gridcode==9~"Bare",gridcode==11~"FAV",gridcode==6~"SAV"))
+Typha_20231012_fixed <- Typha_20231012 %>%  mutate(Vegetation=case_when(gridcode==1~"Typha",gridcode==14~"Bare",gridcode==12~"SAV"))
+
 
 #join data
 Bare_joined <-select(mutate(Bare_20231012,Ecotope="Bare",Date=ymd("2023-10-12"),Area=Area*4046.86),Date,Ecotope,Vegetation,Area) %>%  #convert to sq meters
@@ -114,9 +120,17 @@ bind_rows(select(mutate(Chara_20230725_fixed,Ecotope="Chara",Date=ymd("2023-07-2
 mutate(Vegetation=case_when(str_detect(Vegetation,"tail")~"Typha",str_detect(Vegetation,"Bare")~"Bare",str_detect(Vegetation,"SAV")~"SAV",str_detect(Vegetation,"ily")~"Lily",str_detect(Vegetation,"Spatterdock")~"Spatterdock",TRUE~Vegetation))  %>%
 mutate(Vegetation=case_when(str_detect(Vegetation,"Spatterdock")~"FAV",str_detect(Vegetation,"Lily")~"FAV",TRUE~Vegetation))  
 
+Typha_joined <-select(mutate(Typha_20231012_fixed,Ecotope="Typha",Date=ymd("2023-10-12")),Date,Ecotope,Vegetation,Area) %>%  
+bind_rows(select(mutate(Typha_20220630_fixed,Ecotope="Typha",Date=ymd("2022-06-30")),Date,Ecotope,Vegetation,Area)) %>%
+bind_rows(select(mutate(Typha_20221219_fixed,Ecotope="Typha",Date=ymd("2022-12-19")),Date,Ecotope,Vegetation,Area)) %>%
+bind_rows(select(mutate(Typha_20211117_fixed,Ecotope="Typha",Date=ymd("2021-11-17")),Date,Ecotope,Vegetation,Area)) %>%
+bind_rows(select(mutate(Typha_20230725_fixed,Ecotope="Typha",Date=ymd("2023-07-25")),Date,Ecotope,Vegetation,Area)) %>%
+mutate(Vegetation=case_when(str_detect(Vegetation,"tail")~"Typha",str_detect(Vegetation,"Bare")~"Bare",str_detect(Vegetation,"SAV")~"SAV",str_detect(Vegetation,"ily")~"Lily",str_detect(Vegetation,"Spatterdock")~"Spatterdock",TRUE~Vegetation))  %>%
+mutate(Vegetation=case_when(str_detect(Vegetation,"Spatterdock")~"FAV",str_detect(Vegetation,"Lily")~"FAV",TRUE~Vegetation))  
+
 
 #join data
-Veg_joined <- bind_rows(Bare_joined,Mixed_joined,Chara_joined) 
+Veg_joined <- bind_rows(Bare_joined,Mixed_joined,Chara_joined,Typha_joined) 
 
 #Calculate area by veg class
 Veg_areas <-Veg_joined %>%
