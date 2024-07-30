@@ -667,6 +667,16 @@ filter(TEST_NAME=="OPO4",STA=="STA-3/4 Cell 2B")
 
 ggplot(opo4_data,aes(VALUE*1000))+geom_histogram()
 
+# Upstream vs downstream boxplots -----------------------------------------
+
+
+ggplot(filter(WQ_Field_Data,Ecotope!="Naiad"),aes(Ecotope,TPO4*1000,fill=Ecotope))+facet_grid(STA~factor(Position,c("Upstream","Downstream")))+
+  geom_jitter(aes(Ecotope,TPO4*1000,fill=Ecotope,color=Ecotope))+
+  geom_boxplot(alpha=.5,outliers=F)+scale_y_continuous(breaks=seq(0,50,10))+coord_cartesian(ylim=c(0,50))+
+  guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))+theme(legend.position="none")
+
+ggsave(plot = last_plot(),filename="./Figures/Upstream and Downstream P Boxplots.jpeg",width =8, height =6, units = "in")
+
 # TP Budget Figures -------------------------------------------------------
 
 Cumulative_TP <- TP_Budget %>%
