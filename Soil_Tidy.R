@@ -169,5 +169,10 @@ pivot_longer(names_to="MATRIX",values_to="Letter",7:8) %>%
 select("Ecotope","MATRIX","TEST_NAME","Letter")  %>% 	
 mutate(Units=case_when(TEST_NAME %in% c("AFDW","Carbon")~"%",TRUE~"(mg/kg)"))
 
+Typha_data <- Soils_data %>% filter(Ecotope=="Typha", TEST_NAME %in% c("Phosphorus")) 
+typha_mod <- lm(VALUE ~ MATRIX, data = Typha_data)
+aov(typha_mod)
+TukeyHSD(aov(typha_mod))
 
 
+ggplot

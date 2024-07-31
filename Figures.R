@@ -955,6 +955,21 @@ labs(x="Project",y="Blanks above or equal to MDL (%)",title = "Ammonia Blank Hit
 
 
 # Soil Figures and  SFER Table -------------------------------------------------------------------------------------------------
+#create wide soils data frame
+Soils_wide_data <-  Soils_data %>%
+select(SAMPLE_ID,Ecotope,MATRIX,TEST_NAME,VALUE)  %>%
+pivot_wider(names_from=TEST_NAME,values_from=VALUE)
+
+#Carbon vs P
+ggplot(filter(Soils_wide_data,Ecotope!="Naiad"),aes(x=Carbon,y=Phosphorus,fill=Ecotope))+geom_point(shape=21)+geom_smooth(method="lm")+stat_poly_line() +stat_poly_eq() +
+facet_wrap(~Ecotope)+
+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+
+#Calcium vs P vs P
+ggplot(filter(Soils_wide_data,Ecotope!="Naiad"),aes(x=Calcium,y=Phosphorus,fill=Ecotope))+geom_point(shape=21)+geom_smooth(method="lm")+stat_poly_line() +stat_poly_eq() +
+facet_wrap(~Ecotope)+
+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")
+
 
 #Boxplots all analytes concentration
 ggplot(filter(Soils_data,Ecotope!="Naiad"),aes(MATRIX,y=VALUE,fill=Ecotope,))+
@@ -1025,24 +1040,12 @@ All_light_data_season <- All_light_data %>%
 mutate(Month=month(`Date Time`),Season=if_else(between(Month,6,11),"Wet Season","Dry Season"))
 
 
-#Seasonal Light intensity by ecotope  (Issue with Bare dry season- investigate)
-ggplot(filter(All_light_data_season,Ecotope!="Naiad"),aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,color=Position,fill=Position))+
-geom_jitter(alpha=0.04)+  
-geom_smooth(aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,linetype=Position,color=Position),size=1)+
-facet_grid(~Ecotope)+
-scale_x_datetime(labels = date_format("%I:%M:%p"),breaks=as.POSIXct(c("2000-01-01 00:00:00","2000-01-01 04:00:00","2000-01-01 08:00:00","2000-01-01 12:00:00","2000-01-01 16:00:00","2000-01-01 20:00:00","2000-01-01 24:00:00"),tz = "GMT"))+ 
-scale_y_continuous(label=comma)+
-Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y=expression(Light~(Lumen~m^-2)),x="Time")
-
-ggsave(plot = last_plot(),filename="./Figures/Light Intenstity.jpeg",width =12, height =8, units = "in")
-
-
 
 #Seasonal Light intensity by ecotope  (Issue with Bare dry season- investigate)
 ggplot(filter(All_light_data_season,Ecotope!="Naiad"),aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,color=Position,fill=Position))+
 geom_jitter(alpha=0.04)+  
 geom_smooth(aes(ymd_hms(format(`Date Time`, "2000-01-01 %H:%M:%S")),`Light Intensity Lux`,linetype=Position,color=Position),size=1)+
-facet_grid(Season~Ecotope)+
+facet_wrap(~Ecotope,nrow=2)+
 scale_x_datetime(labels = date_format("%I:%M:%p"),breaks=as.POSIXct(c("2000-01-01 00:00:00","2000-01-01 04:00:00","2000-01-01 08:00:00","2000-01-01 12:00:00","2000-01-01 16:00:00","2000-01-01 20:00:00","2000-01-01 24:00:00"),tz = "GMT"))+ 
 scale_y_continuous(label=comma)+
 Presentation_theme+  guides(x =  guide_axis(angle = 40))+labs(y=expression(Light~(Lumen~m^-2)),x="Time")
@@ -1056,7 +1059,14 @@ ggsave(plot = last_plot(),filename="./Figures/Light Intenstity Seasonal.jpeg",wi
 
 Physico_parameters_long <- WQ_Field_Data %>%
 select(Date, STA,Ecotope,Position,Hour,Minute,Temp,pH,DO,SpCond) %>%
-pivot_longer(values_to="Value",names_to="Parameter",7:10) 
+pivot_longer(values_to="Value",names_to="Parameter",7:10) %>%
+filter(STA=="STA-3/4 Cell 2B")  #STA3/4 only
+
+ggplot(filter(Physico_parameters_long,Ecotope!="Naiad",),aes(month(Date)+day(Date)/31,Value,color=Ecotope,fill=Ecotope))+
+geom_point()+  geom_smooth(method="loess",se=T)+
+facet_wrap(~Parameter,scales="free_y")+scale_x_discrete(limits = 1:12, labels = month.abb)+
+labs(x=NULL)+
+Presentation_theme+  guides(x =  guide_axis(angle = 40))+theme(legend.position="none", axis.text.x=element_blank(),strip.background = element_blank(),strip.text.x = element_blank())
 
 # #trying to create a gap in hte dataframe where do dat was collected
 bind_rows(data.frame(Date=as.Date(c("2022-06-01","2022-06-01","2022-06-01","2022-06-01","2022-09-01","2022-09-01","2022-09-01","2022-09-01")),STA="STA-3/4 Cell 2B",Ecotope="Chara",Parameter=c("DO","pH","Temp","SpCond"),Value=NA)) %>%
@@ -1104,7 +1114,7 @@ Presentation_theme+  guides(x =  guide_axis(angle = 40))+theme(strip.background 
 
 plot_grid(DO_plot,SpCond_plot,pH_plot,Temp_plot,nrow=4,align="v",rel_heights = c(1, .85, .85, 1.2))
 
-ggsave(plot = last_plot(),filename="./Figures/Physico-Chemical.jpeg",width =8.5, height =11, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/Physico-Chemical.jpeg",width =7.5, height =11, units = "in")
 
 
 # Vegetation Change -------------------------------------------------------
