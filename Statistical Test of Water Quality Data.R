@@ -29,6 +29,18 @@ mutate(Date_fct=as.factor(Date),Ecotope_fct=as.factor(Ecotope))
 #Friedman test for STA3/4 -No stat sig
 friedman_test(TPO4 ~ Ecotope_fct|Date_fct,data= Stat_test_STA34_data)
 
+#post-hoc test
+Stat_test_STA34_data_post_hoc = frdAllPairsConoverTest(y      = Stat_test_STA34_data$TPO4,
+                                                     groups = Stat_test_STA34_data$Ecotope_fct,
+                                                     blocks = Stat_test_STA34_data$Date_fct,
+                                                     p.adjust.method="single-step")
+#post-hoc test
+Stat_test_STA34_data_post_hoc_table =PMCMRTable(Stat_test_STA34_data_post_hoc)
+
+#get monoletter for stat sig
+Stat_test_STA34_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = Stat_test_STA34_data_post_hoc_table) %>%
+rename(Ecotope="Group")
+
 # STA3/4 data  year 1 -No stat sig ------------------------------------------
 Stat_test_STA34_yr1_data <-WQ_Field_Data %>%
 filter(Position=="Downstream",STA=="STA-3/4 Cell 2B",Ecotope!="Naiad",Date<"2022-08-27") %>%
@@ -84,7 +96,8 @@ STA34_wet_yr1_data_post_hoc = frdAllPairsConoverTest(y      = Stat_test_STA34_we
 STA34_wet_yr1_data_post_hoc_table =PMCMRTable(STA34_wet_yr1_data_post_hoc)
 
 #get monoletter for stat sig
-STA34_wet_yr1_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_wet_yr1_data_post_hoc_table)
+STA34_wet_yr1_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_wet_yr1_data_post_hoc_table) %>%
+rename(Ecotope="Group")
 
 #calculate effect size using KendallW
 STA34_wet_yr1_data_effect_size <- Stat_test_STA34_wet_yr1_data %>%
@@ -111,7 +124,8 @@ STA34_wet_yr2_data_post_hoc = frdAllPairsConoverTest(y      = Stat_test_STA34_we
 STA34_wet_yr2_data_post_hoc_table =PMCMRTable(STA34_wet_yr2_data_post_hoc)
 
 #get monoletter for stat sig
-STA34_wet_yr2_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_wet_yr2_data_post_hoc_table)
+STA34_wet_yr2_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_wet_yr2_data_post_hoc_table) %>%
+rename(Ecotope="Group")
 
 
 
@@ -134,8 +148,8 @@ STA34_dry_yr1_data_post_hoc = frdAllPairsConoverTest(y      = Stat_test_STA34_dr
 STA34_dry_yr1_data_post_hoc_table =PMCMRTable(STA34_dry_yr1_data_post_hoc)
 
 #get monoletter for stat sig
-STA34_dry_yr1_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_dry_yr1_data_post_hoc_table)
-
+STA34_dry_yr1_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_dry_yr1_data_post_hoc_table) %>%
+rename(Ecotope="Group")
 
 # STA3/4 data dry season year 2 ------------------------------------------
 Stat_test_STA34_dry_yr2_data <-WQ_Field_Data %>%
@@ -153,12 +167,11 @@ STA34_dry_yr2_data_post_hoc = frdAllPairsConoverTest(y      = Stat_test_STA34_dr
                                                      blocks = Stat_test_STA34_dry_yr2_data$Date_fct,
                                                      p.adjust.method="single-step")
 #post-hoc test
-STA34_dry_yr2_data_post_hoc_table =PMCMRTable(STA34_dry_yr2_data_post_hoc)
+STA34_dry_yr2_data_post_hoc_table =PMCMRTable(STA34_dry_yr2_data_post_hoc) 
 
 #get monoletter for stat sig
-STA34_dry_yr2_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_dry_yr2_data_post_hoc_table)
-
-
+STA34_dry_yr2_data_post_hoc_table_letters <-cldList(p.value ~ Comparison, data = STA34_dry_yr2_data_post_hoc_table) %>%
+rename(Ecotope="Group")
 
 
 #STA3/4 data wet season
@@ -260,4 +273,28 @@ mutate(Date_fct=as.factor(Date),Ecotope_fct=as.factor(Ecotope))
 #Friedman test for STA3/4 -No stat sig
 friedman_test(TPO4 ~ Ecotope_fct|Date_fct,data= Upstream_data_STA1W_data )
 
+
+
+# Combine Statistical Data into combined table ----------------------------
+
+WQ_Stat_Sig <- Stat_test_STA34_wet_yr2_data %>% group_by(Ecotope) %>% summarise(Median=Median(TPO4,na.rm=T),IQR_25=quantile(TPO4,.25),IQR_75=quantile(TPO4,.75)) %>% mutate(Treatment="Wet Season Year 2") %>%
+left_join(STA34_wet_yr2_data_post_hoc_table_letters,by="Ecotope")  %>% 
+bind_rows(Stat_test_STA34_wet_yr1_data %>% group_by(Ecotope) %>% summarise(Median=Median(TPO4,na.rm=T),IQR_25=quantile(TPO4,.25),IQR_75=quantile(TPO4,.75)) %>% mutate(Treatment="Wet Season Year 1") %>%
+left_join(STA34_wet_yr1_data_post_hoc_table_letters,by="Ecotope") ) %>%
+bind_rows(Stat_test_STA34_dry_yr1_data %>% group_by(Ecotope) %>% summarise(Median=Median(TPO4,na.rm=T),IQR_25=quantile(TPO4,.25),IQR_75=quantile(TPO4,.75)) %>% mutate(Treatment="Dry Season Year 1") %>%
+left_join(STA34_dry_yr1_data_post_hoc_table_letters,by="Ecotope")  ) %>%
+bind_rows(Stat_test_STA34_dry_yr2_data %>% group_by(Ecotope) %>% summarise(Median=Median(TPO4,na.rm=T),IQR_25=quantile(TPO4,.25),IQR_75=quantile(TPO4,.75)) %>% mutate(Treatment="Dry Season Year 2") %>%
+left_join(STA34_dry_yr2_data_post_hoc_table_letters,by="Ecotope")  ) %>%
+bind_rows(Stat_test_STA34_data %>% group_by(Ecotope) %>% summarise(Median=Median(TPO4,na.rm=T),IQR_25=quantile(TPO4,.25),IQR_75=quantile(TPO4,.75)) %>% mutate(Treatment="Period of Record") %>%
+left_join(Stat_test_STA34_data_post_hoc_table_letters,by="Ecotope")  )
+
+
+WQ_Stat_Sig_Data <- Stat_test_STA34_wet_yr2_data %>% mutate(Treatment="Wet Season Year 2") %>%
+bind_rows(Stat_test_STA34_wet_yr1_data %>% mutate(Treatment="Wet Season Year 1"))  %>%
+bind_rows(Stat_test_STA34_dry_yr1_data %>% mutate(Treatment="Dry Season Year 1"))  %>%
+bind_rows(Stat_test_STA34_dry_yr2_data %>% mutate(Treatment="Dry Season Year 2"))  %>%
+bind_rows(Stat_test_STA34_data %>% mutate(Treatment="Period of Record"))
+
+write.csv(WQ_Stat_Sig,"./Data/WQ Data/Water Quality Stats.csv",row.names = FALSE)  
+write.csv(WQ_Stat_Sig_Data,"./Data/WQ Data/Water Quality Stats Data.csv",row.names = FALSE)  
 
