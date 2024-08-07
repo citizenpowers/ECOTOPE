@@ -65,22 +65,22 @@ select(Ecotope,TPO4,`DCS (Field Data)`,`Mean outflow (cfs)`,`Daylight Fraction`)
 TP_Physical_Correlation <- Correlation_Data_Tidy %>%
 select(-`Date`,Ecotope,-Position,-Hour,-Minute) %>%  
 select(TPO4,Ecotope,28:29,64:70,86:87)  %>%  #Select Physical parameters
-select(sort(current_vars())) 
+select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and Sonde Parameters
 TP_Continuous_Correlation <- Correlation_Data_Tidy %>%
 select(TPO4,Ecotope,75:89)  %>%  #Select Physical parameters
 select(-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  
-select(sort(current_vars())) 
+select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and analytes
 TP_Analyte_Correlation_1 <- Correlation_Data_Tidy %>%
 select(Ecotope,10:20)  %>%  #Select Analyte 
-select(sort(current_vars())) 
+select(sort(tidyselect::peek_vars())) 
 
 TP_Analyte_Correlation_2 <- Correlation_Data_Tidy %>%
 select(TPO4,Ecotope,21:30)  %>%  #Select Analyte 
-select(sort(current_vars()))
+select(sort(tidyselect::peek_vars()))
 
 #Correlation Plot with GGALLY of physical parameters
 ggpairs(TP_Physical_Correlation,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Physical Parameters and TP") #TP04 Correlation with Physico-chemical parameters
@@ -103,29 +103,29 @@ ggpairs(TP_Analyte_Correlation_2,ggplot2::aes(colour=Ecotope),method = "spearman
 ggsave(plot = last_plot(),filename="./Figures/Correlogram- WQ Analytes 2.jpeg",width =16, height =9, units = "in")
 
 
-# Correlation (STA34 Only) --------------------------------------------------
+# Correlation (STA1W Only) --------------------------------------------------
 
 
 #Calculate DF of TPO4 and Physical Parameters
 TP_Physical_Correlation_sta1W <- Correlation_Data_Tidy_sta1W %>%
   select(-`Date`,Ecotope,-Position,-Hour,-Minute) %>%  
   select(TPO4,Ecotope,28:29,64:70,86:87)  %>%  #Select Physical parameters
-  select(sort(current_vars())) 
+  select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and Sonde Parameters
 TP_Continuous_Correlation_sta1W <- Correlation_Data_Tidy_sta1W %>%
   select(TPO4,Ecotope,75:89)  %>%  #Select sonde parameters
   select(-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  
-  select(sort(current_vars())) 
+  select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and analytes
 TP_Analyte_Correlation_sta1W_1 <- Correlation_Data_Tidy_sta1W %>%
   select(Ecotope,10:20)  %>%  #Select Analytes 
-  select(sort(current_vars())) 
+  select(sort(tidyselect::peek_vars())) 
 
 TP_Analyte_Correlation_sta1W_2 <- Correlation_Data_Tidy_sta1W %>%
   select(TPO4,Ecotope,21:30)  %>%  #Select Analytes 
-  select(sort(current_vars()))
+  select(sort(tidyselect::peek_vars()))
 
 #Correlation Plot with GGALLY of analyte 
 ggpairs(TP_Analyte_Correlation_sta1W_1,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
@@ -139,27 +139,34 @@ ggsave(plot = last_plot(),filename="./Figures/Correlogram _sta1W- WQ Analytes 2.
 
 
 
-# Correlation (STA1W only) ------------------------------------------------
+# Correlation (STA3/4 only) ------------------------------------------------
 #Calculate DF of TPO4 and Physical Parameters
 TP_Physical_Correlation_sta34 <- Correlation_Data_Tidy_sta34 %>%
   select(-`Date`,Ecotope,-Position,-Hour,-Minute) %>%  
-  select(TPO4,Ecotope,28:29,64:70,86:87)  %>%  #Select Physical parameters
-  select(sort(current_vars())) 
+  select(TPO4,Ecotope,24,28:29,64:70,86:87)  %>%  #Select Physical parameters
+  select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and Sonde Parameters
 TP_Continuous_Correlation_sta34 <- Correlation_Data_Tidy_sta34 %>%
   select(TPO4,Ecotope,75:89)  %>%  #Select sonde parameters
   select(-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  
-  select(sort(current_vars())) 
+  select(sort(tidyselect::peek_vars())) 
 
 #Calculate DF of TPO4 and analytes
 TP_Analyte_Correlation_sta34_1 <- Correlation_Data_Tidy_sta34 %>%
   select(Ecotope,10:20)  %>%  #Select Analytes 
-  select(sort(current_vars())) 
+  select(sort(tidyselect::peek_vars())) 
 
 TP_Analyte_Correlation_sta34_2 <- Correlation_Data_Tidy_sta34 %>%
   select(TPO4,Ecotope,21:30)  %>%  #Select Analytes 
-  select(sort(current_vars()))
+  select(sort(tidyselect::peek_vars()))
+
+#correlation of TP with DOP and PP
+TP_Analyte_Correlation_sta34_3 <-Correlation_Data_Tidy_sta34 %>%
+mutate(PP=TPO4-TDPO4,DOP=TDPO4-OPO4)  %>%
+select(Ecotope,TPO4,PP,TDPO4,DOP,OPO4)  %>%  #Select Analytes 
+select(sort(tidyselect::peek_vars()))
+
 
 #Correlation Plot with GGALLY of analyte 
 ggpairs(TP_Analyte_Correlation_sta34_1,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
@@ -170,6 +177,11 @@ ggsave(plot = last_plot(),filename="./Figures/Correlogram STA34- WQ Analytes 1.j
 ggpairs(TP_Analyte_Correlation_sta34_2,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
 
 ggsave(plot = last_plot(),filename="./Figures/Correlogram STA34- WQ Analytes 2.jpeg",width =16, height =9, units = "in")
+
+#Correlation Plot with GGALLY of analyte 
+ggpairs(TP_Analyte_Correlation_sta34_3,ggplot2::aes(colour=Ecotope),method = "spearman", title = "Correlation: Water Quality Analytes") #TP04 Correlation with Physico-chemical parameters
+
+ggsave(plot = last_plot(),filename="./Figures/Correlogram STA34- WQ Analytes 3.jpeg",width =16, height =9, units = "in")
 
 
 
@@ -206,7 +218,7 @@ TP_Correlation <- Correlation_Data_Tidy %>%
   select(-`Date`,-Ecotope,-Position,-Hour,-Minute) %>%  
   select(1:28,57:76)  %>%  #remove upstream downstream differences column
   select(-OPO4,-`TSS mg/L`,-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  #remove parameters that are missing data or has unchanging data
-  select(sort(current_vars())) %>% #sorts column alphabetically
+  select(sort(tidyselect::peek_vars())) %>% #sorts column alphabetically
   cor(method="spearman",use = "pairwise.complete.obs")
 
 #Calculate correlation of all ecotopes grouped together
@@ -214,14 +226,14 @@ TP_Correlation <- Correlation_Data_Tidy %>%
   select(-`Date`,-Ecotope,-Position,-Hour,-Minute) %>%  
   select(1:28,57:76)  %>%  #remove upstream downstream differences column
   select(-OPO4,-`TSS mg/L`,-`BGA-PC RFU`,-`BGA-PC ug/L`,-`Chl ug/L`) %>%  #remove parameters that are missing data or has unchanging data
-  select(sort(current_vars())) %>% #sorts column alphabetically
+  select(sort(tidyselect::peek_vars())) %>% #sorts column alphabetically
   cor(method="spearman",use = "pairwise.complete.obs")
 
 
 
 All_Correlation <- WQ_Field_with_continuous_same_rows %>%
   select(-`Date Time`,-Ecotope,-Position,-Hour,-Minute)  %>% 
-  select(sort(current_vars())) %>% #sorts column alphabetically
+  select(sort(tidyselect::peek_vars())) %>% #sorts column alphabetically
   
   cor(method="spearman",use = "pairwise.complete.obs")
 
