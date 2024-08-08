@@ -41,6 +41,8 @@ TP_Budget_Daily_Combined <- read_csv("./Data/P Budget/TP_Budget_Daily_Combined.c
 FWM_Weekly<- read_csv("./Data/P Budget/FWM_Weekly.csv")  #needs update
 WQ_and_Spatial <- read_csv("./Data/Spatial Data/WQ_and_Spatial.csv") #needed for veg maps
 WQ_and_Spatial_long <-read_csv("./Data/Spatial Data/WQ_and_Spatial_long.csv") #needed for veg maps
+WQ_Stat_Sig <-read_csv("./Data/WQ Data/Water Quality Stats.csv") #WQ Stats
+WQ_Stat_Sig_Data <-read_csv("./Data/WQ Data/Water Quality Stats Data.csv") #WQ Stats
 Soils_data <- read_csv("./Data/Soils Data/Soils_Data_Tidy.csv") #needed for soils figures
 Soils_Summary_Stat_Sig <- read_csv( "./Data/Soils Data/Soils_Summary_Stat_Sig.csv")
 All_light_data <- read_csv("Data/HOBO/All_light_data.csv")
@@ -275,6 +277,35 @@ write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary.csv",r
 write.csv(Seasonal_TP_Summary ,"./Data/Publish Tables/Seasonal_TP_Summary_by_year.csv",row.names = FALSE) #SFER table
 
 
+
+# WQ SFER statistical significance  ---------------------------------------
+boxplot_mean_wet <- filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Wet")) %>% group_by(Ecotope,Treatment) %>% 
+summarise(ymin = min(TPO4,na.rm=T),lower = quantile(TPO4, .25),middle = mean(TPO4), upper = quantile(TPO4, .75), ymax = max(TPO4))
+
+boxplot_mean_dry <- filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Dry")) %>% group_by(Ecotope,Treatment) %>% 
+summarise(ymin = min(TPO4,na.rm=T),lower = quantile(TPO4, .25),middle = mean(TPO4), upper = quantile(TPO4, .75), ymax = max(TPO4))
+
+#Use means for boxplot
+ggplot()+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Wet")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
+geom_boxplot(data=boxplot_mean_wet,aes(Ecotope,ymin = ymin*1000, lower = lower*1000, middle = middle*1000, upper = upper*1000, ymax = ymax*1000,group=Ecotope,fill=Ecotope),stat="identity")+
+facet_wrap(~Treatment)+
+geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+geom_text(aes(Ecotope,30,label=Letter,group=Ecotope),data=filter(WQ_Stat_Sig,str_detect(Treatment,"Wet")),color="grey50",size=6)+
+Presentation_theme2+theme(legend.position="none")+ylab(expression(TP~(mu~g~L^-1)))+coord_cartesian(ylim=c(0,30))
+
+ggsave(plot = last_plot(),filename="./Figures/Wet Season TP boxplot stats.jpeg",width =12, height =6, units = "in")
+
+#Use means for boxplot
+ggplot()+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Dry")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
+geom_boxplot(data=boxplot_mean_dry,aes(Ecotope,ymin = ymin*1000, lower = lower*1000, middle = middle*1000, upper = upper*1000, ymax = ymax*1000,group=Ecotope,fill=Ecotope),stat="identity")+
+facet_wrap(~Treatment)+
+geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
+geom_text(aes(Ecotope,80,label=Letter,group=Ecotope),data=filter(WQ_Stat_Sig,str_detect(Treatment,"Dry")),color="grey50",size=6)+
+Presentation_theme2+theme(legend.position="none")+ylab(expression(TP~(mu~g~L^-1)))+coord_cartesian(ylim=c(0,80))
+
+
+ggsave(plot = last_plot(),filename="./Figures/Dry Season TP boxplot stats.jpeg",width =12, height =6, units = "in")
+
 # Water depth vs TP -----------------------------------------------------
 
 #Depth over time with TP differences
@@ -296,6 +327,7 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth 2024 SFER.jpeg
 #Flow vs TP wet seaon and dry season
 Wet_vs_dry <- WQ_Field_with_continuous_same_rows %>%
 mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))  %>%
+mutate(Season=factor(Season, levels=c("Wet Season","Dry Season"))) %>% 
 mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","Naiad","italic(Typha)")))
 
 #DCS Depth vs TP wet season vs dry season STA34
@@ -306,11 +338,11 @@ geom_point(shape=21,size=2.5,color="grey70")+geom_smooth(span=10)+
 geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Depth to Consolidated Substrate (cm)")+guides(fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season STA34- 2024 SFER.jpeg",width =8, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Water Depth wet vs dry season STA34- 2024 SFER.jpeg",width =11, height =7, units = "in")
 
 #DCS Depth vs TP wet season vs dry season STA-1W
 ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
-facet_grid(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
+facet_wrap(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,80))+
 geom_rect(aes(xmin = 45.72, ymin = -Inf, xmax = 76.2, ymax = Inf),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+
 geom_point(shape=21,size=2.5,color="grey70")+geom_smooth(span=10)+
 geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
@@ -415,15 +447,16 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2024 SFER.jpeg",wi
 #Flow vs TP wet seaon and dry season
 Wet_vs_dry <- WQ_Field_with_continuous_same_rows %>%
 mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season"))  %>%
-mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","Naiad","italic(Typha)")))
+mutate(Season=factor(Season, levels=c("Wet Season","Dry Season"))) %>% 
+mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","Naiad","italic(Typha)"))) 
 
-ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B",Date<"2023-07-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2.5,color="grey70")+
+ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2.5,color="grey70")+
 facet_grid(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,100,10))+Presentation_theme2+scale_x_continuous(breaks=seq(0,1200,200))+
 geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3,span=1) +coord_cartesian(ylim=c(0,50),xlim=c(50,1300))+
 geom_line(stat='smooth', method = "loess",span=1)  + geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
 ylab(expression(TP~(mu~g~L^-1)))+xlab("Flow (cfs)")+guides(x =  guide_axis(angle = 40),fill="none",color="none")
 
-ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2024 wet vs dry SFER.jpeg",width =8, height =7, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/TPO4 vs Outflow 2024 wet vs dry SFER.jpeg",width =11, height =7, units = "in")
 
 #outflow vs TPO4 in STA1W (not enough data to use yet)
 ggplot(filter(WQ_Field_with_continuous_same_rows,Position=="Downstream",Ecotope!="Naiad",STA=="STA-1W Cell 5B",Date<"2023-07-02"),aes(`Mean outflow (cfs)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+geom_point(shape=21,size=2,color="grey70")+
@@ -600,15 +633,18 @@ geom_smooth(se=FALSE)+scale_x_date(date_breaks="1 month",labels = date_format("%
 
 #TPO4 Concentration over time points and smooth (STA1W and STA34) SFER 2023 Fig 1
 WQ_Fig_Up_Down <- WQ_Upstream_Downstream_Tidy %>%
-  mutate(`Figure Label Date`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
+mutate(`Figure Label Date`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2021-09-15"~make_date(year=year(Date)+2,month=month(Date),day=day(Date)),
                                        STA=="STA-3/4 Cell 2B" & Date >="2021-09-15" & Date <"2022-07-01"~make_date(year=year(Date)+1,month=month(Date),day=day(Date)),
                                        STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~make_date(year=year(Date),month=month(Date),day=day(Date)),
                                        STA=="STA-1W Cell 5B"~make_date(year=year(Date),month=month(Date),day=day(Date)))) %>%
-  mutate(`Study Period`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2022-07-01"~"Year 1: STA-3/4",
+mutate(`Study Period`=case_when(STA=="STA-3/4 Cell 2B" & Date <"2022-07-01"~"Year 1: STA-3/4",
                                   STA=="STA-3/4 Cell 2B" & Date >"2022-07-01"~"Year 2: STA-3/4",
-                                  STA=="STA-1W Cell 5B"~"Year 2: STA-1W"))  
+                                  STA=="STA-1W Cell 5B"~"Year 2: STA-1W"))  %>%
+mutate(Month=month(Date),Season=if_else(between(Month,6,11),"Wet Season","Dry Season")) %>%
+mutate(Season=factor(Season,levels=c("Wet Season","Dry Season")))
+  
 
-#TP differnce over time 
+#TP differnce over time points and smooth
 ggplot(filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4"),aes(`Figure Label Date`,Difference*1000,color=Ecotope,fill=Ecotope,linetype=Ecotope))+
 geom_point(aes(`Figure Label Date`,Difference*1000,color=Ecotope,fill=Ecotope),size=3)+
 geom_smooth(se=FALSE)+facet_wrap(~factor(`Study Period`,levels = c("Year 1: STA-3/4","Year 2: STA-3/4","Year 2: STA-1W")),nrow=3,scales = "free_y")+
@@ -620,6 +656,20 @@ Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="no
 
 ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream time series.jpeg",width =8, height =8, units = "in")
 
+#TP difference boxplots
+ggplot(filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4"),aes(Ecotope,Difference*1000,fill=Ecotope))+
+geom_jitter(aes(Ecotope,Difference*1000,fill=Ecotope,color=Ecotope))+
+geom_boxplot(alpha=.5,outliers=F)+facet_wrap(~Season)+
+geom_hline(aes(yintercept = 0),color="#785d37",linetype="longdash")+ 
+scale_shape_manual(values = c(21:24)) +coord_cartesian(ylim=c(-12,12))+scale_y_continuous(breaks=c(seq(-12,12,2)))+
+scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
+Presentation_theme+  guides(x =  guide_axis(angle = 40),linetype="none",fill="none")+labs(y=expression(TP~(mu~g~L^-1)),x=NULL)
+
+ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstream boxplot.jpeg",width =11, height =10, units = "in")
+
+
+test <- filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4") %>% group_by(Ecotope,Season) %>%
+summarise(n(),median(Difference*1000,na.rm=TRUE),mean(Difference*1000,na.rm=TRUE),ones=sum(if_else(Difference==0.001,1,0)),zeros=sum(if_else(Difference==0,1,0)))  
 
 # TP forms over time -----------------------------------------------------
 #create DF of P forms
@@ -629,10 +679,12 @@ mutate(VALUE=ifelse(REMARK_CODE %in% "U",0,VALUE)) %>%   #substitute
 select(Date,TEST_NAME,VALUE,STA,Ecotope,Position)  %>%
 pivot_wider(names_from="TEST_NAME",values_from="VALUE") %>%
 mutate(`Particulate P`=TPO4-TDPO4,`Dissolved Organic P`=TDPO4-OPO4,`Soluble Reactive P`=OPO4) %>%
-select(1:4,8:10) %>%
-pivot_longer(5:7,names_to="P Form",values_to="Value") %>%
-mutate(`P Form`=factor(`P Form`,levels=c("Soluble Reactive P","Dissolved Organic P","Particulate P")))  
-
+select(1:4,6,8:10) %>%
+pivot_longer(5:8,names_to="P Form",values_to="Value") %>%
+mutate(`P Form`=factor(`P Form`,levels=c("Soluble Reactive P","Dissolved Organic P","Particulate P","TPO4")))  %>%
+mutate(`P Form`=if_else(`P Form`=="TPO4","Total Phosphorus",`P Form`)) %>%
+mutate(`Facets`=if_else(`P Form`=="Total Phosphorus","Total P","P Forms"))  %>%
+mutate(`Facets`=factor(`Facets`,level=c("Total P","P Forms")))
 TP_forms_monthly <- TP_forms %>%
 mutate(Month=month(Date,abbr=TRUE,label=TRUE)) %>%
 group_by(STA,Ecotope,Month,`P Form`) %>%
@@ -647,13 +699,13 @@ guides(x =guide_axis(angle = 45))+labs(y=expression(P~(mu~g~L^-1)))
 ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Monthly.jpeg",width =8, height =8, units = "in")
 
 #P over time
-ggplot(filter(TP_forms,Ecotope!="Naiad"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
+ggplot(filter(TP_forms,Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(month(Date)+day(Date)/31,Value*1000,color=`P Form`,fill=`P Form`))+geom_point()+
 geom_ribbon(stat='smooth', method = "loess", se=TRUE, alpha=0.3) +
-geom_line(stat='smooth', method = "loess")  + theme(axis.text.x=element_text(size=rel(0.75)))+
-facet_grid(STA~Ecotope)+scale_fill_discrete()+Presentation_theme + scale_x_discrete(limits = 1:12, labels = month.abb)+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)),x="Month")+coord_cartesian(ylim = c(0, 30))
+geom_line(stat='smooth', method = "loess")+ theme(axis.text.x=element_text(size=rel(0.75)))+
+facet_grid(Facets~Ecotope,labeller = labeller(.rows = NULL, .cols = NULL))+scale_fill_discrete()+Presentation_theme + scale_x_discrete(limits = 1:12, labels = month.abb)+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)),x=NULL)+coord_cartesian(ylim = c(0, 40))
 
-ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =8, height =8, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/P Forms over time- Points and smooth.jpeg",width =14, height =8, units = "in")
 
 
 WQ_Data_Tidy %>%
@@ -671,9 +723,9 @@ ggplot(opo4_data,aes(VALUE*1000))+geom_histogram()
 
 
 ggplot(filter(WQ_Field_Data,Ecotope!="Naiad"),aes(Ecotope,TPO4*1000,fill=Ecotope))+facet_grid(STA~factor(Position,c("Upstream","Downstream")))+
-  geom_jitter(aes(Ecotope,TPO4*1000,fill=Ecotope,color=Ecotope))+
-  geom_boxplot(alpha=.5,outliers=F)+scale_y_continuous(breaks=seq(0,50,10))+coord_cartesian(ylim=c(0,50))+
-  guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))+theme(legend.position="none")
+geom_jitter(aes(Ecotope,TPO4*1000,fill=Ecotope,color=Ecotope))+
+geom_boxplot(alpha=.5,outliers=F)+scale_y_continuous(breaks=seq(0,50,10))+coord_cartesian(ylim=c(0,50))+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))+theme(legend.position="none")
 
 ggsave(plot = last_plot(),filename="./Figures/Upstream and Downstream P Boxplots.jpeg",width =8, height =6, units = "in")
 
@@ -734,7 +786,7 @@ geom_line(size=1.25)+scale_color_manual(values=c("#ffb84d","#62bba5"))+
 facet_wrap(~Ecotope,labeller = label_parsed)+
 scale_y_continuous( sec.axis = sec_axis(~ . * 40, name = "Discharge (CFS)"))+
 geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ geom_hline(aes(yintercept = 0),color="#785d37")+ 
-scale_x_date(date_breaks="3 months",labels = date_format("%b %Y"))+labs(x="")+
+scale_x_date(date_breaks="1 months",labels = date_format("%b %Y"))+labs(x="")+
 guides(x =  guide_axis(angle = 40),position="bottom")+ylab(expression(FWM~TP~(mu~g~L^-1)))+theme(legend.position="bottom")
 
 ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-34- SFER24.jpeg",width =12, height =8, units = "in")

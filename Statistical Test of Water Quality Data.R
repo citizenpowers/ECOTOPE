@@ -293,7 +293,9 @@ WQ_Stat_Sig_Data <- Stat_test_STA34_wet_yr2_data %>% mutate(Treatment="Wet Seaso
 bind_rows(Stat_test_STA34_wet_yr1_data %>% mutate(Treatment="Wet Season Year 1"))  %>%
 bind_rows(Stat_test_STA34_dry_yr1_data %>% mutate(Treatment="Dry Season Year 1"))  %>%
 bind_rows(Stat_test_STA34_dry_yr2_data %>% mutate(Treatment="Dry Season Year 2"))  %>%
-bind_rows(Stat_test_STA34_data %>% mutate(Treatment="Period of Record"))
+bind_rows(Stat_test_STA34_data %>% mutate(Treatment="Period of Record")) %>%
+mutate(Month=month(Date),Season=if_else(between(Month,6,11),"Wet Season","Dry Season")) %>% select(-Month)
+  
 
 write.csv(WQ_Stat_Sig,"./Data/WQ Data/Water Quality Stats.csv",row.names = FALSE)  
 write.csv(WQ_Stat_Sig_Data,"./Data/WQ Data/Water Quality Stats Data.csv",row.names = FALSE)  
