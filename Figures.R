@@ -786,10 +786,10 @@ geom_line(size=1.25)+scale_color_manual(values=c("#ffb84d","#62bba5"))+
 facet_wrap(~Ecotope,labeller = label_parsed)+
 scale_y_continuous( sec.axis = sec_axis(~ . * 40, name = "Discharge (CFS)"))+
 geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ geom_hline(aes(yintercept = 0),color="#785d37")+ 
-scale_x_date(date_breaks="1 months",labels = date_format("%b %Y"))+labs(x="")+
+scale_x_date(date_breaks="2 months",labels = date_format("%b %Y"))+labs(x="")+Presentation_theme2+
 guides(x =  guide_axis(angle = 40),position="bottom")+ylab(expression(FWM~TP~(mu~g~L^-1)))+theme(legend.position="bottom")
 
-ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-34- SFER24.jpeg",width =12, height =8, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-34- SFER24.jpeg",width =10, height =8, units = "in")
 
 #P FWM over time 1W
 ggplot(filter(TP_Budget_Daily_Combined,Ecotope %in% c("italic(Chara)","Bare","italic(Typha)","Mixed"),STA=="STA-1W"),aes(`Date`,`Int`*1000,fill=`Study Period`,color=`Study Period`))+
@@ -802,7 +802,7 @@ geom_hline(aes(yintercept = 13),color="#785d37",linetype="longdash")+ geom_hline
 scale_x_date(date_breaks="3 months",labels = date_format("%b %Y"))+labs(x="")+
 guides(x =  guide_axis(angle = 40),position="bottom")+ylab(expression(FWM~TP~(mu~g~L^-1)))+theme(legend.position="bottom")
 
-ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-1W- SFER24.jpeg",width =12, height =6, units = "in")
+ggsave(plot = last_plot(),filename="./Figures/FWM TP Daily and cumulative-1W- SFER24.jpeg",width =10, height =6, units = "in")
 
 swatch(c("#785d37","#62bba5","#ffb84d","#aaa488","#b2432f","#3a6589","#9b5672","#908150","#373634"))
 
