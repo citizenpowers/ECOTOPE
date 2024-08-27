@@ -286,8 +286,9 @@ boxplot_mean_dry <- filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Dry")) %>% gro
 summarise(ymin = min(TPO4,na.rm=T),lower = quantile(TPO4, .25),middle = mean(TPO4), upper = quantile(TPO4, .75), ymax = max(TPO4))
 
 #Use means for boxplot
-ggplot()+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Wet")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
+ggplot()+
 geom_boxplot(data=boxplot_mean_wet,aes(Ecotope,ymin = ymin*1000, lower = lower*1000, middle = middle*1000, upper = upper*1000, ymax = ymax*1000,group=Ecotope,fill=Ecotope),stat="identity")+
+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Wet")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
 facet_wrap(~Treatment)+
 geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
 geom_text(aes(Ecotope,30,label=Letter,group=Ecotope),data=filter(WQ_Stat_Sig,str_detect(Treatment,"Wet")),color="grey50",size=6)+
@@ -296,8 +297,9 @@ Presentation_theme2+theme(legend.position="none")+ylab(expression(TP~(mu~g~L^-1)
 ggsave(plot = last_plot(),filename="./Figures/Wet Season TP boxplot stats.jpeg",width =12, height =6, units = "in")
 
 #Use means for boxplot
-ggplot()+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Dry")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
+ggplot()+
 geom_boxplot(data=boxplot_mean_dry,aes(Ecotope,ymin = ymin*1000, lower = lower*1000, middle = middle*1000, upper = upper*1000, ymax = ymax*1000,group=Ecotope,fill=Ecotope),stat="identity")+
+geom_jitter(data=filter(WQ_Stat_Sig_Data,str_detect(Treatment,"Dry")),aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey30")+
 facet_wrap(~Treatment)+
 geom_hline(yintercept = 13,linetype="longdash",color="#785d37")+
 geom_text(aes(Ecotope,80,label=Letter,group=Ecotope),data=filter(WQ_Stat_Sig,str_detect(Treatment,"Dry")),color="grey50",size=6)+
@@ -330,7 +332,7 @@ mutate(Season=if_else(between(month(Date),6,11)==TRUE,"Wet Season","Dry Season")
 mutate(Season=factor(Season, levels=c("Wet Season","Dry Season"))) %>% 
 mutate(Ecotope=factor(Ecotope,labels = c("Bare","italic(Chara)","Mixed","Naiad","italic(Typha)")))
 
-#DCS Depth vs TP wet season vs dry season STA34
+#DCS Depth vs TP wet season vs dry season STA34 
 ggplot(filter(Wet_vs_dry,Position=="Downstream",Ecotope!="Naiad",STA=="STA-3/4 Cell 2B"),aes(`DCS (Field Data)`,`TPO4`*1000,fill=Ecotope,color=Ecotope))+
 facet_grid(Season~Ecotope,labeller = labeller(.rows = label_value, .cols = label_parsed))+scale_y_continuous(breaks=seq(0,80,10))+Presentation_theme2+coord_cartesian(ylim=c(0,50))+
 geom_rect(aes(xmin = 38.1, ymin = -Inf, xmax = 45.7, ymax = 80),alpha=.5,fill="#e0ecf4",color="#e0ecf4")+
@@ -658,8 +660,8 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstre
 
 #TP difference boxplots
 ggplot(filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4"),aes(Ecotope,Difference*1000,fill=Ecotope))+
-geom_jitter(aes(Ecotope,Difference*1000,fill=Ecotope,color=Ecotope))+
-geom_boxplot(alpha=.5,outliers=F)+facet_wrap(~Season)+
+geom_boxplot(alpha=1,outliers=F)+geom_jitter(aes(Ecotope,Difference*1000,fill=Ecotope),color="grey30",shape=21)+
+facet_wrap(~Season)+
 geom_hline(aes(yintercept = 0),color="#785d37",linetype="longdash")+ 
 scale_shape_manual(values = c(21:24)) +coord_cartesian(ylim=c(-12,12))+scale_y_continuous(breaks=c(seq(-12,12,2)))+
 scale_color_discrete("Ecotope", breaks = c("Bare","Chara","Mixed","Typha"),labels = c("Bare", expression(italic("Chara")),"Mixed",expression(italic("Typha"))))+  
@@ -670,6 +672,13 @@ ggsave(plot = last_plot(),filename="./Figures/TPO4 Differences Upstream-Downstre
 
 test <- filter(WQ_Fig_Up_Down,Ecotope!="Naiad",TEST_NAME=="TPO4") %>% group_by(Ecotope,Season) %>%
 summarise(n(),median(Difference*1000,na.rm=TRUE),mean(Difference*1000,na.rm=TRUE),ones=sum(if_else(Difference==0.001,1,0)),zeros=sum(if_else(Difference==0,1,0)))  
+
+ggplot(filter(WQ_Field_Data,Ecotope!="Naiad"),aes(Ecotope,TPO4*1000,fill=Ecotope))+facet_grid(STA~factor(Position,c("Upstream","Downstream")))+
+geom_boxplot(alpha=1,outliers=F)+geom_jitter(aes(Ecotope,TPO4*1000,fill=Ecotope),shape=21,color="grey20")+
+scale_y_continuous(breaks=seq(0,50,10))+coord_cartesian(ylim=c(0,50))+
+guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))+theme(legend.position="none")
+
+ggsave(plot = last_plot(),filename="./Figures/Upstream and Downstream P Boxplots.jpeg",width =8, height =6, units = "in")
 
 # TP forms over time -----------------------------------------------------
 #create DF of P forms
@@ -718,16 +727,6 @@ opo4_data <-WQ_Data_Tidy %>%
 filter(TEST_NAME=="OPO4",STA=="STA-3/4 Cell 2B") 
 
 ggplot(opo4_data,aes(VALUE*1000))+geom_histogram()
-
-# Upstream vs downstream boxplots -----------------------------------------
-
-
-ggplot(filter(WQ_Field_Data,Ecotope!="Naiad"),aes(Ecotope,TPO4*1000,fill=Ecotope))+facet_grid(STA~factor(Position,c("Upstream","Downstream")))+
-geom_jitter(aes(Ecotope,TPO4*1000,fill=Ecotope,color=Ecotope))+
-geom_boxplot(alpha=.5,outliers=F)+scale_y_continuous(breaks=seq(0,50,10))+coord_cartesian(ylim=c(0,50))+
-guides(x =  guide_axis(angle = 40))+labs(y=expression(P~(mu~g~L^-1)))+theme(legend.position="none")
-
-ggsave(plot = last_plot(),filename="./Figures/Upstream and Downstream P Boxplots.jpeg",width =8, height =6, units = "in")
 
 # TP Budget Figures -------------------------------------------------------
 
@@ -1040,7 +1039,7 @@ ggsave(plot = last_plot(),filename="./Figures/Soils all analytes.jpeg",width =12
 #Soils Concentration figure
 ggplot(filter(Soils_Summary_Stat_Sig,Units %in% c("(mg/kg)","%")),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
 geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
-geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_col(alpha=1,color="grey50",position = position_dodge(width=.8),width=.8)+
 geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
 facet_wrap(~`Facet Label`,scale="free",nrow=2)+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
@@ -1050,7 +1049,7 @@ ggsave(plot = last_plot(),filename="./Figures/Soils Concentration.jpeg",width =1
 #Soils Storage figure
 ggplot(filter(Soils_Summary_Stat_Sig,Units=="(g/m^2)"),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
 geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
-geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_col(alpha=1,color="grey50",position = position_dodge(width=.8),width=.8)+
 geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
 facet_wrap(~`Facet Label`,scale="free",nrow=2)+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
@@ -1060,7 +1059,7 @@ ggsave(plot = last_plot(),filename="./Figures/Soils Content.jpeg",width =16, hei
 #Soils physical parameters figure
 ggplot(filter(Soils_Summary_Stat_Sig,Units %in% c("(g/cm^3)","(cm)")),aes(MATRIX,y=Mean,fill=Ecotope,color=as.factor(MATRIX)))+scale_color_manual(values=c("grey30","grey60"))+
 geom_text(aes(MATRIX,y*1.1,label=Letter,group=Ecotope,color=as.factor(MATRIX)),position=position_dodge(.8))+
-geom_col(alpha=.5,color="grey50",position = position_dodge(width=.8),width=.8)+
+geom_col(alpha=1,color="grey50",position = position_dodge(width=.8),width=.8)+
 geom_errorbar(aes(MATRIX,ymax=Mean+SE,ymin=Mean-SE),position=position_dodge(.8),width=.8,color="grey50")+
 facet_wrap(~`Facet Label`,scale="free",nrow=1)+
 labs(y=NULL,x=NULL)+Presentation_theme+scale_y_continuous(labels = label_comma())+theme(legend.position="bottom")+guides(color="none")
